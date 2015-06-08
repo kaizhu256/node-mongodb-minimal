@@ -128,8 +128,13 @@ https://www.npmjs.com/package/mongodb with zero npm dependencies",
         "utility2": "2015.6.1-b"
     },
     "engines": { "node": ">=0.10 <=0.12" },
+    "keywords": [
+        "client",
+        "driver",
+        "mongo", "mongodb"
+    ],
     "license": "MIT",
-    "main": "node_modules/mongodb/index.js",
+    "main": "node_modules/mongodb.js",
     "name": "mongodb-minimal",
     "os": ["darwin", "linux"],
     "repository" : {
@@ -138,14 +143,13 @@ https://www.npmjs.com/package/mongodb with zero npm dependencies",
     },
     "scripts": {
         "build-ci": "node_modules/.bin/utility2 shRun shReadmeBuild",
-        "preinstall": "rm -fr node_modules && \
-mkdir -p node_modules && \
-ln -s ../bson node_modules/bson && \
-ln -s ../mongodb node_modules/mongodb && \
-ln -s ../mongodb-core node_modules/mongodb-core",
-        "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson"
+        "postinstall": "mkdir -p node_modules && \
+printf \"module.exports = require('../bson')\" > node_modules/bson.js && \
+printf \"module.exports = require('../mongodb')\" > node_modules/mongodb.js && \
+printf \"module.exports = require('../mongodb-core')\" > node_modules/mongodb-core.js",
+        "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && node -e \"require('./node_modules/mongodb')\""
     },
-    "version": "2.0.33-2015.06.01-b"
+    "version": "2.0.33-2015.06.01-e"
 }
 ```
 
@@ -156,8 +160,9 @@ ln -s ../mongodb-core node_modules/mongodb-core",
 
 
 
-# change since 9fe8c225
-- npm publish 2.0.33-2015.06.01-b
+# change since 08abfc5c
+- npm publish 2.0.33-2015.06.01-e
+- remove symlink in npm install
 - none
 
 
