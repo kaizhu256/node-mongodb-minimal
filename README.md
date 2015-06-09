@@ -20,6 +20,8 @@ pure javascript version of https://www.npmjs.com/package/mongodb with zero npm d
 
 | git-branch : | [master](https://github.com/kaizhu256/node-mongodb-minimal/tree/master) | [beta](https://github.com/kaizhu256/node-mongodb-minimal/tree/beta) | [alpha](https://github.com/kaizhu256/node-mongodb-minimal/tree/alpha)|
 |--:|:--|:--|:--|
+| test-report : | [![test-report](https://kaizhu256.github.io/node-mongodb-minimal/build..master..travis-ci.org/test-report.badge.svg)](https://kaizhu256.github.io/node-mongodb-minimal/build..master..travis-ci.org/test-report.html) | [![test-report](https://kaizhu256.github.io/node-mongodb-minimal/build..beta..travis-ci.org/test-report.badge.svg)](https://kaizhu256.github.io/node-mongodb-minimal/build..beta..travis-ci.org/test-report.html) | [![test-report](https://kaizhu256.github.io/node-mongodb-minimal/build..alpha..travis-ci.org/test-report.badge.svg)](https://kaizhu256.github.io/node-mongodb-minimal/build..alpha..travis-ci.org/test-report.html)|
+| coverage : | [![istanbul-lite coverage](https://kaizhu256.github.io/node-mongodb-minimal/build..master..travis-ci.org/coverage.badge.svg)](https://kaizhu256.github.io/node-mongodb-minimal/build..master..travis-ci.org/coverage.html/index.html) | [![istanbul-lite coverage](https://kaizhu256.github.io/node-mongodb-minimal/build..beta..travis-ci.org/coverage.badge.svg)](https://kaizhu256.github.io/node-mongodb-minimal/build..beta..travis-ci.org/coverage.html/index.html) | [![istanbul-lite coverage](https://kaizhu256.github.io/node-mongodb-minimal/build..alpha..travis-ci.org/coverage.badge.svg)](https://kaizhu256.github.io/node-mongodb-minimal/build..alpha..travis-ci.org/coverage.html/index.html)|
 | build-artifacts : | [![build-artifacts](https://kaizhu256.github.io/node-mongodb-minimal/glyphicons_144_folder_open.png)](https://github.com/kaizhu256/node-mongodb-minimal/tree/gh-pages/build..master..travis-ci.org) | [![build-artifacts](https://kaizhu256.github.io/node-mongodb-minimal/glyphicons_144_folder_open.png)](https://github.com/kaizhu256/node-mongodb-minimal/tree/gh-pages/build..beta..travis-ci.org) | [![build-artifacts](https://kaizhu256.github.io/node-mongodb-minimal/glyphicons_144_folder_open.png)](https://github.com/kaizhu256/node-mongodb-minimal/tree/gh-pages/build..alpha..travis-ci.org)|
 
 #### master branch
@@ -67,9 +69,15 @@ instruction
     'use strict';
     // run node js-env code
     (function () {
-        var db, mongodb_minimal, modeNext, onNext;
+        var local, modeNext, onNext;
+        // init local;
+        local = global.local = {};
         // require modules
-        mongodb_minimal = require('mongodb-minimal');
+        try {
+            local.mongodb = require('mongodb-minimal');
+        } catch (errorCaught) {
+            local.mongodb = require('./node_modules/mongodb.js');
+        }
         // sequentially run io operations
         modeNext = 0;
         onNext = function (error, data) {
@@ -80,14 +88,51 @@ instruction
             switch (modeNext) {
             case 1:
                 console.log('connecting to mongodb server');
-                mongodb_minimal.MongoClient.connect(
+                local.mongodb.MongoClient.connect(
                     'mongodb://localhost:27017/test',
                     onNext
                 );
                 break;
             case 2:
-                db = data;
+                local.db = data;
                 console.log('connected to mongodb server');
+                onNext();
+                break;
+            case 3:
+                local.collection = local.db.collection('TestMongodbMinimal');
+                local.document = {
+                    _id: Math.random().toString(16),
+                    value: 'hello'
+                };
+                console.log('inserting document into collection - ' +
+                    JSON.stringify(local.document));
+                local.collection.insert(local.document, onNext);
+                break;
+            case 4:
+                console.log('updating document in collection');
+                local.collection.update(
+                    { _id: local.document._id },
+                    { $set: { value: 'bye' } },
+                    onNext
+                );
+                break;
+            case 5:
+                console.log('finding document in collection');
+                local.collection.findOne({ _id: local.document._id }, onNext);
+                break;
+            case 6:
+                console.log('found document in collection - ' +
+                    JSON.stringify(data));
+                onNext();
+                break;
+            case 7:
+                console.log('removing document from collection');
+                local.collection.remove({ _id: local.document._id }, onNext);
+                break;
+            case 8:
+                global.data = data;
+                console.log('removed ' + data.result.n +
+                    ' documents from collection');
                 onNext();
                 break;
             default:
@@ -95,7 +140,15 @@ instruction
                     throw error;
                 }
                 console.log('disconnecting from mongodb server');
-                db.close();
+                local.db.close();
+                // internal test-script
+                if (process.env.npm_config_mode_npm_test) {
+                    require('utility2').testRun({
+                        testCase_example_default: function (onError) {
+                            onError();
+                        }
+                    });
+                }
             }
         };
         onNext();
@@ -144,12 +197,20 @@ https://www.npmjs.com/package/mongodb with zero npm dependencies",
     "scripts": {
         "build-ci": "node_modules/.bin/utility2 shRun shReadmeBuild",
         "postinstall": "mkdir -p node_modules && \
-printf \"module.exports = require('../bson')\" > node_modules/bson.js && \
-printf \"module.exports = require('../mongodb')\" > node_modules/mongodb.js && \
-printf \"module.exports = require('../mongodb-core')\" > node_modules/mongodb-core.js",
-        "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && node -e \"require('./node_modules/mongodb')\""
+printf \"module.exports = require('../bson')\" > \
+node_modules/bson.js && \
+printf \"module.exports = require('../mongodb')\" > \
+node_modules/mongodb.js && \
+printf \"module.exports = require('../mongodb-core')\" > \
+node_modules/mongodb-core.js",
+        "start": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && \
+node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && \
+node_modules/.bin/utility2 start example.js",
+        "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && \
+node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && \
+node_modules/.bin/utility2 test example.js"
     },
-    "version": "2.0.33-2015.06.01-e"
+    "version": "2.0.33-2015.06.01-f"
 }
 ```
 
@@ -160,9 +221,11 @@ printf \"module.exports = require('../mongodb-core')\" > node_modules/mongodb-co
 
 
 
-# change since 08abfc5c
-- npm publish 2.0.33-2015.06.01-e
-- remove symlink in npm install
+# change since ede6b6bb
+- npm publish 2.0.33-2015.06.01-f
+- add test
+- add coverage
+- add crud io to example.js
 - none
 
 
@@ -188,12 +251,12 @@ shBuild() {
     # run npm-test on published package
     shNpmTestPublished || return $?
 
-    # run npm-test
-    MODE_BUILD=npmTest shRunScreenCapture npm test || return $?
-
     # test example js script
     MODE_BUILD=testExampleJs \
         shRunScreenCapture shReadmeTestJs example.js || return $?
+
+    # run npm-test
+    MODE_BUILD=npmTest shRunScreenCapture npm test || return $?
 
     # if running legacy-node, then do not continue
     [ "$(node --version)" \< "v0.12" ] && return

@@ -21,7 +21,8 @@
     "scripts": {
         "build-ci": "node_modules/.bin/utility2 shRun shReadmeBuild",
         "postinstall": "mkdir -p node_modules && printf \"module.exports = require('../bson')\" > node_modules/bson.js && printf \"module.exports = require('../mongodb')\" > node_modules/mongodb.js && printf \"module.exports = require('../mongodb-core')\" > node_modules/mongodb-core.js",
-        "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && node -e \"require('./node_modules/mongodb')\""
+        "start": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 start example.js",
+        "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 test example.js"
     },
-    "version": "2.0.33-2015.06.01-e"
+    "version": "2.0.33-2015.06.01-f"
 }
