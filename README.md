@@ -1,6 +1,6 @@
 mongodb-minimal
 ===============
-pure javascript version of https://www.npmjs.com/package/mongodb with zero npm dependencies
+pure javascript version of https://www.npmjs.com/package/mongodb with zero npm-dependencies
 
 [![NPM](https://img.shields.io/npm/v/mongodb-minimal.svg?style=flat-square)](https://www.npmjs.org/package/mongodb-minimal)
 
@@ -17,6 +17,8 @@ pure javascript version of https://www.npmjs.com/package/mongodb with zero npm d
 
 
 # build-status [![travis-ci.org build-status](https://api.travis-ci.org/kaizhu256/node-mongodb-minimal.svg)](https://travis-ci.org/kaizhu256/node-mongodb-minimal)
+
+[![build commit status](https://kaizhu256.github.io/node-mongodb-minimal/build/build.badge.svg)](https://travis-ci.org/kaizhu256/node-mongodb-minimal)
 
 | git-branch : | [master](https://github.com/kaizhu256/node-mongodb-minimal/tree/master) | [beta](https://github.com/kaizhu256/node-mongodb-minimal/tree/beta) | [alpha](https://github.com/kaizhu256/node-mongodb-minimal/tree/alpha)|
 |--:|:--|:--|:--|
@@ -132,7 +134,7 @@ instruction
             case 8:
                 global.data = data;
                 console.log('removed ' + data.result.n +
-                    ' documents from collection');
+                    ' document from collection');
                 onNext();
                 break;
             default:
@@ -176,9 +178,9 @@ instruction
 {
     "author": "kai zhu <kaizhu256@gmail.com>",
     "description": "pure javascript version of \
-https://www.npmjs.com/package/mongodb with zero npm dependencies",
+https://www.npmjs.com/package/mongodb with zero npm-dependencies",
     "devDependencies": {
-        "utility2": "2015.6.1-b"
+        "utility2": "^2015.6.1-b"
     },
     "engines": { "node": ">=0.10 <=0.12" },
     "keywords": [
@@ -210,7 +212,7 @@ node_modules/.bin/utility2 start example.js",
 node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && \
 node_modules/.bin/utility2 test example.js"
     },
-    "version": "2.0.33-2015.06.01-f"
+    "version": "2015.6.1"
 }
 ```
 
@@ -221,11 +223,9 @@ node_modules/.bin/utility2 test example.js"
 
 
 
-# change since ede6b6bb
-- npm publish 2.0.33-2015.06.01-f
-- add test
-- add coverage
-- add crud io to example.js
+# change since 99b73e17
+- npm publish 2015.6.1
+- fix version breakage with latest npm install
 - none
 
 
@@ -257,12 +257,6 @@ shBuild() {
 
     # run npm-test
     MODE_BUILD=npmTest shRunScreenCapture npm test || return $?
-
-    # if running legacy-node, then do not continue
-    [ "$(node --version)" \< "v0.12" ] && return
-
-    # if number of commits > 1024, then squash older commits
-    shGitBackupAndSquashAndPush 1024 > /dev/null || return $?
 }
 shBuild
 
