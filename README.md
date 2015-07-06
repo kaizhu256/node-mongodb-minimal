@@ -31,7 +31,7 @@ pure javascript version of https://www.npmjs.com/package/mongodb with zero npm-d
 - HEAD should be tagged, npm-published package
 
 #### beta branch
-- stable branch
+- semi-stable branch
 - HEAD should be latest, npm-published package
 
 #### alpha branch
@@ -146,7 +146,9 @@ instruction
                 // internal test-script
                 if (process.env.npm_config_mode_npm_test) {
                     require('utility2').testRun({
-                        testCase_example_default: function (onError) {
+                        testCase_example_default: function (options, onError) {
+                            // jslint-hack
+                            require('utility2').nop(options);
                             onError();
                         }
                     });
@@ -180,7 +182,7 @@ instruction
     "description": "pure javascript version of \
 https://www.npmjs.com/package/mongodb with zero npm-dependencies",
     "devDependencies": {
-        "utility2": "^2015.6.1-b"
+        "utility2": "^2015.7.5"
     },
     "engines": { "node": ">=0.10 <=0.12" },
     "keywords": [
@@ -199,20 +201,27 @@ https://www.npmjs.com/package/mongodb with zero npm-dependencies",
     "scripts": {
         "build-ci": "node_modules/.bin/utility2 shRun shReadmeBuild",
         "postinstall": "mkdir -p node_modules && \
-printf \"module.exports = require('../bson')\" > \
+printf \"module.exports = require('../bson/browser_build/bson.js')();\n\
+module.exports.native = module.exports.pure = function () {\n\
+    return module.exports;\n\
+};\n\
+module.exports.ObjectId = module.exports.ObjectID;\n\
+\" > \
 node_modules/bson.js && \
-printf \"module.exports = require('../mongodb')\" > \
+printf \"module.exports = require('../mongodb');\" > \
 node_modules/mongodb.js && \
-printf \"module.exports = require('../mongodb-core')\" > \
+printf \"module.exports = require('../mongodb-core');\" > \
 node_modules/mongodb-core.js",
         "start": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && \
+npm run-script postinstall && \
 node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && \
 node_modules/.bin/utility2 start example.js",
         "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && \
+npm run-script postinstall && \
 node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && \
 node_modules/.bin/utility2 test example.js"
     },
-    "version": "2015.6.1"
+    "version": "2015.6.3"
 }
 ```
 
@@ -223,9 +232,9 @@ node_modules/.bin/utility2 test example.js"
 
 
 
-# change since 99b73e17
-- npm publish 2015.6.1
-- fix version breakage with latest npm install
+# change since 7436c304
+- npm publish 2015.6.3
+- update to mongodb@2.0.35
 - none
 
 
@@ -242,6 +251,7 @@ node_modules/.bin/utility2 test example.js"
 # build.sh
 
 # this shell script will run the build for this package
+
 shBuild() {
     # this function will run the main build
     # init env

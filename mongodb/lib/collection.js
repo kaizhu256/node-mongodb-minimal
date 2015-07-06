@@ -345,6 +345,9 @@ Collection.prototype.insertOne = function(doc, options, callback) {
   insertDocuments(this, [doc], options, function(err, r) {
     if(callback == null) return;
     if(err && callback) return callback(err);
+    // Workaround for pre 2.6 servers
+    if(r == null) return callback(null, {result: {ok:1}});
+    // Add values to top level to ensure crud spec compatibility
     r.insertedCount = r.result.n;
     r.insertedId = doc._id;
     if(callback) callback(null, r);
@@ -370,6 +373,7 @@ Collection.prototype.insertMany = function(docs, options, callback) {
   insertDocuments(this, docs, options, function(err, r) {
     if(callback == null) return;
     if(err && callback) return callback(err);
+    if(r == null) return callback(null, {result: {ok:1}});
     r.insertedCount = r.result.n;
     var ids = [];
     for(var i = 0; i < docs.length; i++) {
@@ -557,6 +561,7 @@ Collection.prototype.updateOne = function(filter, update, options, callback) {
   updateDocuments(this, filter, update, options, function(err, r) {
     if(callback == null) return;
     if(err && callback) return callback(err);
+    if(r == null) return callback(null, {result: {ok:1}});
     r.matchedCount = r.result.n;
     r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
     r.upsertedId = Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? r.result.upserted[0] : null;
@@ -587,6 +592,7 @@ Collection.prototype.replaceOne = function(filter, update, options, callback) {
   updateDocuments(this, filter, update, options, function(err, r) {
     if(callback == null) return;
     if(err && callback) return callback(err);
+    if(r == null) return callback(null, {result: {ok:1}});
     r.matchedCount = r.result.n;
     r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
     r.upsertedId = Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? r.result.upserted[0] : null;
@@ -618,6 +624,7 @@ Collection.prototype.updateMany = function(filter, update, options, callback) {
   updateDocuments(this, filter, update, options, function(err, r) {
     if(callback == null) return;
     if(err && callback) return callback(err);
+    if(r == null) return callback(null, {result: {ok:1}});
     r.matchedCount = r.result.n;
     r.modifiedCount = r.result.nModified != null ? r.result.nModified : r.result.n;
     r.upsertedId = Array.isArray(r.result.upserted) && r.result.upserted.length > 0 ? r.result.upserted[0] : null;
@@ -698,6 +705,7 @@ Collection.prototype.deleteOne = function(filter, options, callback) {
   removeDocuments(this, filter, options, function(err, r) {
     if(callback == null) return;
     if(err && callback) return callback(err);
+    if(r == null) return callback(null, {result: {ok:1}});
     r.deletedCount = r.result.n;
     if(callback) callback(null, r);
   });
@@ -723,6 +731,7 @@ Collection.prototype.deleteMany = function(filter, options, callback) {
   removeDocuments(this, filter, options, function(err, r) {
     if(callback == null) return;
     if(err && callback) return callback(err);
+    if(r == null) return callback(null, {result: {ok:1}});
     r.deletedCount = r.result.n;
     if(callback) callback(null, r);
   });
@@ -1019,6 +1028,8 @@ Collection.prototype.dropIndex = function(indexName, options, callback) {
   var args = Array.prototype.slice.call(arguments, 1);
   callback = args.pop();
   options = args.length ? args.shift() || {} : {};
+  // Run only against primary
+  options.readPreference = ReadPreference.PRIMARY;
 
   // Delete index command
   var cmd = {'deleteIndexes':this.s.name, 'index':indexName};  
@@ -1130,6 +1141,7 @@ Collection.prototype.listIndexes = function(options) {
 Collection.prototype.ensureIndex = function(fieldOrSpec, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   options = options || {};
+  // Execute ensureIndex
   this.s.db.ensureIndex(this.s.name, fieldOrSpec, options, callback);
 }
 

@@ -2,7 +2,7 @@
     "author": "kai zhu <kaizhu256@gmail.com>",
     "description": "pure javascript version of https://www.npmjs.com/package/mongodb with zero npm-dependencies",
     "devDependencies": {
-        "utility2": "^2015.6.1-b"
+        "utility2": "^2015.7.5"
     },
     "engines": { "node": ">=0.10 <=0.12" },
     "keywords": [
@@ -20,9 +20,9 @@
     },
     "scripts": {
         "build-ci": "node_modules/.bin/utility2 shRun shReadmeBuild",
-        "postinstall": "mkdir -p node_modules && printf \"module.exports = require('../bson')\" > node_modules/bson.js && printf \"module.exports = require('../mongodb')\" > node_modules/mongodb.js && printf \"module.exports = require('../mongodb-core')\" > node_modules/mongodb-core.js",
-        "start": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 start example.js",
-        "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 test example.js"
+        "postinstall": "mkdir -p node_modules && printf \"module.exports = require('../bson/browser_build/bson.js')();\nmodule.exports.native = module.exports.pure = function () {\n    return module.exports;\n};\nmodule.exports.ObjectId = module.exports.ObjectID;\n\" > node_modules/bson.js && printf \"module.exports = require('../mongodb');\" > node_modules/mongodb.js && printf \"module.exports = require('../mongodb-core');\" > node_modules/mongodb-core.js",
+        "start": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && npm run-script postinstall && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 start example.js",
+        "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && npm run-script postinstall && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 test example.js"
     },
-    "version": "2015.6.1"
+    "version": "2015.6.3"
 }

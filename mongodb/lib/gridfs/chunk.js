@@ -32,11 +32,12 @@ var Chunk = function(file, mongoObject, writeConcern) {
   if(mongoObjectFinal.data == null) {
   } else if(typeof mongoObjectFinal.data == "string") {
     var buffer = new Buffer(mongoObjectFinal.data.length);
-    buffer.write(mongoObjectFinal.data, 'binary', 0);
+    buffer.write(mongoObjectFinal.data, 0, mongoObjectFinal.data.length, 'binary');
     this.data = new Binary(buffer);
   } else if(Array.isArray(mongoObjectFinal.data)) {
     var buffer = new Buffer(mongoObjectFinal.data.length);
-    buffer.write(mongoObjectFinal.data.join(''), 'binary', 0);
+    var data = mongoObjectFinal.data.join('');
+    buffer.write(data, 0, data.length, 'binary');
     this.data = new Binary(buffer);
   } else if(mongoObjectFinal.data._bsontype === 'Binary') {
     this.data = mongoObjectFinal.data;
@@ -44,7 +45,7 @@ var Chunk = function(file, mongoObject, writeConcern) {
   } else {
     throw Error("Illegal chunk format");
   }
-  
+
   // Update position
   this.internalPosition = 0;
 };
@@ -52,13 +53,13 @@ var Chunk = function(file, mongoObject, writeConcern) {
 /**
  * Writes a data to this object and advance the read/write head.
  *
- * @param data {string} the data to write 
+ * @param data {string} the data to write
  * @param callback {function(*, GridStore)} This will be called after executing
  *     this method. The first parameter will contain null and the second one
  *     will contain a reference to this object.
  */
 Chunk.prototype.write = function(data, callback) {
-  this.data.write(data, this.internalPosition);
+  this.data.write(data, this.internalPosition, data.length, 'binary');
   this.internalPosition = this.data.length();
   if(callback != null) return callback(null, this);
   return this;
@@ -152,7 +153,7 @@ Chunk.prototype.save = function(options, callback) {
     // Merge the options
     var writeOptions = {};
     for(var name in options) writeOptions[name] = options[name];
-    for(var name in self.writeConcern) writeOptions[name] = self.writeConcern[name];    
+    for(var name in self.writeConcern) writeOptions[name] = self.writeConcern[name];
 
     // collection.remove({'_id':self.objectId}, self.writeConcern, function(err, result) {
     collection.remove({'_id':self.objectId}, writeOptions, function(err, result) {
@@ -179,10 +180,10 @@ Chunk.prototype.save = function(options, callback) {
 /**
  * Creates a mongoDB object representation of this chunk.
  *
- * @param callback {function(Object)} This will be called after executing this 
+ * @param callback {function(Object)} This will be called after executing this
  *     method. The object will be passed to the first parameter and will have
  *     the structure:
- *        
+ *
  *        <pre><code>
  *        {
  *          '_id' : , // {number} id for this chunk

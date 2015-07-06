@@ -3,7 +3,7 @@
 var Long = require('bson').Long
   , Logger = require('./connection/logger')
   , MongoError = require('./error')
-  , f = require('util').format;  
+  , f = require('util').format;
 
 /**
  * This is a cursor results callback
@@ -16,18 +16,18 @@ var Long = require('bson').Long
 /**
  * @fileOverview The **Cursor** class is an internal class that embodies a cursor on MongoDB
  * allowing for iteration over the results returned from the underlying query.
- * 
+ *
  * **CURSORS Cannot directly be instantiated**
  * @example
  * var Server = require('mongodb-core').Server
  *   , ReadPreference = require('mongodb-core').ReadPreference
  *   , assert = require('assert');
- * 
+ *
  * var server = new Server({host: 'localhost', port: 27017});
  * // Wait for the connection event
  * server.on('connect', function(server) {
  *   assert.equal(null, err);
- * 
+ *
  *   // Execute the write
  *   var cursor = _server.cursor('integration_tests.inserts_example4', {
  *       find: 'integration_tests.example4'
@@ -35,14 +35,14 @@ var Long = require('bson').Long
  *   }, {
  *     readPreference: new ReadPreference('secondary');
  *   });
- * 
+ *
  *   // Get the first document
  *   cursor.next(function(err, doc) {
  *     assert.equal(null, err);
  *     server.destroy();
  *   });
  * });
- * 
+ *
  * // Start connecting
  * server.connect();
  */
@@ -111,7 +111,7 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   // Logger
   this.logger = Logger('Cursor', options);
 
-  // 
+  //
   // Did we pass in a cursor id
   if(typeof cmd == 'number') {
     this.cursorState.cursorId = Long.fromNumber(cmd);
@@ -120,27 +120,27 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   }
 }
 
-Cursor.prototype.setCursorBatchSize = function(value) {  
+Cursor.prototype.setCursorBatchSize = function(value) {
   this.cursorState.batchSize = value;
 }
 
-Cursor.prototype.cursorBatchSize = function() {  
+Cursor.prototype.cursorBatchSize = function() {
   return this.cursorState.batchSize;
 }
 
-Cursor.prototype.setCursorLimit = function(value) {  
+Cursor.prototype.setCursorLimit = function(value) {
   this.cursorState.limit = value;
 }
 
-Cursor.prototype.cursorLimit = function() {  
+Cursor.prototype.cursorLimit = function() {
   return this.cursorState.limit;
 }
 
-Cursor.prototype.setCursorSkip = function(value) {  
+Cursor.prototype.setCursorSkip = function(value) {
   this.cursorState.skip = value;
 }
 
-Cursor.prototype.cursorSkip = function() {  
+Cursor.prototype.cursorSkip = function() {
   return this.cursorState.skip;
 }
 
@@ -154,7 +154,7 @@ var execGetMore = function(self, callback) {
   self.server.wireProtocolHandler.getMore(self.bson, self.ns, self.cursorState, self.cursorState.batchSize, raw, self.connection, self.callbacks, self.options, callback);
 }
 
-// 
+//
 // Execute the first query
 var execInitialQuery = function(self, query, cmd, options, cursorState, connection, logger, callbacks, callback) {
   if(logger.isDebug()) {
@@ -172,12 +172,12 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
 
     // Check if we have a command cursor
     if(Array.isArray(result.documents) && result.documents.length == 1 && !cmd.find) {
-      if(result.documents[0]['$err'] 
+      if(result.documents[0]['$err']
         || result.documents[0]['errmsg']) {
-        return callback(MongoError.create(result.documents[0]), null);          
+        return callback(MongoError.create(result.documents[0]), null);
       }
 
-      if(result.documents[0].cursor != null 
+      if(result.documents[0].cursor != null
         && typeof result.documents[0].cursor != 'string') {
           var id = result.documents[0].cursor.id;
           // If we have a namespace change set the new namespace for getmores
@@ -199,7 +199,7 @@ var execInitialQuery = function(self, query, cmd, options, cursorState, connecti
         cursorState.documents = result.documents[0].result;
         cursorState.cursorId = Long.ZERO;
         return callback(null, null);
-      }      
+      }
     }
 
     // Otherwise fall back to regular find path
@@ -243,7 +243,7 @@ var handleCallback = function(callback, err, result) {
  * Clone the cursor
  * @method
  * @return {Cursor}
- */  
+ */
 Cursor.prototype.clone = function() {
   return this.topology.cursor(this.ns, this.cmd, this.options);
 }
@@ -293,8 +293,6 @@ Cursor.prototype.readBufferedDocuments = function(number) {
   var unreadDocumentsLength = this.cursorState.documents.length - this.cursorState.cursorIndex;
   var length = number < unreadDocumentsLength ? number : unreadDocumentsLength;
   var elements = this.cursorState.documents.slice(this.cursorState.cursorIndex, this.cursorState.cursorIndex + length);
-  this.cursorState.currentLimit = this.cursorState.currentLimit + length;
-  this.cursorState.cursorIndex = this.cursorState.cursorIndex + length;
 
   // Transform the doc with passed in transformation method if provided
   if(this.cursorState.transforms && typeof this.cursorState.transforms.doc == 'function') {
@@ -303,6 +301,17 @@ Cursor.prototype.readBufferedDocuments = function(number) {
       elements[i] = this.cursorState.transforms.doc(elements[i]);
     }
   }
+
+  // Ensure we do not return any more documents than the limit imposed
+  // Just return the number of elements up to the limit
+  if(this.cursorState.limit > 0 && (this.cursorState.currentLimit + elements.length) > this.cursorState.limit) {
+    elements = elements.slice(0, (this.cursorState.limit - this.cursorState.currentLimit));
+    this.kill();
+  }
+
+  // Adjust current limit
+  this.cursorState.currentLimit = this.cursorState.currentLimit + elements.length;
+  this.cursorState.cursorIndex = this.cursorState.cursorIndex + elements.length;
 
   // Return elements
   return elements;
@@ -334,7 +343,7 @@ Cursor.prototype.kill = function(callback) {
  * Resets the cursor
  * @method
  * @return {null}
- */  
+ */
 Cursor.prototype.rewind = function() {
   if(this.cursorState.init) {
     if(!this.cursorState.dead) {
@@ -349,14 +358,14 @@ Cursor.prototype.rewind = function() {
     this.cursorState.documents = [];
     this.cursorState.cursorId = null;
     this.cursorState.cursorIndex = 0;
-  }  
+  }
 }
 
 /**
  * Validate if the connection is dead and return error
  */
 var isConnectionDead = function(self, callback) {
-  if(self.connection 
+  if(self.connection
     && !self.connection.isConnected()) {
     self.cursorState.notified = true;
     self.cursorState.killed = true;
@@ -381,7 +390,7 @@ var isCursorDeadButNotkilled = function(self, callback) {
     self.cursorState.cursorIndex = 0;
     handleCallback(callback, null, null);
     return true;
-  }    
+  }
 
   return false;
 }
@@ -393,7 +402,7 @@ var isCursorDeadAndKilled = function(self, callback) {
   if(self.cursorState.dead && self.cursorState.killed) {
     handleCallback(callback, MongoError.create("cursor is dead"));
     return true;
-  }  
+  }
 
   return false;
 }
@@ -421,7 +430,7 @@ var setCursorDeadAndNotified = function(self, callback) {
   self.cursorState.notified = true;
   self.cursorState.documents = [];
   self.cursorState.cursorIndex = 0;
-  handleCallback(callback, null, null);  
+  handleCallback(callback, null, null);
 }
 
 /**
@@ -440,7 +449,7 @@ var nextFunction = function(self, callback) {
     return callback(new Error('cursor is exhausted'));
   }
   // Cursor is killed return null
-  if(isCursorKilled(self, callback)) return;  
+  if(isCursorKilled(self, callback)) return;
 
   // Cursor is dead but not marked killed, return null
   if(isCursorDeadButNotkilled(self, callback)) return;
@@ -499,7 +508,7 @@ var nextFunction = function(self, callback) {
       self.cursorState.cursorId = result.cursorId;
       nextFunction(self, callback);
     }
-  }    
+  }
 
   // If we have exhaust
   if(self.cmd.exhaust && self.cursorState.cursorId == null) {
@@ -527,7 +536,7 @@ var nextFunction = function(self, callback) {
 
     // Check if topology is destroyed
     if(self.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
-    
+
     // query, cmd, options, cursorState, callback
     execInitialQuery(self, self.query, self.cmd, self.options, self.cursorState, self.connection, self.logger, self.callbacks, function(err, r) {
       if(err) return handleCallback(callback, err, null);
@@ -538,7 +547,10 @@ var nextFunction = function(self, callback) {
       nextFunction(self, callback);
     });
   } else if(self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
-      return setCursorDeadAndNotified(self, callback);
+    // Ensure we kill the cursor on the server
+    self.kill();
+    // Set cursor in dead and notified state
+    return setCursorDeadAndNotified(self, callback);
   } else if(self.cursorState.cursorIndex == self.cursorState.documents.length
       && !Long.ZERO.equals(self.cursorState.cursorId)) {
       // Ensure an empty cursor state
@@ -556,7 +568,7 @@ var nextFunction = function(self, callback) {
       execGetMore(self, function(err, doc) {
         if(err) return handleCallback(callback, err);
         if(self.cursorState.documents.length == 0 && Long.ZERO.equals(self.cursorState.cursorId)) self.cursorState.dead = true;
-        
+
         // Tailable cursor getMore result, notify owner about it
         // No attempt is made here to retry, this is left to the user of the
         // core module to handle to keep core simple
@@ -574,18 +586,21 @@ var nextFunction = function(self, callback) {
 
         nextFunction(self, callback);
       });
-  } else if(self.cursorState.documents.length == self.cursorState.cursorIndex 
-    && self.cmd.tailable) { 
+  } else if(self.cursorState.documents.length == self.cursorState.cursorIndex
+    && self.cmd.tailable) {
       return handleCallback(callback, MongoError.create({
           message: "No more documents in tailed cursor"
         , tailable: self.cmd.tailable
         , awaitData: self.cmd.awaitData
       }));
-  } else if(self.cursorState.documents.length == self.cursorState.cursorIndex 
+  } else if(self.cursorState.documents.length == self.cursorState.cursorIndex
       && Long.ZERO.equals(self.cursorState.cursorId)) {
       setCursorDeadAndNotified(self, callback);
   } else {
     if(self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
+      // Ensure we kill the cursor on the server
+      self.kill();
+      // Set cursor in dead and notified state
       return setCursorDeadAndNotified(self, callback);
     }
 
@@ -602,7 +617,7 @@ var nextFunction = function(self, callback) {
 
     // Return the document
     handleCallback(callback, null, doc);
-  }  
+  }
 }
 
 /**

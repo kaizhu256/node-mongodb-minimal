@@ -155,8 +155,6 @@ for(var name in CoreCursor.prototype) {
   Cursor.prototype[name] = CoreCursor.prototype[name];
 }
 
-Cursor.prototype.mister = function() {}
-
 /**
  * Set the cursor query
  * @method
@@ -181,7 +179,7 @@ Cursor.prototype.setCursorOption = function(field, value) {
   if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw new MongoError("Cursor is closed");
   if(fields.indexOf(field) == -1) throw new MongoError(f("option %s not a supported option %s", field, fields));
   this.s[field] = value;
-  if(field == 'numberOfRetries') 
+  if(field == 'numberOfRetries')
     this.s.currentNumberOfRetries = value;
   return this;
 }
@@ -343,14 +341,6 @@ Cursor.prototype.skip = function(value) {
  */
 
 /**
- * Get the next available document from the cursor, returns null if no more documents are available.
- * @function external:CoreCursor#next
- * @param {Cursor~resultCallback} callback The result callback.
- * @throws {MongoError}
- * @return {null}
- */
-
-/**
  * Set the new batchSize of the cursor
  * @function Cursor.prototype.setBatchSize
  * @param {number} value The new batchSize for the cursor
@@ -449,6 +439,16 @@ var loop = function(self, callback) {
   // Loop
   return loop;
 }
+
+/**
+ * Get the next available document from the cursor, returns null if no more documents are available.
+ * @method
+ * @param {Cursor~resultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @deprecated
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.next = Cursor.prototype.nextObject;
 
 /**
  * Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
@@ -592,6 +592,7 @@ Cursor.prototype.toArray = function(callback) {
 
       // Add doc to items
       items.push(doc)
+
       // Get all buffered objects
       if(self.bufferedCount() > 0) {
         var docs = self.readBufferedDocuments(self.bufferedCount())
@@ -772,7 +773,8 @@ Cursor.prototype._read = function(n) {
       }
 
       // Emit end event
-      return self.emit('end');
+      self.emit('end');
+      return self.emit('finish');
     }
 
     // If we provided a transformation method

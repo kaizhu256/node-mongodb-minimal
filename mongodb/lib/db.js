@@ -282,13 +282,13 @@ Db.prototype.close = function(force, callback) {
       // Fire close on all children
       for(var i = 0; i < this.s.children.length; i++) {
         this.s.children[i].emit('close');
-      }      
+      }
     }
 
     // Remove listeners after emit
-    self.removeAllListeners('close');    
+    self.removeAllListeners('close');
   }
-  
+
   // Close parent db if set
   if(this.s.parentDb) this.s.parentDb.close();
   // Callback after next event loop tick
@@ -710,6 +710,10 @@ Db.prototype.createIndex = function(name, fieldOrSpec, options, callback) {
   options = args.length ? args.shift() || {} : {};
   options = typeof callback === 'function' ? options : callback;
   options = options == null ? {} : options;
+  // Clone options
+  options = shallowClone(options);
+  // Run only against primary
+  options.readPreference = ReadPreference.PRIMARY;
 
   // Get the write concern options
   var finalOptions = writeConcern({}, self, options);
@@ -768,6 +772,10 @@ Db.prototype.ensureIndex = function(name, fieldOrSpec, options, callback) {
   var self = this;
   if(typeof options == 'function') callback = options, options = {};
   options = options || {};
+  // Clone options
+  options = shallowClone(options);
+  // Run only against primary
+  options.readPreference = ReadPreference.PRIMARY;
 
   // Get the write concern options
   var finalOptions = writeConcern({}, self, options);
@@ -815,9 +823,9 @@ Db.prototype.db = function(dbName) {
 
   // Keep reference to the object
   // if(this.s.parentDb) {
-    // this.s.parentDb.s.children.push(db); 
-    this.addChild(db);    
-  // } 
+    // this.s.parentDb.s.children.push(db);
+    this.addChild(db);
+  // }
   // this.s.children.push(db);
 
   // // Add listeners to the parent database
@@ -825,7 +833,7 @@ Db.prototype.db = function(dbName) {
   // this.once('timeout', createListener(this, 'timeout', db));
   // this.once('close', createListener(this, 'close', db));
   // this.once('parseError', createListener(this, 'parseError', db));
-  
+
   // Return the database
   return db;
 };
@@ -1054,7 +1062,7 @@ Db.prototype.removeUser = function(username, options, callback) {
  * @param {string} username The username.
  * @param {string} [password] The password.
  * @param {object} [options=null] Optional settings.
- * @param {string} [options.authMechanism=MONGODB-CR] The authentication mechanism to use, GSSAPI, MONGODB-CR, MONGODB-X509, PLAIN
+ * @param {string} [options.authMechanism=MONGODB-CR] The authentication mechanism to use, GSSAPI, MONGODB-CR, MONGODB-X509, SCRAM-SHA-1, PLAIN
  * @param {Db~resultCallback} callback The command result callback
  * @return {null}
  */
