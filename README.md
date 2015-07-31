@@ -182,7 +182,7 @@ instruction
     "description": "pure javascript version of \
 https://www.npmjs.com/package/mongodb with zero npm-dependencies",
     "devDependencies": {
-        "utility2": "^2015.7.5"
+        "utility2": "^2015.7.10"
     },
     "engines": { "node": ">=0.10 <=0.12" },
     "keywords": [
@@ -208,6 +208,8 @@ module.exports.native = module.exports.pure = function () {\n\
 module.exports.ObjectId = module.exports.ObjectID;\n\
 \" > \
 node_modules/bson.js && \
+printf \"module.exports = require('../es6-promise');\" > \
+node_modules/es6-promise.js && \
 printf \"module.exports = require('../mongodb');\" > \
 node_modules/mongodb.js && \
 printf \"module.exports = require('../mongodb-core');\" > \
@@ -221,7 +223,7 @@ npm run-script postinstall && \
 node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && \
 node_modules/.bin/utility2 test example.js"
     },
-    "version": "2015.6.3"
+    "version": "2015.6.4"
 }
 ```
 
@@ -232,9 +234,9 @@ node_modules/.bin/utility2 test example.js"
 
 
 
-# change since 7436c304
-- npm publish 2015.6.3
-- update to mongodb@2.0.35
+# change since cafb6e5d
+- npm publish 2015.6.4
+- update bson@0.4.8, es6-promise@2.1.1, mongodb@2.0.39, and mongodb-core@1.2.6 static dependencies
 - none
 
 
@@ -259,7 +261,7 @@ shBuild() {
     . node_modules/.bin/utility2 && shInit || return $?
 
     # run npm-test on published package
-    shNpmTestPublished || return $?
+    shRun shNpmTestPublished || return $?
 
     # test example js script
     MODE_BUILD=testExampleJs \

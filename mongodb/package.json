@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.0.35",
+  "version": "2.0.39",
   "description": "MongoDB legacy driver emulation layer on top of mongodb-core",
   "main": "index.js",
   "repository": {
@@ -13,8 +13,9 @@
     "legacy"
   ],
   "dependencies": {
-    "mongodb-core": "1.2.2",
-    "readable-stream": "1.0.31"
+    "mongodb-core": "1.2.6",
+    "readable-stream": "1.0.31",
+    "es6-promise": "2.1.1"
   },
   "devDependencies": {
     "integra": "0.1.8",
@@ -25,7 +26,9 @@
     "rimraf": "2.2.6",
     "gleak": "0.5.0",
     "mongodb-version-manager": "^0.7.1",
-    "mongodb-tools": "~1.0"
+    "mongodb-tools": "~1.0",
+    "co": "4.5.4",
+    "bluebird": "2.9.27"
   },
   "author": {
     "name": "Christian Kvalheim"
@@ -38,12 +41,11 @@
     "test": "node test/runner.js -t functional"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
-  "gitHead": "3631ae10441b1ebffc6b629347df65b14e7affc8",
-  "_id": "mongodb@2.0.35",
-  "_shasum": "077bdbe50ac935c776f2504ca7e1d72bbdcfd37b",
+  "gitHead": "70ceff324a2a1ebdbaa047376d06e2c48d5f4700",
+  "_id": "mongodb@2.0.39",
+  "_shasum": "02977bd825293dbca349d6671744c526549646e5",
   "_from": "mongodb@*",
-  "_npmVersion": "2.11.1",
-  "_nodeVersion": "2.3.0",
+  "_npmVersion": "1.4.28",
   "_npmUser": {
     "name": "christkv",
     "email": "christkv@gmail.com"
@@ -55,9 +57,9 @@
     }
   ],
   "dist": {
-    "shasum": "077bdbe50ac935c776f2504ca7e1d72bbdcfd37b",
-    "tarball": "http://registry.npmjs.org/mongodb/-/mongodb-2.0.35.tgz"
+    "shasum": "02977bd825293dbca349d6671744c526549646e5",
+    "tarball": "http://registry.npmjs.org/mongodb/-/mongodb-2.0.39.tgz"
   },
   "directories": {},
-  "_resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.0.35.tgz"
+  "_resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.0.39.tgz"
 }
