@@ -141,7 +141,8 @@ inherits(CommandCursor, Readable);
 
 // Set the methods to inherit from prototype
 var methodsToInherit = ['_next', 'next', 'each', 'forEach', 'toArray'
-  , 'rewind', 'bufferedCount', 'readBufferedDocuments', 'close', 'isClosed', 'kill'];
+  , 'rewind', 'bufferedCount', 'readBufferedDocuments', 'close', 'isClosed', 'kill'
+  , '_find', '_getmore', '_killcursor', 'isDead', 'isNotified', 'isKilled'];
 
 // Only inherit the types we need
 for(var i = 0; i < methodsToInherit.length; i++) {
@@ -156,8 +157,8 @@ for(var i = 0; i < methodsToInherit.length; i++) {
  * @return {CommandCursor}
  */
 CommandCursor.prototype.batchSize = function(value) {
-  if(this.s.state == CommandCursor.CLOSED || this.isDead()) throw new MongoError("Cursor is closed");
-  if(typeof value != 'number') throw new MongoError("batchSize requires an integer");
+  if(this.s.state == CommandCursor.CLOSED || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  if(typeof value != 'number') throw MongoError.create({message: "batchSize requires an integer", driver:true});
   if(this.s.cmd.cursor) this.s.cmd.cursor.batchSize = value;
   this.setCursorBatchSize(value);
   return this;
@@ -181,7 +182,7 @@ CommandCursor.prototype.get = CommandCursor.prototype.toArray;
 /**
  * Get the next available document from the cursor, returns null if no more documents are available.
  * @function CommandCursor.prototype.next
- * @param {CommandCursor~resultCallback} callback The result callback.
+ * @param {CommandCursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */
@@ -212,7 +213,7 @@ CommandCursor.prototype.get = CommandCursor.prototype.toArray;
  * is enough memory to store the results. Note that the array only contain partial
  * results when this cursor had been previouly accessed.
  * @method CommandCursor.prototype.toArray
- * @param {CommandCursor~toArrayResultCallback} callback The result callback.
+ * @param {CommandCursor~toArrayResultCallback} [callback] The result callback.
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */

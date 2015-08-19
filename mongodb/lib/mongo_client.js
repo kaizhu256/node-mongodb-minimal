@@ -51,7 +51,7 @@ function MongoClient() {
    * @param {object} [options.replSet=null] A hash of options to set on the replSet object, see **ReplSet** constructor**
    * @param {object} [options.mongos=null] A hash of options to set on the mongos object, see **Mongos** constructor**
    * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
-   * @param {MongoClient~connectCallback} callback The command result callback
+   * @param {MongoClient~connectCallback} [callback] The command result callback
    * @return {Promise} returns Promise if no callback passed
    */
   this.connect = MongoClient.connect;
@@ -74,7 +74,7 @@ function MongoClient() {
  * @param {object} [options.replSet=null] A hash of options to set on the replSet object, see **ReplSet** constructor**
  * @param {object} [options.mongos=null] A hash of options to set on the mongos object, see **Mongos** constructor**
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {MongoClient~connectCallback} callback The command result callback
+ * @param {MongoClient~connectCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 MongoClient.connect = function(url, options, callback) {
@@ -242,16 +242,19 @@ var connect = function(url, options, callback) {
       new Db(object.dbName, __server, {w:1, native_parser:false}).open(function(err, db) {
         // Update number of servers
         totalNumberOfServers = totalNumberOfServers - 1;
+        
         // If no error do the correct checks
         if(!err) {
           // Close the connection
           db.close();
           var isMasterDoc = db.serverConfig.isMasterDoc;
+          
           // Check what type of server we have
           if(isMasterDoc.setName) {
             totalNumberOfMongodServers++;
             setName = isMasterDoc.setName;
           }
+
           if(isMasterDoc.msg && isMasterDoc.msg == "isdbgrid") totalNumberOfMongosServers++;
         } else {
           error = err;

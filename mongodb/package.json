@@ -1,6 +1,6 @@
 {
   "name": "mongodb",
-  "version": "2.0.39",
+  "version": "2.0.42",
   "description": "MongoDB legacy driver emulation layer on top of mongodb-core",
   "main": "index.js",
   "repository": {
@@ -13,7 +13,7 @@
     "legacy"
   ],
   "dependencies": {
-    "mongodb-core": "1.2.6",
+    "mongodb-core": "1.2.10",
     "readable-stream": "1.0.31",
     "es6-promise": "2.1.1"
   },
@@ -41,11 +41,12 @@
     "test": "node test/runner.js -t functional"
   },
   "homepage": "https://github.com/mongodb/node-mongodb-native",
-  "gitHead": "70ceff324a2a1ebdbaa047376d06e2c48d5f4700",
-  "_id": "mongodb@2.0.39",
-  "_shasum": "02977bd825293dbca349d6671744c526549646e5",
+  "gitHead": "3cb2435867e41515e64fae3e951503a421305ce2",
+  "_id": "mongodb@2.0.42",
+  "_shasum": "1bad7813d0725ce2e3bd54180f31faedd24d9e53",
   "_from": "mongodb@*",
-  "_npmVersion": "1.4.28",
+  "_npmVersion": "2.13.0",
+  "_nodeVersion": "2.4.0",
   "_npmUser": {
     "name": "christkv",
     "email": "christkv@gmail.com"
@@ -57,9 +58,9 @@
     }
   ],
   "dist": {
-    "shasum": "02977bd825293dbca349d6671744c526549646e5",
-    "tarball": "http://registry.npmjs.org/mongodb/-/mongodb-2.0.39.tgz"
+    "shasum": "1bad7813d0725ce2e3bd54180f31faedd24d9e53",
+    "tarball": "http://registry.npmjs.org/mongodb/-/mongodb-2.0.42.tgz"
   },
   "directories": {},
-  "_resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.0.39.tgz"
+  "_resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.0.42.tgz"
 }

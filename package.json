@@ -1,8 +1,9 @@
 {
     "author": "kai zhu <kaizhu256@gmail.com>",
-    "description": "pure javascript version of https://www.npmjs.com/package/mongodb with zero npm-dependencies",
+    "description": "pure javascript version of mongodb-client @ https://www.npmjs.com/package/mongodb with zero npm-dependenciess",
     "devDependencies": {
-        "utility2": "^2015.7.10"
+        "phantomjs-lite": "^2015.8.2",
+        "utility2": "2015.8.5"
     },
     "engines": { "node": ">=0.10 <=0.12" },
     "keywords": [
@@ -20,9 +21,10 @@
     },
     "scripts": {
         "build-ci": "node_modules/.bin/utility2 shRun shReadmeBuild",
-        "postinstall": "mkdir -p node_modules && printf \"module.exports = require('../bson/browser_build/bson.js')();\nmodule.exports.native = module.exports.pure = function () {\n    return module.exports;\n};\nmodule.exports.ObjectId = module.exports.ObjectID;\n\" > node_modules/bson.js && printf \"module.exports = require('../es6-promise');\" > node_modules/es6-promise.js && printf \"module.exports = require('../mongodb');\" > node_modules/mongodb.js && printf \"module.exports = require('../mongodb-core');\" > node_modules/mongodb-core.js",
+        "build-doc": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && node_modules/.bin/utility2 shRun shDocApiCreate \"{exampleFileList:['example.js','node_modules/mongodb.js','mongodb/test/functional','mongodb/lib','mongodb/lib/gridfs','mongodb-core/lib/connection','mongodb-core/lib/topologies'],moduleDict:{'mongodb':{aliasList:[''],exports:require('./node_modules/mongodb')},'mongodb.Collection':{aliasList:['col','collection'],exports:require('./node_modules/mongodb').Collection.prototype},'mongodb.MongoClient':{exports:require('./node_modules/mongodb').MongoClient},'mongodb.bson':{aliasList:['','.'],exports:require('./node_modules/mongodb').bson},'mongodb.core':{aliasList:[''],exports:require('./node_modules/mongodb').core},}}\"",
+        "postinstall": "mkdir -p node_modules && printf \"module.exports = require('../bson/browser_build/bson.js')(); module.exports.native = module.exports.pure = function () {     return module.exports; }; module.exports.ObjectId = module.exports.ObjectID; \" > node_modules/bson.js && printf \"module.exports = require('../es6-promise');\" > node_modules/es6-promise.js && printf \" module.exports = require('../mongodb'); module.exports.bson = require('bson'); module.exports.core = require('mongodb-core'); \" > node_modules/mongodb.js && printf \"module.exports = require('../mongodb-core');\" > node_modules/mongodb-core.js",
         "start": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && npm run-script postinstall && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 start example.js",
         "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && npm run-script postinstall && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 test example.js"
     },
-    "version": "2015.6.4"
+    "version": "2015.8.1"
 }

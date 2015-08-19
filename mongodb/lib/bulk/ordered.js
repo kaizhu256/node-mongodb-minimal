@@ -283,6 +283,8 @@ function OrderedBulkOperation(topology, collection, options) {
     , collection: collection
     // Promise Library
     , promiseLibrary: promiseLibrary
+		// Fundamental error
+		, err: null
   }
 }
 
@@ -391,6 +393,11 @@ var executeCommands = function(self, callback) {
   var batch = self.s.batches.shift();
 
   var resultHandler = function(err, result) {
+		// Error is a driver related error not a bulk op error, terminate
+		if(err && err.driver || err && err.message) {
+			return callback(err);
+		}
+
     // If we have and error
     if(err) err.ok = 0;
     // Merge the results together
@@ -402,7 +409,7 @@ var executeCommands = function(self, callback) {
     // If we are ordered and have errors and they are
     // not all replication errors terminate the operation
     if(self.s.bulkResult.writeErrors.length > 0) {
-      return callback(self.s.bulkResult.writeErrors[0], new BulkWriteResult(self.s.bulkResult));
+      return callback(toError(self.s.bulkResult.writeErrors[0]), new BulkWriteResult(self.s.bulkResult));
     }
 
     // Execute the next command in line
@@ -413,6 +420,16 @@ var executeCommands = function(self, callback) {
   if(self.s.writeConcern != null) {
     finalOptions.writeConcern = self.s.writeConcern;
   }
+
+	// Set an operationIf if provided
+	if(self.operationId) {
+		resultHandler.operationId = self.operationId;
+	}
+
+	// Serialize functions
+	if(self.s.options.serializeFunctions) {
+		finalOptions.serializeFunctions = true
+	}
 
   try {
     if(batch.batchType == common.INSERT) {
@@ -425,7 +442,7 @@ var executeCommands = function(self, callback) {
   } catch(err) {
     // Force top level error
     err.ok = 0;
-    // Merge top level error and return 
+    // Merge top level error and return
     callback(null, mergeBatchResults(false, batch, self.s.bulkResult, err, null));
   }
 }
@@ -446,7 +463,7 @@ var executeCommands = function(self, callback) {
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.fsync=false] Specify a file sync write concern.
- * @param {OrderedBulkOperation~resultCallback} callback The result callback
+ * @param {OrderedBulkOperation~resultCallback} [callback] The result callback
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */
@@ -468,13 +485,15 @@ OrderedBulkOperation.prototype.execute = function(_writeConcern, callback) {
   }
 
   // Execute using callback
-  if(typeof callback == 'function') return executeCommands(this, callback);
+  if(typeof callback == 'function') {
+		return executeCommands(this, callback);
+	}
 
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
     executeCommands(self, function(err, r) {
       if(err) return reject(err);
-      resolve(r); 
+      resolve(r);
     });
   });
 }
@@ -488,3 +507,4 @@ var initializeOrderedBulkOp = function(topology, collection, options) {
 }
 
 module.exports = initializeOrderedBulkOp;
+module.exports.Bulk = OrderedBulkOperation;

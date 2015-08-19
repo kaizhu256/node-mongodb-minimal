@@ -70,7 +70,7 @@ var Mongos = function(servers, options) {
   // Ensure all the instances are Server
   for(var i = 0; i < servers.length; i++) {
     if(!(servers[i] instanceof Server)) {
-      throw new MongoError("all seed list instances must be of the Server type");
+      throw MongoError.create({message: "all seed list instances must be of the Server type", driver:true});
     }
   }
 
@@ -105,6 +105,13 @@ var Mongos = function(servers, options) {
 
   // Add the store
   finalOptions.disconnectHandler = store;
+
+  // Ensure we change the sslCA option to ca if available
+  if(options.sslCA) finalOptions.ca = options.sslCA;
+  if(typeof options.sslValidate == 'boolean') finalOptions.rejectUnauthorized = options.sslValidate;
+  if(options.sslKey) finalOptions.key = options.sslKey;
+  if(options.sslCert) finalOptions.cert = options.sslCert;
+  if(options.sslPass) finalOptions.passphrase = options.sslPass;
 
   // Socket options passed down
   if(options.socketOptions) {
@@ -185,7 +192,9 @@ var Mongos = function(servers, options) {
 
   // Last ismaster
   Object.defineProperty(this, 'numberOfConnectedServers', {
-    enumerable:true, get: function() { return self.s.mongos.connectedServers().length; }
+    enumerable:true, get: function() { 
+      return self.s.mongos.s.mongosState.connectedServers().length; 
+    }
   });
 
   // BSON property
@@ -305,7 +314,7 @@ Mongos.prototype.parserType = function() {
 // Server capabilities
 Mongos.prototype.capabilities = function() {
   if(this.s.sCapabilities) return this.s.sCapabilities;
-  if(this.s.mongos.lastIsMaster() == null) throw new MongoError('cannot establish topology capabilities as driver is still in process of connecting');
+  if(this.s.mongos.lastIsMaster() == null) throw MongoError.create({message: 'cannot establish topology capabilities as driver is still in process of connecting', driver:true});
   this.s.sCapabilities = new ServerCapabilities(this.s.mongos.lastIsMaster());
   return this.s.sCapabilities;
 }

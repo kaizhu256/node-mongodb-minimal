@@ -152,8 +152,8 @@ for(var name in CoreCursor.prototype) {
  * @return {AggregationCursor}
  */
 AggregationCursor.prototype.batchSize = function(value) {
-  if(this.s.state == AggregationCursor.CLOSED || this.isDead()) throw new MongoError("Cursor is closed");
-  if(typeof value != 'number') throw new MongoError("batchSize requires an integer");
+  if(this.s.state == AggregationCursor.CLOSED || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true });
+  if(typeof value != 'number') throw MongoError.create({message: "batchSize requires an integer", drvier:true });
   if(this.s.cmd.cursor) this.s.cmd.cursor.batchSize = value;
   this.setCursorBatchSize(value);
   return this;
@@ -287,7 +287,7 @@ AggregationCursor.prototype.get = AggregationCursor.prototype.toArray;
 /**
  * Get the next available document from the cursor, returns null if no more documents are available.
  * @function AggregationCursor.prototype.next
- * @param {AggregationCursor~resultCallback} callback The result callback.
+ * @param {AggregationCursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */
@@ -319,7 +319,7 @@ AggregationCursor.prototype.get = AggregationCursor.prototype.toArray;
  * results when this cursor had been previouly accessed. In that case,
  * cursor.rewind() can be used to reset the cursor.
  * @method AggregationCursor.prototype.toArray
- * @param {AggregationCursor~toArrayResultCallback} callback The result callback.
+ * @param {AggregationCursor~toArrayResultCallback} [callback] The result callback.
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */

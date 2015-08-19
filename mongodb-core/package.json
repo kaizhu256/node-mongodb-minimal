@@ -1,6 +1,6 @@
 {
   "name": "mongodb-core",
-  "version": "1.2.6",
+  "version": "1.2.10",
   "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
   "main": "index.js",
   "scripts": {
@@ -41,11 +41,12 @@
     "url": "https://github.com/christkv/mongodb-core/issues"
   },
   "homepage": "https://github.com/christkv/mongodb-core",
-  "gitHead": "55913e03bff9f0a8603d24a14a30723b79a4b751",
-  "_id": "mongodb-core@1.2.6",
-  "_shasum": "4aeffe09070814d257899e441e49affd6cd8c7c5",
-  "_from": "mongodb-core@1.2.6",
-  "_npmVersion": "1.4.28",
+  "gitHead": "10a69e505d188415dc5ac5210523a4b02d956d2e",
+  "_id": "mongodb-core@1.2.10",
+  "_shasum": "ece17201bd395a647fb98f48be8fbae15be0afd9",
+  "_from": "mongodb-core@1.2.10",
+  "_npmVersion": "2.13.0",
+  "_nodeVersion": "2.4.0",
   "_npmUser": {
     "name": "christkv",
     "email": "christkv@gmail.com"
@@ -57,10 +58,9 @@
     }
   ],
   "dist": {
-    "shasum": "4aeffe09070814d257899e441e49affd6cd8c7c5",
-    "tarball": "http://registry.npmjs.org/mongodb-core/-/mongodb-core-1.2.6.tgz"
+    "shasum": "ece17201bd395a647fb98f48be8fbae15be0afd9",
+    "tarball": "http://registry.npmjs.org/mongodb-core/-/mongodb-core-1.2.10.tgz"
   },
   "directories": {},
-  "_resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-1.2.6.tgz",
-  "readme": "ERROR: No README data found!"
+  "_resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-1.2.10.tgz"
 }

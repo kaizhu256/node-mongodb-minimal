@@ -399,10 +399,25 @@ var executeBatch = function(self, batch, callback) {
   }
 
   var resultHandler = function(err, result) {
+		// Error is a driver related error not a bulk op error, terminate
+		if(err && err.driver || err && err.message) {
+			return callback(err);
+		}
+
     // If we have and error
     if(err) err.ok = 0;
     callback(null, mergeBatchResults(false, batch, self.s.bulkResult, err, result));
   }
+
+	// Set an operationIf if provided
+	if(self.operationId) {
+		resultHandler.operationId = self.operationId;
+	}
+
+	// Serialize functions
+	if(self.s.options.serializeFunctions) {
+		finalOptions.serializeFunctions = true
+	}
 
   try {
     if(batch.batchType == common.INSERT) {
@@ -415,7 +430,7 @@ var executeBatch = function(self, batch, callback) {
   } catch(err) {
     // Force top level error
     err.ok = 0;
-    // Merge top level error and return 
+    // Merge top level error and return
     callback(null, mergeBatchResults(false, batch, self.s.bulkResult, err, null));
   }
 }
@@ -424,14 +439,21 @@ var executeBatch = function(self, batch, callback) {
 // Execute all the commands
 var executeBatches = function(self, callback) {
   var numberOfCommandsToExecute = self.s.batches.length;
+	var error = null;
   // Execute over all the batches
   for(var i = 0; i < self.s.batches.length; i++) {
     executeBatch(self, self.s.batches[i], function(err, result) {
+			// Driver layer error capture it
+			if(err) error = err;
+			// Count down the number of commands left to execute
       numberOfCommandsToExecute = numberOfCommandsToExecute - 1;
 
       // Execute
       if(numberOfCommandsToExecute == 0) {
-        var error = self.s.bulkResult.writeErrors.length > 0 ? self.s.bulkResult.writeErrors[0] : null;
+				// Driver level error
+				if(error) return callback(error);
+				// Treat write errors
+        var error = self.s.bulkResult.writeErrors.length > 0 ? toError(self.s.bulkResult.writeErrors[0]) : null;
         callback(error, new BulkWriteResult(self.s.bulkResult));
       }
     });
@@ -454,7 +476,7 @@ var executeBatches = function(self, callback) {
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.fsync=false] Specify a file sync write concern.
- * @param {UnorderedBulkOperation~resultCallback} callback The result callback
+ * @param {UnorderedBulkOperation~resultCallback} [callback] The result callback
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */
@@ -484,7 +506,7 @@ UnorderedBulkOperation.prototype.execute = function(_writeConcern, callback) {
   return new this.s.promiseLibrary(function(resolve, reject) {
     executeBatches(self, function(err, r) {
       if(err) return reject(err);
-      resolve(r); 
+      resolve(r);
     });
   });
 }
@@ -498,3 +520,4 @@ var initializeUnorderedBulkOp = function(topology, collection, options) {
 }
 
 module.exports = initializeUnorderedBulkOp;
+module.exports.Bulk = UnorderedBulkOperation;

@@ -6,7 +6,7 @@
     "bson",
     "parser"
   ],
-  "version": "0.4.8",
+  "version": "0.4.11",
   "author": {
     "name": "Christian Amor Kvalheim",
     "email": "christkv@gmail.com"
@@ -41,12 +41,13 @@
   },
   "browser": "lib/bson/bson.js",
   "license": "Apache-2.0",
-  "gitHead": "b356ee449b83373833db40fabe1672ed39ce1630",
+  "gitHead": "d1d89789176c089f7e58f61c923df7dbd4079459",
   "homepage": "https://github.com/mongodb/js-bson",
-  "_id": "bson@0.4.8",
-  "_shasum": "006020eaee74f5897fb4985b1e413f251c765399",
+  "_id": "bson@0.4.11",
+  "_shasum": "045255ce798d2d40001ff775e0dd9176efaf25b4",
   "_from": "bson@>=0.4.0 <0.5.0",
-  "_npmVersion": "1.4.28",
+  "_npmVersion": "2.13.0",
+  "_nodeVersion": "2.4.0",
   "_npmUser": {
     "name": "christkv",
     "email": "christkv@gmail.com"
@@ -62,8 +63,8 @@
     }
   ],
   "dist": {
-    "shasum": "006020eaee74f5897fb4985b1e413f251c765399",
-    "tarball": "http://registry.npmjs.org/bson/-/bson-0.4.8.tgz"
+    "shasum": "045255ce798d2d40001ff775e0dd9176efaf25b4",
+    "tarball": "http://registry.npmjs.org/bson/-/bson-0.4.11.tgz"
   },
-  "_resolved": "https://registry.npmjs.org/bson/-/bson-0.4.8.tgz"
+  "_resolved": "https://registry.npmjs.org/bson/-/bson-0.4.11.tgz"
 }

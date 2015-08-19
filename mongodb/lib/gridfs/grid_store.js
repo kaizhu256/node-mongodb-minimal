@@ -180,13 +180,13 @@ var GridStore = function GridStore(db, id, filename, mode, options) {
  * new one if file does not exist.
  *
  * @method
- * @param {GridStore~openCallback} callback this will be called after executing this method
+ * @param {GridStore~openCallback} [callback] this will be called after executing this method
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.open = function(callback) {
   var self = this;
   if( this.mode != "w" && this.mode != "w+" && this.mode != "r"){
-    throw new MongoError("Illegal mode " + this.mode);
+    throw MongoError.create({message: "Illegal mode " + this.mode, driver:true});
   }
 
   // We provided a callback leg
@@ -197,7 +197,7 @@ GridStore.prototype.open = function(callback) {
       if(err) return reject(err);
       resolve(store);
     })
-  });  
+  });
 };
 
 var open = function(self, callback) {
@@ -229,7 +229,7 @@ var open = function(self, callback) {
       self.isOpen = true;
       callback(err, r);
     });
-  }  
+  }
 }
 
 /**
@@ -253,7 +253,7 @@ GridStore.prototype.eof = function() {
  * Retrieves a single character from this file.
  *
  * @method
- * @param {GridStore~resultCallback} callback this gets called after this method is executed. Passes null to the first parameter and the character read to the second or null to the second if the read/write head is at the end of the file.
+ * @param {GridStore~resultCallback} [callback] this gets called after this method is executed. Passes null to the first parameter and the character read to the second or null to the second if the read/write head is at the end of the file.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.getc = function(callback) {
@@ -281,7 +281,7 @@ var eof = function(self, callback) {
   } else {
     self.position = self.position + 1;
     callback(null, self.currentChunk.getc());
-  }  
+  }
 }
 
 /**
@@ -290,7 +290,7 @@ var eof = function(self, callback) {
  *
  * @method
  * @param {string} string the string to write.
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.puts = function(string, callback) {
@@ -323,7 +323,7 @@ GridStore.prototype.stream = function() {
  * @method
  * @param {(string|Buffer)} data the data to write.
  * @param {boolean} [close] closes this file after writing if set to true.
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.write = function write(data, close, callback) {
@@ -361,7 +361,7 @@ GridStore.prototype.destroy = function destroy() {
  *
  * @method
  * @param {(string|Buffer|FileHandle)} file the file to store.
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.writeFile = function (file, callback) {
@@ -433,7 +433,7 @@ var writeFile = function(self, file, callback) {
       // Process the first write
       process.nextTick(writeChunk);
     });
-  });  
+  });
 }
 
 /**
@@ -442,7 +442,7 @@ var writeFile = function(self, file, callback) {
  * "w" or "w+".
  *
  * @method
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.close = function(callback) {
@@ -523,8 +523,8 @@ var close = function(self, callback) {
       callback(null, null);
   } else {
     if(typeof callback == 'function')
-      callback(new MongoError(f("Illegal mode %s", self.mode), null));
-  }  
+      callback(MongoError.create({message: f("Illegal mode %s", self.mode), driver:true}));
+  }
 }
 
 /**
@@ -551,7 +551,7 @@ GridStore.prototype.chunkCollection = function(callback) {
  * Deletes all the chunks of this file in the database.
  *
  * @method
- * @param {GridStore~resultCallback} callback the command callback.
+ * @param {GridStore~resultCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.unlink = function(callback) {
@@ -584,7 +584,7 @@ var unlink = function(self, callback) {
         callback(err, self);
       });
     });
-  });  
+  });
 }
 
 /**
@@ -612,7 +612,7 @@ GridStore.prototype.collection = function(callback) {
  *
  * @method
  * @param {string} [separator] The character to be recognized as the newline separator.
- * @param {GridStore~readlinesCallback} callback the command callback.
+ * @param {GridStore~readlinesCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.readlines = function(separator, callback) {
@@ -622,7 +622,7 @@ GridStore.prototype.readlines = function(separator, callback) {
   if(typeof callback != 'function') args.push(callback);
   separator = args.length ? args.shift() : "\n";
   separator = separator || "\n";
-  
+
   // We provided a callback leg
   if(typeof callback == 'function') return readlines(self, separator, callback);
 
@@ -646,7 +646,7 @@ var readlines = function(self, separator, callback) {
     }
 
     callback(null, items);
-  });  
+  });
 }
 
 /**
@@ -654,7 +654,7 @@ var readlines = function(self, separator, callback) {
  * "w+" and resets the read/write head to the initial position.
  *
  * @method
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.rewind = function(callback) {
@@ -692,7 +692,7 @@ var rewind = function(self, callback) {
     self.currentChunk.rewind();
     self.position = 0;
     callback(null, self);
-  }  
+  }
 }
 
 /**
@@ -714,7 +714,7 @@ var rewind = function(self, callback) {
  * @method
  * @param {number} [length] the number of characters to read. Reads all the characters from the read/write head to the EOF if not specified.
  * @param {(string|Buffer)} [buffer] a string to hold temporary data. This is used for storing the string data read so far when recursively calling this method.
- * @param {GridStore~readCallback} callback the command callback.
+ * @param {GridStore~readCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.read = function(length, buffer, callback) {
@@ -750,7 +750,7 @@ var read = function(self, length, buffer, callback) {
     // Update internal position
     self.position = self.position + finalBuffer.length;
     // Check if we don't have a file at all
-    if(finalLength == 0 && finalBuffer.length == 0) return callback(new MongoError("File does not exist"), null);
+    if(finalLength == 0 && finalBuffer.length == 0) return callback(MongoError.create({message: "File does not exist", driver:true}), null);
     // Else return data
     return callback(null, finalBuffer);
   }
@@ -773,10 +773,10 @@ var read = function(self, length, buffer, callback) {
       if(finalBuffer._index > 0) {
         callback(null, finalBuffer)
       } else {
-        callback(new MongoError("no chunks found for file, possibly corrupt"), null);
+        callback(MongoError.create({message: "no chunks found for file, possibly corrupt", driver:true}), null);
       }
     }
-  });  
+  });
 }
 
 /**
@@ -792,7 +792,7 @@ var read = function(self, length, buffer, callback) {
  * @method
  * @param {number} [length] the number of characters to read. Reads all the characters from the read/write head to the EOF if not specified.
  * @param {(string|Buffer)} [buffer] a string to hold temporary data. This is used for storing the string data read so far when recursively calling this method.
- * @param {GridStore~tellCallback} callback the command callback.
+ * @param {GridStore~tellCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.tell = function(callback) {
@@ -825,7 +825,7 @@ GridStore.prototype.tell = function(callback) {
  * @method
  * @param {number} [position] the position to seek to
  * @param {number} [seekLocation] seek mode. Use one of the Seek Location modes.
- * @param {GridStore~gridStoreCallback} callback the command callback.
+ * @param {GridStore~gridStoreCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.seek = function(position, seekLocation, callback) {
@@ -850,7 +850,7 @@ GridStore.prototype.seek = function(position, seekLocation, callback) {
 var seek = function(self, position, seekLocation, callback) {
   // Seek only supports read mode
   if(self.mode != 'r') {
-    return callback(new MongoError("seek is only supported for mode r"))
+    return callback(MongoError.create({message: "seek is only supported for mode r", driver:true}))
   }
 
   var seekLocationFinal = seekLocation == null ? GridStore.IO_SEEK_SET : seekLocation;
@@ -877,7 +877,7 @@ var seek = function(self, position, seekLocation, callback) {
     });
   };
 
-  seekChunk();  
+  seekChunk();
 }
 
 /**
@@ -915,7 +915,7 @@ var _open = function(self, options, callback) {
       } else {
          self.length = 0;
          var txtId = self.fileId instanceof ObjectID ? self.fileId.toHexString() : self.fileId;
-         return error(new MongoError(f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? txtId : self.filename))), self);
+         return error(MongoError.create({message: f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? txtId : self.filename)), driver:true}), self);
       }
 
       // Process the mode of the object
@@ -1001,7 +1001,7 @@ var writeBuffer = function(self, buffer, close, callback) {
   var finalClose = typeof close == 'boolean' ? close : false;
 
   if(self.mode != "w") {
-    callback(new MongoError(f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? self.referenceBy : self.filename))), null);
+    callback(MongoError.create({message: f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? self.referenceBy : self.filename)), driver:true}), null);
   } else {
     if(self.currentChunk.position + buffer.length >= self.chunkSize) {
       // Write out the current Chunk and then keep writing until we have less data left than a chunkSize left
@@ -1209,7 +1209,7 @@ GridStore.IO_SEEK_END = 2;
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~resultCallback} callback result from exists.
+ * @param {GridStore~resultCallback} [callback] result from exists.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.exist = function(db, fileIdObject, rootCollection, options, callback) {
@@ -1265,7 +1265,7 @@ var exists = function(db, fileIdObject, rootCollection, options, callback) {
       if(err) return callback(err);
       callback(null, item == null ? false : true);
     });
-  });  
+  });
 }
 
 /**
@@ -1278,7 +1278,7 @@ var exists = function(db, fileIdObject, rootCollection, options, callback) {
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~resultCallback} callback result from exists.
+ * @param {GridStore~resultCallback} [callback] result from exists.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.list = function(db, rootCollection, options, callback) {
@@ -1337,7 +1337,7 @@ var list = function(db, rootCollection, options, callback) {
         }
       });
     });
-  });  
+  });
 }
 
 /**
@@ -1359,7 +1359,7 @@ var list = function(db, rootCollection, options, callback) {
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~readCallback} callback the command callback.
+ * @param {GridStore~readCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 
@@ -1408,7 +1408,7 @@ var readStatic = function(db, name, length, offset, options, callback) {
     } else {
       gridStore.read(length, callback);
     }
-  });  
+  });
 }
 
 /**
@@ -1422,7 +1422,7 @@ var readStatic = function(db, name, length, offset, options, callback) {
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~readlinesCallback} callback the command callback.
+ * @param {GridStore~readlinesCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.readlines = function(db, name, separator, options, callback) {
@@ -1458,7 +1458,7 @@ var readlinesStatic = function(db, name, separator, options, callback) {
   new GridStore(db, name, "r", options).open(function(err, gridStore) {
     if(err) return callback(err);
     gridStore.readlines(finalSeperator, callback);
-  });  
+  });
 }
 
 /**
@@ -1470,7 +1470,7 @@ var readlinesStatic = function(db, name, separator, options, callback) {
  * @param {(string|array)} names The name/names of the files to delete.
  * @param {object} [options=null] Optional settings.
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~resultCallback} callback the command callback.
+ * @param {GridStore~resultCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.unlink = function(db, names, options, callback) {
@@ -1530,7 +1530,7 @@ var unlinkStatic = function(self, db, names, options, callback) {
         });
       });
     });
-  }  
+  }
 }
 
 /**
@@ -1583,7 +1583,7 @@ var _getWriteConcern = function(self, options) {
 
   // Ensure we don't have an invalid combination of write concerns
   if(finalOptions.w < 1
-    && (finalOptions.journal == true || finalOptions.j == true || finalOptions.fsync == true)) throw new MongoError("No acknowledgement using w < 1 cannot be combined with journal:true or fsync:true");
+    && (finalOptions.journal == true || finalOptions.j == true || finalOptions.fsync == true)) throw MongoError.create({message: "No acknowledgement using w < 1 cannot be combined with journal:true or fsync:true", driver:true});
 
   // Return the options
   return finalOptions;
@@ -1684,7 +1684,7 @@ GridStoreStream.prototype.destroy = function() {
 
 GridStoreStream.prototype.write = function(chunk, encoding, callback) {
   var self = this;
-  if(self.endCalled) return self.emit('error', new MongoError('attempting to write to stream after end called'))
+  if(self.endCalled) return self.emit('error', MongoError.create({message: 'attempting to write to stream after end called', driver:true}))
   // Do we have to open the gridstore
   if(!self.gs.isOpen) {
     self.gs.open(function() {

@@ -56,7 +56,7 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
  * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
  * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
  * @param {number} [options.bufferMaxEntries=-1] Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.
- * @param {number} [options.numberOfRetries=5] Number of retries off connection.
+ * @param {number} [options.numberOfRetries=5] Number of times a tailable cursor will re-poll when it gets nothing back.
  * @param {number} [options.retryMiliSeconds=500] Number of milliseconds between retries.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.pkFactory=null] A primary key factory object for generation of custom _id keys.
@@ -99,6 +99,8 @@ var Db = function(databaseName, topology, options) {
   this.s = {
     // Database name
       databaseName: databaseName
+    // DbCache
+    , dbCache: {}
     // Children db's
     , children: []
     // Topology
@@ -123,6 +125,8 @@ var Db = function(databaseName, topology, options) {
     , nativeParser: options.nativeParser || options.native_parser
     // Promise library
     , promiseLibrary: promiseLibrary
+    // No listener
+    , noListener: typeof options.noListener == 'boolean' ? options.noListener : false
   }
 
   // Ensure we have a valid db name
@@ -180,6 +184,7 @@ var Db = function(databaseName, topology, options) {
 
   // This is a child db, do not register any listeners
   if(options.parentDb) return;
+  if(this.s.noListener) return;
 
   // Add listeners
   topology.once('error', createListener(self, 'error', self));
@@ -220,7 +225,7 @@ var open = function(self, callback) {
 /**
  * Open the database
  * @method
- * @param {Db~openCallback} callback Callback
+ * @param {Db~openCallback} [callback] Callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.open = function(callback) {
@@ -276,7 +281,7 @@ var executeCommand = function(self, command, options, callback) {
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {number} [options.maxTimeMS=null] Number of milliseconds to wait before aborting the query.
- * @param {Db~resultCallback} callback The command result callback
+ * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.command = function(command, options, callback) {
@@ -308,7 +313,7 @@ Db.prototype.command = function(command, options, callback) {
  * Close the db and it's underlying connections
  * @method
  * @param {boolean} force Force close, emitting no events
- * @param {Db~noResultCallback} callback The result callback
+ * @param {Db~noResultCallback} [callback] The result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.close = function(force, callback) {
@@ -425,7 +430,7 @@ var createCollection = function(self, name, options, callback) {
   self.listCollections({name: name}).toArray(function(err, collections) {
     if(err != null) return handleCallback(callback, err, null);
     if(collections.length > 0 && finalOptions.strict) {
-      return handleCallback(callback, new MongoError(f("Collection %s already exists. Currently in strict mode.", name)), null);
+      return handleCallback(callback, MongoError.create({message: f("Collection %s already exists. Currently in strict mode.", name), driver:true}), null);
     } else if (collections.length > 0) {
       try { return handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options)); }
       catch(err) { return handleCallback(callback, err); }
@@ -466,7 +471,7 @@ var createCollection = function(self, name, options, callback) {
  * @param {number} [options.size=null] The size of the capped collection in bytes.
  * @param {number} [options.max=null] The maximum number of documents in the capped collection.
  * @param {boolean} [options.autoIndexId=true] Create an index on the _id field of the document, True by default on MongoDB 2.2 or higher off for version < 2.2.
- * @param {Db~collectionResultCallback} callback The results callback
+ * @param {Db~collectionResultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.createCollection = function(name, options, callback) {
@@ -476,6 +481,9 @@ Db.prototype.createCollection = function(name, options, callback) {
   if(typeof callback != 'function') args.push(callback);
   name = args.length ? args.shift() : null;
   options = args.length ? args.shift() || {} : {};
+
+  // Do we have a promisesLibrary
+  options.promiseLibrary = options.promiseLibrary || this.s.promiseLibrary;
 
   // Check if the callback is in fact a string
   if(typeof callback == 'string') name = callback;
@@ -496,7 +504,7 @@ Db.prototype.createCollection = function(name, options, callback) {
  * @method
  * @param {object} [options=null] Optional settings.
  * @param {number} [options.scale=null] Divide the returned sizes by scale value.
- * @param {Db~resultCallback} callback The collection result callback
+ * @param {Db~resultCallback} [callback] The collection result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.stats = function(options, callback) {
@@ -617,7 +625,7 @@ var evaluate = function(self, code, parameters, options, callback) {
   self.command(cmd, options, function(err, result) {
     if(err) return handleCallback(callback, err, null);
     if(result && result.ok == 1) return handleCallback(callback, null, result.retval);
-    if(result) return handleCallback(callback, new MongoError(f("eval failed: %s", result.errmsg)), null);
+    if(result) return handleCallback(callback, MongoError.create({message: f("eval failed: %s", result.errmsg), driver:true}), null);
     handleCallback(callback, err, result);
   });
 }
@@ -630,7 +638,7 @@ var evaluate = function(self, code, parameters, options, callback) {
  * @param {(object|array)} parameters The parameters for the call.
  * @param {object} [options=null] Optional settings.
  * @param {boolean} [options.nolock=false] Tell MongoDB not to block on the evaulation of the javascript.
- * @param {Db~resultCallback} callback The results callback
+ * @param {Db~resultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.eval = function(code, parameters, options, callback) {
@@ -660,7 +668,7 @@ Db.prototype.eval = function(code, parameters, options, callback) {
  * @param {string} toCollection New name of of the collection.
  * @param {object} [options=null] Optional settings.
  * @param {boolean} [options.dropTarget=false] Drop the target name collection if it previously exists.
- * @param {Db~collectionResultCallback} callback The results callback
+ * @param {Db~collectionResultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.renameCollection = function(fromCollection, toCollection, options, callback) {
@@ -689,7 +697,7 @@ Db.prototype.renameCollection = function(fromCollection, toCollection, options, 
  *
  * @method
  * @param {string} name Name of collection to drop
- * @param {Db~resultCallback} callback The results callback
+ * @param {Db~resultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.dropCollection = function(name, callback) {
@@ -725,7 +733,6 @@ Db.prototype.dropCollection = function(name, callback) {
  */
 Db.prototype.dropDatabase = function(callback) {
   var self = this;
-  if(typeof options == 'function') callback = options, options = {};
   // Drop database command
   var cmd = {'dropDatabase':1};
 
@@ -798,7 +805,7 @@ Db.prototype.collections = function(callback) {
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {number} [options.maxTimeMS=null] Number of milliseconds to wait before aborting the query.
- * @param {Db~resultCallback} callback The command result callback
+ * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.executeDbAdminCommand = function(selector, options, callback) {
@@ -830,7 +837,7 @@ var createIndex = function(self, name, fieldOrSpec, options, callback) {
   var finalOptions = writeConcern({}, self, options);
   // Ensure we have a callback
   if(finalOptions.writeConcern && typeof callback != 'function') {
-    throw new MongoError("Cannot use a writeConcern without a provided callback");
+    throw MongoError.create({message: "Cannot use a writeConcern without a provided callback", driver:true});
   }
 
   // Attempt to run using createIndexes command
@@ -869,7 +876,7 @@ var createIndex = function(self, name, fieldOrSpec, options, callback) {
  * @param {number} [options.v=null] Specify the format version of the indexes.
  * @param {number} [options.expireAfterSeconds=null] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  * @param {number} [options.name=null] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
- * @param {Db~resultCallback} callback The command result callback
+ * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.createIndex = function(name, fieldOrSpec, options, callback) {
@@ -936,7 +943,7 @@ var ensureIndex = function(self, name, fieldOrSpec, options, callback) {
  * @param {number} [options.v=null] Specify the format version of the indexes.
  * @param {number} [options.expireAfterSeconds=null] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  * @param {number} [options.name=null] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
- * @param {Db~resultCallback} callback The command result callback
+ * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.ensureIndex = function(name, fieldOrSpec, options, callback) {
@@ -962,27 +969,48 @@ Db.prototype.addChild = function(db) {
 }
 
 /**
- * Create a new Db instance sharing the current socket connections.
+ * Create a new Db instance sharing the current socket connections. Be aware that the new db instances are
+ * related in a parent-child relationship to the original instance so that events are correctly emitted on child
+ * db instances. Child db instances are cached so performing db('db1') twice will return the same instance.
+ * You can control these behaviors with the options noListener and returnNonCachedInstance.
+ *
  * @method
  * @param {string} name The name of the database we want to use.
+ * @param {object} [options=null] Optional settings.
+ * @param {boolean} [options.noListener=false] Do not make the db an event listener to the original connection.
+ * @param {boolean} [options.returnNonCachedInstance=false] Control if you want to return a cached instance or have a new one created
  * @return {Db}
  */
-Db.prototype.db = function(dbName) {
+Db.prototype.db = function(dbName, options) {
+  options = options || {};
   // Copy the options and add out internal override of the not shared flag
-  var options = {};
   for(var key in this.options) {
     options[key] = this.options[key];
   }
 
+  // Do we have the db in the cache already
+  if(this.s.dbCache[dbName] && options.returnNonCachedInstance !== true) {
+    return this.s.dbCache[dbName];
+  }
+
   // Add current db as parentDb
-  options.parentDb = this;
+  if(options.noListener == null || options.noListener == false) {
+    options.parentDb = this;
+  }
+
   // Add promiseLibrary
   options.promiseLibrary = this.s.promiseLibrary;
 
   // Return the db object
   var db = new Db(dbName, this.s.topology, options)
+
   // Add as child
-  this.addChild(db);
+  if(options.noListener == null || options.noListener == false) {
+    this.addChild(db);
+  }
+
+  // Add the db to the cache
+  this.s.dbCache[dbName] = db;
   // Return the database
   return db;
 };
@@ -1121,7 +1149,7 @@ var addUser = function(self, username, password, options, callback) {
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {object} [options.customData=null] Custom data associated with the user (only Mongodb 2.6 or higher)
  * @param {object[]} [options.roles=null] Roles associated with the created user (only Mongodb 2.6 or higher)
- * @param {Db~resultCallback} callback The command result callback
+ * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.addUser = function(username, password, options, callback) {
@@ -1210,7 +1238,7 @@ var removeUser = function(self, username, options, callback) {
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {Db~resultCallback} callback The command result callback
+ * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.removeUser = function(username, options, callback) {
@@ -1293,7 +1321,7 @@ var authenticate = function(self, username, password, options, callback) {
       _callback(null, true);
     });
   } else {
-    handleCallback(callback, new MongoError(f("authentication mechanism %s not supported", options.authMechanism), false));
+    handleCallback(callback, MongoError.create({message: f("authentication mechanism %s not supported", options.authMechanism), driver:true}));
   }
 }
 
@@ -1304,7 +1332,7 @@ var authenticate = function(self, username, password, options, callback) {
  * @param {string} [password] The password.
  * @param {object} [options=null] Optional settings.
  * @param {string} [options.authMechanism=MONGODB-CR] The authentication mechanism to use, GSSAPI, MONGODB-CR, MONGODB-X509, PLAIN
- * @param {Db~resultCallback} callback The command result callback
+ * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.authenticate = function(username, password, options, callback) {
@@ -1321,7 +1349,7 @@ Db.prototype.authenticate = function(username, password, options, callback) {
     && options.authMechanism != 'MONGODB-X509'
     && options.authMechanism != 'SCRAM-SHA-1'
     && options.authMechanism != 'PLAIN') {
-      return handleCallback(callback, new MongoError("only GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism"));
+      return handleCallback(callback, MongoError.create({message: "only GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", driver:true}));
   }
 
   // If we have a callback fallback
@@ -1341,7 +1369,7 @@ Db.prototype.authenticate = function(username, password, options, callback) {
  * @method
  * @param {object} [options=null] Optional settings.
  * @param {string} [options.dbName=null] Logout against different database than current.
- * @param {Db~resultCallback} callback The command result callback
+ * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.logout = function(options, callback) {
@@ -1389,7 +1417,7 @@ var getReadPreference = function(options, db) {
  * @param {object} [options=null] Optional settings.
  * @param {boolean} [options.full=false] Returns the full raw index information.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {Db~resultCallback} callback The command result callback
+ * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.indexInformation = function(name, options, callback) {
@@ -1513,13 +1541,13 @@ var createIndexUsingCreateIndexes = function(self, name, fieldOrSpec, options, c
 
 // Validate the database name
 var validateDatabaseName = function(databaseName) {
-  if(typeof databaseName !== 'string') throw new MongoError("database name must be a string");
-  if(databaseName.length === 0) throw new MongoError("database name cannot be the empty string");
+  if(typeof databaseName !== 'string') throw MongoError.create({message: "database name must be a string", driver:true});
+  if(databaseName.length === 0) throw MongoError.create({message: "database name cannot be the empty string", driver:true});
   if(databaseName == '$external') return;
 
   var invalidChars = [" ", ".", "$", "/", "\\"];
   for(var i = 0; i < invalidChars.length; i++) {
-    if(databaseName.indexOf(invalidChars[i]) != -1) throw new MongoError("database names cannot contain the character '" + invalidChars[i] + "'");
+    if(databaseName.indexOf(invalidChars[i]) != -1) throw MongoError.create({message: "database names cannot contain the character '" + invalidChars[i] + "'", driver:true});
   }
 }
 
