@@ -1182,7 +1182,7 @@ var Admin = <span class="fstat-no" title="function not covered" >function(db, to
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {number} [options.maxTimeMS=null] Number of milliseconds to wait before aborting the query.
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.command = <span class="fstat-no" title="function not covered" >function(command, options, callback) {</span>
@@ -1211,7 +1211,7 @@ Admin.prototype.command = <span class="fstat-no" title="function not covered" >f
  * Retrieve the server information for the current
  * instance of the db client
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.buildInfo = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -1232,7 +1232,7 @@ Admin.prototype.buildInfo = <span class="fstat-no" title="function not covered" 
  * Retrieve the server information for the current
  * instance of the db client
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.serverInfo = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -1255,7 +1255,7 @@ Admin.prototype.serverInfo = <span class="fstat-no" title="function not covered"
 /**
  * Retrieve this db's server status.
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.serverStatus = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -1287,7 +1287,7 @@ var serverStatus = <span class="fstat-no" title="function not covered" >function
 /**
  * Retrieve the current profiling Level for MongoDB
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.profilingLevel = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -1324,7 +1324,7 @@ var profilingLevel = <span class="fstat-no" title="function not covered" >functi
 /**
  * Ping the MongoDB server and retrieve results
  *
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.ping = <span class="fstat-no" title="function not covered" >function(options, callback) {</span>
@@ -1350,7 +1350,7 @@ Admin.prototype.ping = <span class="fstat-no" title="function not covered" >func
  * @method
  * @param {string} username The username.
  * @param {string} [password] The password.
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.authenticate = <span class="fstat-no" title="function not covered" >function(username, password, callback) {</span>
@@ -1370,7 +1370,7 @@ Admin.prototype.authenticate = <span class="fstat-no" title="function not covere
 /**
  * Logout user from server, fire off on all connections and remove all auth info
  * @method
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.logout = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -1420,7 +1420,7 @@ var writeConcern = <span class="fstat-no" title="function not covered" >function
  * @param {boolean} [options.fsync=false] Specify a file sync write concern.
  * @param {object} [options.customData=null] Custom data associated with the user (only Mongodb 2.6 or higher)
  * @param {object[]} [options.roles=null] Roles associated with the created user (only Mongodb 2.6 or higher)
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.addUser = <span class="fstat-no" title="function not covered" >function(username, password, options, callback) {</span>
@@ -1457,7 +1457,7 @@ Admin.prototype.addUser = <span class="fstat-no" title="function not covered" >f
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.fsync=false] Specify a file sync write concern.
- * @param {Admin~resultCallback} callback The command result callback
+ * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.removeUser = <span class="fstat-no" title="function not covered" >function(username, options, callback) {</span>
@@ -1489,7 +1489,7 @@ Admin.prototype.removeUser = <span class="fstat-no" title="function not covered"
  * Set the current profiling level of MongoDB
  *
  * @param {string} level The new profiling level (off, slow_only, all).
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.setProfilingLevel = <span class="fstat-no" title="function not covered" >function(level, callback) {</span>
@@ -1536,7 +1536,7 @@ var setProfilingLevel = <span class="fstat-no" title="function not covered" >fun
 /**
  * Retrive the current profiling information for MongoDB
  *
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.profilingInfo = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -1567,7 +1567,7 @@ var profilingInfo = <span class="fstat-no" title="function not covered" >functio
  *
  * @param {string} collectionName The name of the collection to validate.
  * @param {object} [options=null] Optional settings.
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.validateCollection = <span class="fstat-no" title="function not covered" >function(collectionName, options, callback) {</span>
@@ -1621,7 +1621,7 @@ var validateCollection = <span class="fstat-no" title="function not covered" >fu
 /**
  * List the available databases
  *
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.listDatabases = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -1641,7 +1641,7 @@ Admin.prototype.listDatabases = <span class="fstat-no" title="function not cover
 /**
  * Get ReplicaSet status
  *
- * @param {Admin~resultCallback} callback The command result callback.
+ * @param {Admin~resultCallback} [callback] The command result callback.
  * @return {Promise} returns Promise if no callback passed
  */
 Admin.prototype.replSetGetStatus = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -1671,7 +1671,7 @@ module.exports = Admin;
 </table></pre>
 </div>
 <div class="footer">
-    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 31 2015 10:54:58 GMT+0000 (UTC)</div>
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Sep 16 2015 13:04:10 GMT+0000 (UTC)</div>
 </div>
 </body>
 </html>

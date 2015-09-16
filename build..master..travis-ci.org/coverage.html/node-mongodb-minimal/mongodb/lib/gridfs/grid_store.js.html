@@ -3954,13 +3954,13 @@ var GridStore = <span class="fstat-no" title="function not covered" >function Gr
  * new one if file does not exist.
  *
  * @method
- * @param {GridStore~openCallback} callback this will be called after executing this method
+ * @param {GridStore~openCallback} [callback] this will be called after executing this method
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.open = <span class="fstat-no" title="function not covered" >function(callback) {</span>
 <span class="cstat-no" title="statement not covered" >  var self = this;</span>
 <span class="cstat-no" title="statement not covered" >  if( this.mode != "w" &amp;&amp; this.mode != "w+" &amp;&amp; this.mode != "r"){</span>
-<span class="cstat-no" title="statement not covered" >    throw new MongoError("Illegal mode " + this.mode);</span>
+<span class="cstat-no" title="statement not covered" >    throw MongoError.create({message: "Illegal mode " + this.mode, driver:true});</span>
   }
 &nbsp;
   // We provided a callback leg
@@ -3971,7 +3971,7 @@ GridStore.prototype.open = <span class="fstat-no" title="function not covered" >
 <span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return reject(err);</span></span>
 <span class="cstat-no" title="statement not covered" >      resolve(store);</span>
     })
-  });  
+  });
 };
 &nbsp;
 var open = <span class="fstat-no" title="function not covered" >function(self, callback) {</span>
@@ -4003,7 +4003,7 @@ var open = <span class="fstat-no" title="function not covered" >function(self, c
 <span class="cstat-no" title="statement not covered" >      self.isOpen = true;</span>
 <span class="cstat-no" title="statement not covered" >      callback(err, r);</span>
     });
-  }  
+  }
 }
 &nbsp;
 /**
@@ -4027,7 +4027,7 @@ GridStore.prototype.eof = <span class="fstat-no" title="function not covered" >f
  * Retrieves a single character from this file.
  *
  * @method
- * @param {GridStore~resultCallback} callback this gets called after this method is executed. Passes null to the first parameter and the character read to the second or null to the second if the read/write head is at the end of the file.
+ * @param {GridStore~resultCallback} [callback] this gets called after this method is executed. Passes null to the first parameter and the character read to the second or null to the second if the read/write head is at the end of the file.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.getc = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -4055,7 +4055,7 @@ var eof = <span class="fstat-no" title="function not covered" >function(self, ca
   } else {
 <span class="cstat-no" title="statement not covered" >    self.position = self.position + 1;</span>
 <span class="cstat-no" title="statement not covered" >    callback(null, self.currentChunk.getc());</span>
-  }  
+  }
 }
 &nbsp;
 /**
@@ -4064,7 +4064,7 @@ var eof = <span class="fstat-no" title="function not covered" >function(self, ca
  *
  * @method
  * @param {string} string the string to write.
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.puts = <span class="fstat-no" title="function not covered" >function(string, callback) {</span>
@@ -4097,7 +4097,7 @@ GridStore.prototype.stream = <span class="fstat-no" title="function not covered"
  * @method
  * @param {(string|Buffer)} data the data to write.
  * @param {boolean} [close] closes this file after writing if set to true.
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.write = <span class="fstat-no" title="function not covered" >function write(data, close, callback) {</span>
@@ -4135,7 +4135,7 @@ GridStore.prototype.destroy = <span class="fstat-no" title="function not covered
  *
  * @method
  * @param {(string|Buffer|FileHandle)} file the file to store.
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.writeFile = <span class="fstat-no" title="function not covered" >function (file, callback) {</span>
@@ -4207,7 +4207,7 @@ var writeFile = <span class="fstat-no" title="function not covered" >function(se
       // Process the first write
 <span class="cstat-no" title="statement not covered" >      process.nextTick(writeChunk);</span>
     });
-  });  
+  });
 }
 &nbsp;
 /**
@@ -4216,7 +4216,7 @@ var writeFile = <span class="fstat-no" title="function not covered" >function(se
  * "w" or "w+".
  *
  * @method
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.close = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -4297,8 +4297,8 @@ var close = <span class="fstat-no" title="function not covered" >function(self, 
 <span class="cstat-no" title="statement not covered" >      callback(null, null);</span>
   } else {
 <span class="cstat-no" title="statement not covered" >    if(typeof callback == 'function')</span>
-<span class="cstat-no" title="statement not covered" >      callback(new MongoError(f("Illegal mode %s", self.mode), null));</span>
-  }  
+<span class="cstat-no" title="statement not covered" >      callback(MongoError.create({message: f("Illegal mode %s", self.mode), driver:true}));</span>
+  }
 }
 &nbsp;
 /**
@@ -4325,7 +4325,7 @@ GridStore.prototype.chunkCollection = <span class="fstat-no" title="function not
  * Deletes all the chunks of this file in the database.
  *
  * @method
- * @param {GridStore~resultCallback} callback the command callback.
+ * @param {GridStore~resultCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.unlink = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -4358,7 +4358,7 @@ var unlink = <span class="fstat-no" title="function not covered" >function(self,
 <span class="cstat-no" title="statement not covered" >        callback(err, self);</span>
       });
     });
-  });  
+  });
 }
 &nbsp;
 /**
@@ -4386,7 +4386,7 @@ GridStore.prototype.collection = <span class="fstat-no" title="function not cove
  *
  * @method
  * @param {string} [separator] The character to be recognized as the newline separator.
- * @param {GridStore~readlinesCallback} callback the command callback.
+ * @param {GridStore~readlinesCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.readlines = <span class="fstat-no" title="function not covered" >function(separator, callback) {</span>
@@ -4396,7 +4396,7 @@ GridStore.prototype.readlines = <span class="fstat-no" title="function not cover
 <span class="cstat-no" title="statement not covered" >  if(typeof callback != 'function') <span class="cstat-no" title="statement not covered" >args.push(callback);</span></span>
 <span class="cstat-no" title="statement not covered" >  separator = args.length ? args.shift() : "\n";</span>
 <span class="cstat-no" title="statement not covered" >  separator = separator || "\n";</span>
-  
+&nbsp;
   // We provided a callback leg
 <span class="cstat-no" title="statement not covered" >  if(typeof callback == 'function') <span class="cstat-no" title="statement not covered" >return readlines(self, separator, callback);</span></span>
 &nbsp;
@@ -4420,7 +4420,7 @@ var readlines = <span class="fstat-no" title="function not covered" >function(se
     }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    callback(null, items);</span>
-  });  
+  });
 }
 &nbsp;
 /**
@@ -4428,7 +4428,7 @@ var readlines = <span class="fstat-no" title="function not covered" >function(se
  * "w+" and resets the read/write head to the initial position.
  *
  * @method
- * @param {GridStore~resultCallback} callback this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
+ * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.rewind = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -4466,7 +4466,7 @@ var rewind = <span class="fstat-no" title="function not covered" >function(self,
 <span class="cstat-no" title="statement not covered" >    self.currentChunk.rewind();</span>
 <span class="cstat-no" title="statement not covered" >    self.position = 0;</span>
 <span class="cstat-no" title="statement not covered" >    callback(null, self);</span>
-  }  
+  }
 }
 &nbsp;
 /**
@@ -4488,7 +4488,7 @@ var rewind = <span class="fstat-no" title="function not covered" >function(self,
  * @method
  * @param {number} [length] the number of characters to read. Reads all the characters from the read/write head to the EOF if not specified.
  * @param {(string|Buffer)} [buffer] a string to hold temporary data. This is used for storing the string data read so far when recursively calling this method.
- * @param {GridStore~readCallback} callback the command callback.
+ * @param {GridStore~readCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.read = <span class="fstat-no" title="function not covered" >function(length, buffer, callback) {</span>
@@ -4524,7 +4524,7 @@ var read = <span class="fstat-no" title="function not covered" >function(self, l
     // Update internal position
 <span class="cstat-no" title="statement not covered" >    self.position = self.position + finalBuffer.length;</span>
     // Check if we don't have a file at all
-<span class="cstat-no" title="statement not covered" >    if(finalLength == 0 &amp;&amp; finalBuffer.length == 0) <span class="cstat-no" title="statement not covered" >return callback(new MongoError("File does not exist"), null);</span></span>
+<span class="cstat-no" title="statement not covered" >    if(finalLength == 0 &amp;&amp; finalBuffer.length == 0) <span class="cstat-no" title="statement not covered" >return callback(MongoError.create({message: "File does not exist", driver:true}), null);</span></span>
     // Else return data
 <span class="cstat-no" title="statement not covered" >    return callback(null, finalBuffer);</span>
   }
@@ -4547,10 +4547,10 @@ var read = <span class="fstat-no" title="function not covered" >function(self, l
 <span class="cstat-no" title="statement not covered" >      if(finalBuffer._index &gt; 0) {</span>
 <span class="cstat-no" title="statement not covered" >        callback(null, finalBuffer)</span>
       } else {
-<span class="cstat-no" title="statement not covered" >        callback(new MongoError("no chunks found for file, possibly corrupt"), null);</span>
+<span class="cstat-no" title="statement not covered" >        callback(MongoError.create({message: "no chunks found for file, possibly corrupt", driver:true}), null);</span>
       }
     }
-  });  
+  });
 }
 &nbsp;
 /**
@@ -4566,7 +4566,7 @@ var read = <span class="fstat-no" title="function not covered" >function(self, l
  * @method
  * @param {number} [length] the number of characters to read. Reads all the characters from the read/write head to the EOF if not specified.
  * @param {(string|Buffer)} [buffer] a string to hold temporary data. This is used for storing the string data read so far when recursively calling this method.
- * @param {GridStore~tellCallback} callback the command callback.
+ * @param {GridStore~tellCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.tell = <span class="fstat-no" title="function not covered" >function(callback) {</span>
@@ -4599,7 +4599,7 @@ GridStore.prototype.tell = <span class="fstat-no" title="function not covered" >
  * @method
  * @param {number} [position] the position to seek to
  * @param {number} [seekLocation] seek mode. Use one of the Seek Location modes.
- * @param {GridStore~gridStoreCallback} callback the command callback.
+ * @param {GridStore~gridStoreCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.prototype.seek = <span class="fstat-no" title="function not covered" >function(position, seekLocation, callback) {</span>
@@ -4624,7 +4624,7 @@ GridStore.prototype.seek = <span class="fstat-no" title="function not covered" >
 var seek = <span class="fstat-no" title="function not covered" >function(self, position, seekLocation, callback) {</span>
   // Seek only supports read mode
 <span class="cstat-no" title="statement not covered" >  if(self.mode != 'r') {</span>
-<span class="cstat-no" title="statement not covered" >    return callback(new MongoError("seek is only supported for mode r"))</span>
+<span class="cstat-no" title="statement not covered" >    return callback(MongoError.create({message: "seek is only supported for mode r", driver:true}))</span>
   }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  var seekLocationFinal = seekLocation == null ? GridStore.IO_SEEK_SET : seekLocation;</span>
@@ -4651,7 +4651,7 @@ var seek = <span class="fstat-no" title="function not covered" >function(self, p
     });
   };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  seekChunk();  </span>
+<span class="cstat-no" title="statement not covered" >  seekChunk();</span>
 }
 &nbsp;
 /**
@@ -4689,7 +4689,7 @@ var _open = <span class="fstat-no" title="function not covered" >function(self, 
       } else {
 <span class="cstat-no" title="statement not covered" >         self.length = 0;</span>
 <span class="cstat-no" title="statement not covered" >         var txtId = self.fileId instanceof ObjectID ? self.fileId.toHexString() : self.fileId;</span>
-<span class="cstat-no" title="statement not covered" >         return error(new MongoError(f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? txtId : self.filename))), self);</span>
+<span class="cstat-no" title="statement not covered" >         return error(MongoError.create({message: f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? txtId : self.filename)), driver:true}), self);</span>
       }
 &nbsp;
       // Process the mode of the object
@@ -4775,7 +4775,7 @@ var writeBuffer = <span class="fstat-no" title="function not covered" >function(
 <span class="cstat-no" title="statement not covered" >  var finalClose = typeof close == 'boolean' ? close : false;</span>
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  if(self.mode != "w") {</span>
-<span class="cstat-no" title="statement not covered" >    callback(new MongoError(f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? self.referenceBy : self.filename))), null);</span>
+<span class="cstat-no" title="statement not covered" >    callback(MongoError.create({message: f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? self.referenceBy : self.filename)), driver:true}), null);</span>
   } else {
 <span class="cstat-no" title="statement not covered" >    if(self.currentChunk.position + buffer.length &gt;= self.chunkSize) {</span>
       // Write out the current Chunk and then keep writing until we have less data left than a chunkSize left
@@ -4983,7 +4983,7 @@ GridStore.IO_SEEK_END = 2;
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~resultCallback} callback result from exists.
+ * @param {GridStore~resultCallback} [callback] result from exists.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.exist = <span class="fstat-no" title="function not covered" >function(db, fileIdObject, rootCollection, options, callback) {</span>
@@ -5039,7 +5039,7 @@ var exists = <span class="fstat-no" title="function not covered" >function(db, f
 <span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return callback(err);</span></span>
 <span class="cstat-no" title="statement not covered" >      callback(null, item == null ? false : true);</span>
     });
-  });  
+  });
 }
 &nbsp;
 /**
@@ -5052,7 +5052,7 @@ var exists = <span class="fstat-no" title="function not covered" >function(db, f
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~resultCallback} callback result from exists.
+ * @param {GridStore~resultCallback} [callback] result from exists.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.list = <span class="fstat-no" title="function not covered" >function(db, rootCollection, options, callback) {</span>
@@ -5111,7 +5111,7 @@ var list = <span class="fstat-no" title="function not covered" >function(db, roo
         }
       });
     });
-  });  
+  });
 }
 &nbsp;
 /**
@@ -5133,7 +5133,7 @@ var list = <span class="fstat-no" title="function not covered" >function(db, roo
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~readCallback} callback the command callback.
+ * @param {GridStore~readCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 &nbsp;
@@ -5182,7 +5182,7 @@ var readStatic = <span class="fstat-no" title="function not covered" >function(d
     } else {
 <span class="cstat-no" title="statement not covered" >      gridStore.read(length, callback);</span>
     }
-  });  
+  });
 }
 &nbsp;
 /**
@@ -5196,7 +5196,7 @@ var readStatic = <span class="fstat-no" title="function not covered" >function(d
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~readlinesCallback} callback the command callback.
+ * @param {GridStore~readlinesCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.readlines = <span class="fstat-no" title="function not covered" >function(db, name, separator, options, callback) {</span>
@@ -5232,7 +5232,7 @@ var readlinesStatic = <span class="fstat-no" title="function not covered" >funct
 <span class="cstat-no" title="statement not covered" >  new GridStore(db, name, "r", options).open(<span class="fstat-no" title="function not covered" >function(err, gridStore) {</span></span>
 <span class="cstat-no" title="statement not covered" >    if(err) <span class="cstat-no" title="statement not covered" >return callback(err);</span></span>
 <span class="cstat-no" title="statement not covered" >    gridStore.readlines(finalSeperator, callback);</span>
-  });  
+  });
 }
 &nbsp;
 /**
@@ -5244,7 +5244,7 @@ var readlinesStatic = <span class="fstat-no" title="function not covered" >funct
  * @param {(string|array)} names The name/names of the files to delete.
  * @param {object} [options=null] Optional settings.
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
- * @param {GridStore~resultCallback} callback the command callback.
+ * @param {GridStore~resultCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
  */
 GridStore.unlink = <span class="fstat-no" title="function not covered" >function(db, names, options, callback) {</span>
@@ -5304,7 +5304,7 @@ var unlinkStatic = <span class="fstat-no" title="function not covered" >function
         });
       });
     });
-  }  
+  }
 }
 &nbsp;
 /**
@@ -5357,7 +5357,7 @@ var _getWriteConcern = <span class="fstat-no" title="function not covered" >func
 &nbsp;
   // Ensure we don't have an invalid combination of write concerns
 <span class="cstat-no" title="statement not covered" >  if(finalOptions.w &lt; 1</span>
-    &amp;&amp; (finalOptions.journal == true || finalOptions.j == true || finalOptions.fsync == true)) <span class="cstat-no" title="statement not covered" >throw new MongoError("No acknowledgement using w &lt; 1 cannot be combined with journal:true or fsync:true");</span>
+    &amp;&amp; (finalOptions.journal == true || finalOptions.j == true || finalOptions.fsync == true)) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "No acknowledgement using w &lt; 1 cannot be combined with journal:true or fsync:true", driver:true});</span>
 &nbsp;
   // Return the options
 <span class="cstat-no" title="statement not covered" >  return finalOptions;</span>
@@ -5458,7 +5458,7 @@ GridStoreStream.prototype.destroy = <span class="fstat-no" title="function not c
 &nbsp;
 GridStoreStream.prototype.write = <span class="fstat-no" title="function not covered" >function(chunk, encoding, callback) {</span>
 <span class="cstat-no" title="statement not covered" >  var self = this;</span>
-<span class="cstat-no" title="statement not covered" >  if(self.endCalled) <span class="cstat-no" title="statement not covered" >return self.emit('error', new MongoError('attempting to write to stream after end called'))</span></span>
+<span class="cstat-no" title="statement not covered" >  if(self.endCalled) <span class="cstat-no" title="statement not covered" >return self.emit('error', MongoError.create({message: 'attempting to write to stream after end called', driver:true}))</span></span>
   // Do we have to open the gridstore
 <span class="cstat-no" title="statement not covered" >  if(!self.gs.isOpen) {</span>
 <span class="cstat-no" title="statement not covered" >    self.gs.open(<span class="fstat-no" title="function not covered" >function() {</span></span>
@@ -5646,7 +5646,7 @@ module.exports = GridStore;
 </table></pre>
 </div>
 <div class="footer">
-    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 31 2015 10:54:58 GMT+0000 (UTC)</div>
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Sep 16 2015 13:04:10 GMT+0000 (UTC)</div>
 </div>
 </body>
 </html>

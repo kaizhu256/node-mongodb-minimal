@@ -15,16 +15,16 @@
     <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb/lib/bulk/unordered.js</span></h1>
     <h2>
         
-        Statements: <span class="metric">11.18% <small>(19 / 170)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Statements: <span class="metric">10.99% <small>(20 / 182)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Branches: <span class="metric">0% <small>(0 / 124)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Branches: <span class="metric">0% <small>(0 / 138)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
         Functions: <span class="metric">0% <small>(0 / 21)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         
-        Lines: <span class="metric">12.1% <small>(19 / 157)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        Lines: <span class="metric">11.98% <small>(20 / 167)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
         
         Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
     </h2>
@@ -532,7 +532,30 @@
 498
 499
 500
-501</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -938,6 +961,21 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -958,13 +996,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1031,6 +1076,7 @@
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-yes">1</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
 &nbsp;
@@ -1433,10 +1479,25 @@ var executeBatch = <span class="fstat-no" title="function not covered" >function
   }
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  var resultHandler = <span class="fstat-no" title="function not covered" >function(err, result) {</span></span>
+		// Error is a driver related error not a bulk op error, terminate
+<span class="cstat-no" title="statement not covered" >		if(err &amp;&amp; err.driver || err &amp;&amp; err.message) {</span>
+<span class="cstat-no" title="statement not covered" >			return callback(err);</span>
+		}
+&nbsp;
     // If we have and error
 <span class="cstat-no" title="statement not covered" >    if(err) <span class="cstat-no" title="statement not covered" >err.ok = 0;</span></span>
 <span class="cstat-no" title="statement not covered" >    callback(null, mergeBatchResults(false, batch, self.s.bulkResult, err, result));</span>
   }
+&nbsp;
+	// Set an operationIf if provided
+<span class="cstat-no" title="statement not covered" >	if(self.operationId) {</span>
+<span class="cstat-no" title="statement not covered" >		resultHandler.operationId = self.operationId;</span>
+	}
+&nbsp;
+	// Serialize functions
+<span class="cstat-no" title="statement not covered" >	if(self.s.options.serializeFunctions) {</span>
+<span class="cstat-no" title="statement not covered" >		finalOptions.serializeFunctions = true</span>
+	}
 &nbsp;
 <span class="cstat-no" title="statement not covered" >  try {</span>
 <span class="cstat-no" title="statement not covered" >    if(batch.batchType == common.INSERT) {</span>
@@ -1449,7 +1510,7 @@ var executeBatch = <span class="fstat-no" title="function not covered" >function
   } catch(err) {
     // Force top level error
 <span class="cstat-no" title="statement not covered" >    err.ok = 0;</span>
-    // Merge top level error and return 
+    // Merge top level error and return
 <span class="cstat-no" title="statement not covered" >    callback(null, mergeBatchResults(false, batch, self.s.bulkResult, err, null));</span>
   }
 }
@@ -1458,14 +1519,21 @@ var executeBatch = <span class="fstat-no" title="function not covered" >function
 // Execute all the commands
 var executeBatches = <span class="fstat-no" title="function not covered" >function(self, callback) {</span>
 <span class="cstat-no" title="statement not covered" >  var numberOfCommandsToExecute = self.s.batches.length;</span>
+<span class="cstat-no" title="statement not covered" >	var error = null;</span>
   // Execute over all the batches
 <span class="cstat-no" title="statement not covered" >  for(var i = 0; i &lt; self.s.batches.length; i++) {</span>
 <span class="cstat-no" title="statement not covered" >    executeBatch(self, self.s.batches[i], <span class="fstat-no" title="function not covered" >function(err, result) {</span></span>
+			// Driver layer error capture it
+<span class="cstat-no" title="statement not covered" >			if(err) <span class="cstat-no" title="statement not covered" >error = err;</span></span>
+			// Count down the number of commands left to execute
 <span class="cstat-no" title="statement not covered" >      numberOfCommandsToExecute = numberOfCommandsToExecute - 1;</span>
 &nbsp;
       // Execute
 <span class="cstat-no" title="statement not covered" >      if(numberOfCommandsToExecute == 0) {</span>
-<span class="cstat-no" title="statement not covered" >        var error = self.s.bulkResult.writeErrors.length &gt; 0 ? self.s.bulkResult.writeErrors[0] : null;</span>
+				// Driver level error
+<span class="cstat-no" title="statement not covered" >				if(error) <span class="cstat-no" title="statement not covered" >return callback(error);</span></span>
+				// Treat write errors
+<span class="cstat-no" title="statement not covered" >        var error = self.s.bulkResult.writeErrors.length &gt; 0 ? toError(self.s.bulkResult.writeErrors[0]) : null;</span>
 <span class="cstat-no" title="statement not covered" >        callback(error, new BulkWriteResult(self.s.bulkResult));</span>
       }
     });
@@ -1488,7 +1556,7 @@ var executeBatches = <span class="fstat-no" title="function not covered" >functi
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
  * @param {boolean} [options.fsync=false] Specify a file sync write concern.
- * @param {UnorderedBulkOperation~resultCallback} callback The result callback
+ * @param {UnorderedBulkOperation~resultCallback} [callback] The result callback
  * @throws {MongoError}
  * @return {Promise} returns Promise if no callback passed
  */
@@ -1518,7 +1586,7 @@ UnorderedBulkOperation.prototype.execute = <span class="fstat-no" title="functio
 <span class="cstat-no" title="statement not covered" >  return new this.s.promiseLibrary(<span class="fstat-no" title="function not covered" >function(resolve, reject) {</span></span>
 <span class="cstat-no" title="statement not covered" >    executeBatches(self, <span class="fstat-no" title="function not covered" >function(err, r) {</span></span>
 <span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return reject(err);</span></span>
-<span class="cstat-no" title="statement not covered" >      resolve(r); </span>
+<span class="cstat-no" title="statement not covered" >      resolve(r);</span>
     });
   });
 }
@@ -1532,11 +1600,12 @@ var initializeUnorderedBulkOp = <span class="fstat-no" title="function not cover
 }
 &nbsp;
 module.exports = initializeUnorderedBulkOp;
+module.exports.Bulk = UnorderedBulkOperation;
 &nbsp;</pre></td></tr>
 </table></pre>
 </div>
 <div class="footer">
-    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 31 2015 10:54:58 GMT+0000 (UTC)</div>
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Sep 16 2015 13:04:10 GMT+0000 (UTC)</div>
 </div>
 </body>
 </html>
