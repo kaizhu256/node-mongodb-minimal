@@ -18,7 +18,7 @@
 <tspan x="10" y="250">e_modules/mongodb-core.js</tspan>
 <tspan x="10" y="266"></tspan>
 <tspan x="10" y="282"></tspan>
-<tspan x="10" y="298">[MODE_BUILD=npmTest] - 2015-09-15T12:13:02Z - npm-testing /home/travis/build/kaizhu256/node-mong\</tspan>
+<tspan x="10" y="298">[MODE_BUILD=npmTest] - 2015-09-16T13:02:48Z - npm-testing /home/travis/build/kaizhu256/node-mong\</tspan>
 <tspan x="10" y="314">odb-minimal</tspan>
 <tspan x="10" y="330"></tspan>
 <tspan x="10" y="346"></tspan>
@@ -28,13 +28,13 @@
 <tspan x="10" y="410">step 2</tspan>
 <tspan x="10" y="426">connected to mongodb server</tspan>
 <tspan x="10" y="442">step 3</tspan>
-<tspan x="10" y="458">inserting document into collection - {"_id":"0.611a4b33","value":"hello"}</tspan>
+<tspan x="10" y="458">inserting document into collection - {"_id":"0.675158d2","value":"hello"}</tspan>
 <tspan x="10" y="474">step 4</tspan>
 <tspan x="10" y="490">updating document in collection</tspan>
 <tspan x="10" y="506">step 5</tspan>
 <tspan x="10" y="522">finding document in collection</tspan>
 <tspan x="10" y="538">step 6</tspan>
-<tspan x="10" y="554">found document in collection - {"_id":"0.611a4b33","value":"bye"}</tspan>
+<tspan x="10" y="554">found document in collection - {"_id":"0.675158d2","value":"bye"}</tspan>
 <tspan x="10" y="570">step 7</tspan>
 <tspan x="10" y="586">removing document from collection</tspan>
 <tspan x="10" y="602">step 8</tspan>
@@ -44,7 +44,7 @@
 <tspan x="10" y="666">[node test-case 1 of 1 passed] - testCase_example_default</tspan>
 <tspan x="10" y="682"></tspan>
 <tspan x="10" y="698">-------------------------------------------------------</tspan>
-<tspan x="10" y="714">| test-report - npmTest - node - linux v0.12.7 - 2015-09-15T12:13:04.327Z</tspan>
+<tspan x="10" y="714">| test-report - npmTest - node - linux v0.12.7 - 2015-09-16T13:02:50.747Z</tspan>
 <tspan x="10" y="730">|       2 ms            0 failed        1 passed      |</tspan>
 <tspan x="10" y="746">-------------------------------------------------------</tspan>
 <tspan x="10" y="762"></tspan>

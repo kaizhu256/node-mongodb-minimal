@@ -2213,7 +2213,7 @@ test.equal(null, err);
 test.equal(3, r.result.n);
 
 // Get first two documents that match the query
-<span class="docApiCodeKeywordSpan">col.aggregate</span>([
+col.<span class="docApiCodeKeywordSpan">aggregate</span>([
       {$match: {}}
     , {$group:
         {_id: '$a', total: {$sum: '$a'} }
@@ -2257,7 +2257,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>bulkWrite
 // BEGIN
   // Get the collection
   var col = db.collection('bulk_write');
-  <span class="docApiCodeKeywordSpan">col.bulkWrite</span>([
+  col.<span class="docApiCodeKeywordSpan">bulkWrite</span>([
       { insertOne: { document: { a: 1 } } }
     , { updateOne: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
     , { updateMany: { filter: {a:2}, update: {$set: {a:2}}, upsert:true } }
@@ -2304,7 +2304,7 @@ test: function(configuration, test) {
   var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
   db.open(function(err, db) {
     db.collection('test_multiple_insert_2', function(err, collection) {
-      <span class="docApiCodeKeywordSpan">collection.count</span>(function(err, count) {
+      collection.<span class="docApiCodeKeywordSpan">count</span>(function(err, count) {
         test.equal(0, count);
         // Let's close the db
         db.close();
@@ -2348,7 +2348,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>createIndex
       col.drop(function(err, r) {
 
         // Create unique index
-        <span class="docApiCodeKeywordSpan">col.createIndex</span>({a:1}, {unique:true}, function(err, r) {
+        col.<span class="docApiCodeKeywordSpan">createIndex</span>({a:1}, {unique:true}, function(err, r) {
           test.equal(null, err);
 
           col.insertMany([{a:1}, {a:2}, {a:1}, {a:3}, {a:1}], {ordered:false}, function(err, r) {
@@ -2378,7 +2378,23 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>createIndex
     });
   });
 }</pre></li>
-<li>example usage<pre class="docApiCodePre">n/a</pre></li>
+<li>example usage<pre class="docApiCodePre">...
+exports['should correctly execute createIndexes'] = {
+  metadata: { requires: { mongodb: "&gt;=2.6.0", topology: ['single', 'ssl', 'heap', 'wiredtiger'] } },
+
+  // The actual test we wish to run
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+      db.collection('createIndexes').<span class="docApiCodeKeywordSpan">createIndexes</span>([
+{ key: {a:1} }, { key: {b:1}, name: "hello1"}
+      ], function(err, r) {
+test.equal(null, err);
+test.equal(3, r.numIndexesAfter)
+
+db.collection('createIndexes').listIndexes().toArray(function(err, docs) {
+  test.equal(null, err);
+...</pre></li>
 </ul>
 
 <h2><a href="#element.mongodb.Collection.deleteMany" id="element.mongodb.Collection.deleteMany">
@@ -2410,7 +2426,7 @@ col.deleteOne({a:1}, {w:0}, function(err, result) {
   test.equal(null, err);
   test.equal(1, result.result.ok);
 
-  <span class="docApiCodeKeywordSpan">col.deleteMany</span>({a:1}, {w:0}, function(err, result) {
+  col.<span class="docApiCodeKeywordSpan">deleteMany</span>({a:1}, {w:0}, function(err, result) {
     test.equal(null, err);
     test.equal(1, result.result.ok);
 
@@ -2450,7 +2466,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>deleteOne
               test.equal(null, err);
               test.equal(1, result.result.ok);
 
-              <span class="docApiCodeKeywordSpan">col.deleteOne</span>({a:1}, {w:0}, function(err, result) {
+              col.<span class="docApiCodeKeywordSpan">deleteOne</span>({a:1}, {w:0}, function(err, result) {
 test.equal(null, err);
 test.equal(1, result.result.ok);
 
@@ -2496,7 +2512,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>distinct
           {'a':1, 'b':{'c':'b'}},
           {'a':1, 'b':{'c':'c'}},
           {'a':2, 'b':{'c':'a'}}, {'a':3}, {'a':3}], configuration.writeConcernMax(), function(err, ids) {
-<span class="docApiCodeKeywordSpan">collection.distinct</span>('a', function(err, docs) {
+collection.<span class="docApiCodeKeywordSpan">distinct</span>('a', function(err, docs) {
   test.deepEqual([0, 1, 2, 3], docs.sort());
 });
 
@@ -2533,7 +2549,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>drop
     db.open(function(err, db) {
       // Get collection
       var col = db.collection('insertManyMultipleWriteErrors');
-      <span class="docApiCodeKeywordSpan">col.drop</span>(function(err, r) {
+      col.<span class="docApiCodeKeywordSpan">drop</span>(function(err, r) {
 
         // Create unique index
         col.createIndex({a:1}, {unique:true}, function(err, r) {
@@ -2571,7 +2587,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>dropAllInde
           db.createIndex(collection.collectionName, 'a', configuration.writeConcernMax(), function(err, indexName) {
             test.equal("a_1", indexName);
             // Drop all the indexes
-            <span class="docApiCodeKeywordSpan">collection.dropAllIndexes</span>(function(err, result) {
+            collection.<span class="docApiCodeKeywordSpan">dropAllIndexes</span>(function(err, result) {
 test.equal(true, result);
 
 collection.indexInformation(function(err, result) {
@@ -2615,7 +2631,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>dropIndex
       test.equal(null, err);
 
       collection.ensureIndex({a:1}, configuration.writeConcernMax(), function(err, result) {
-        <span class="docApiCodeKeywordSpan">collection.dropIndex</span>("a_1")
+        collection.<span class="docApiCodeKeywordSpan">dropIndex</span>("a_1")
 
         db.close();
         test.done();
@@ -2677,7 +2693,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>ensureIndex
       var col = db.collection('batch_write_ordered_ops_1');
 
       // Add unique index on b field causing all updates to fail
-      <span class="docApiCodeKeywordSpan">col.ensureIndex</span>({a:1}, {unique:true, sparse:false}, function(err, result) {
+      col.<span class="docApiCodeKeywordSpan">ensureIndex</span>({a:1}, {unique:true, sparse:false}, function(err, result) {
 test.equal(err, null);
 
 // Initialize the Ordered Batch
@@ -2822,7 +2838,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>find
         col.ensureIndex({i:1}, function(err, r) {
           test.equal(null, err);
 
-          <span class="docApiCodeKeywordSpan">col.find</span>({i:1}, {hint: "_id_"}).count(function(err, count) {
+          col.<span class="docApiCodeKeywordSpan">find</span>({i:1}, {hint: "_id_"}).count(function(err, count) {
 test.equal(null, err);
 test.equal(1, count);
 
@@ -2872,7 +2888,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>findAndModi
         // Test return new document on change
         collection.insert({'a':1, 'b':2}, configuration.writeConcernMax(), function(err, doc) {
           // Let's modify the document in place
-          <span class="docApiCodeKeywordSpan">collection.findAndModify</span>({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true}, function(err, updated_doc) {
+          collection.<span class="docApiCodeKeywordSpan">findAndModify</span>({'a':1}, [['a', 1]], {'$set':{'b':3}}, {'new':true}, function(err, updated_doc) {
 test.equal(1, updated_doc.value.a);
 test.equal(3, updated_doc.value.b);
 
@@ -2915,7 +2931,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>findAndRemo
 
         // Simple findAndModify command returning the old document and
         // removing it at the same time
-        <span class="docApiCodeKeywordSpan">collection.findAndRemove</span>({b:1}, [['b', 1]], function(err, doc) {
+        collection.<span class="docApiCodeKeywordSpan">findAndRemove</span>({b:1}, [['b', 1]], function(err, doc) {
 test.equal(null, err);
 test.equal(1, doc.value.b);
 test.equal(1, doc.value.d);
@@ -2956,7 +2972,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>findOne
         col.update({a:1}, {$bit: {b: {and: 0}}}, function(err, result) {
 test.equal(null, err);
 
-<span class="docApiCodeKeywordSpan">col.findOne</span>({a:1}, function(err, doc) {
+col.<span class="docApiCodeKeywordSpan">findOne</span>({a:1}, function(err, doc) {
   test.equal(null, err);
   test.equal(1, doc.a);
   test.equal(0, doc.b);
@@ -2998,7 +3014,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>findOneAndD
         test.equal(null, err);
         test.equal(1, r.result.n);
 
-        <span class="docApiCodeKeywordSpan">col.findOneAndDelete</span>({a:1}
+        col.<span class="docApiCodeKeywordSpan">findOneAndDelete</span>({a:1}
           , { projection: {b:1}, sort: {a:1} }
           , function(err, r) {
 test.equal(null, err);
@@ -3040,7 +3056,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>findOneAndR
 test.equal(null, err);
 test.equal(1, r.result.n);
 
-<span class="docApiCodeKeywordSpan">col.findOneAndReplace</span>({a:1}
+col.<span class="docApiCodeKeywordSpan">findOneAndReplace</span>({a:1}
   , {c:1, b:1}
   , {
         projection: {b:1, c:1}
@@ -3082,7 +3098,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>findOneAndU
 test.equal(null, err);
 test.equal(1, r.result.n);
 
-<span class="docApiCodeKeywordSpan">col.findOneAndUpdate</span>({a:1}
+col.<span class="docApiCodeKeywordSpan">findOneAndUpdate</span>({a:1}
   , {$set: {d:1}}
   , {
         projection: {b:1, d:1}
@@ -3125,7 +3141,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>geoHaystack
     collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
 
       // Use geoNear command to find document
-      <span class="docApiCodeKeywordSpan">collection.geoHaystackSearch</span>(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
+      collection.<span class="docApiCodeKeywordSpan">geoHaystackSearch</span>(50, 50, {search:{a:1}, limit:1, maxDistance:100}, function(err, docs) {
         test.equal(1, docs.results.length);
         db.close();
         test.done();
@@ -3170,7 +3186,7 @@ collection.ensureIndex({loc:"2d"}, function(err, result) {
   collection.insertMany([{a:1, loc:[50, 30]}, {a:1, loc:[30, 50]}], configuration.writeConcernMax(), function(err, result) {
 
     // Use geoNear command to find document
-    <span class="docApiCodeKeywordSpan">collection.geoNear</span>(50, 50, {query:{a:1}, num:1}, function(err, docs) {
+    collection.<span class="docApiCodeKeywordSpan">geoNear</span>(50, 50, {query:{a:1}, num:1}, function(err, docs) {
       test.equal(1, docs.results.length);
 
       db.close();
@@ -3237,7 +3253,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>group
     var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
     db.open(function(err, db) {
       db.createCollection('test_group2', function(err, collection) {
-        <span class="docApiCodeKeywordSpan">collection.group</span>([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
+        collection.<span class="docApiCodeKeywordSpan">group</span>([], {}, {"count":0}, "function (obj, prev) { prev.count++; }", true, function(err, results) {
 test.deepEqual([], results);
 
 // Trigger some inserts
@@ -3275,7 +3291,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>indexExists
       // Create an index on the collection
       collection.createIndex('a', configuration.writeConcernMax(), function(err, indexName) {
         // Let's test to check if a single index exists
-        <span class="docApiCodeKeywordSpan">collection.indexExists</span>("a_1", function(err, result) {
+        collection.<span class="docApiCodeKeywordSpan">indexExists</span>("a_1", function(err, result) {
           test.equal(true, result);
 
           // Let's test to check if multiple indexes are available
@@ -3318,7 +3334,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>indexInform
           collection.insert({a:1, createdAt:new Date()}, configuration.writeConcernMax(), function(err, result) {
             test.equal(null, err);
 
-            <span class="docApiCodeKeywordSpan">collection.indexInformation</span>({full:true}, function(err, indexes) {
+            collection.<span class="docApiCodeKeywordSpan">indexInformation</span>({full:true}, function(err, indexes) {
 test.equal(null, err);
 
 for(var i = 0; i &lt; indexes.length; i++) {
@@ -3355,7 +3371,7 @@ collection.ensureIndex({a:1}, configuration.writeConcernMax(), function(err, res
 
   setTimeout(function() {
     // List all of the indexes on the collection
-    <span class="docApiCodeKeywordSpan">collection.indexes</span>(function(err, indexes) {
+    collection.<span class="docApiCodeKeywordSpan">indexes</span>(function(err, indexes) {
       test.equal(3, indexes.length);
 
       db.close();
@@ -3384,7 +3400,7 @@ test.equal(null, err);
 var col = db.collection('test');
 
 // Initialize the Ordered Batch
-var batch = <span class="docApiCodeKeywordSpan">col.initializeOrderedBulkOp</span>();
+var batch = col.<span class="docApiCodeKeywordSpan">initializeOrderedBulkOp</span>();
 
 // Add some operations to be executed in order
 batch.insert({a:1});
@@ -3413,7 +3429,7 @@ test.equal(null, err);
 var col = db.collection('test');
 
 // Initialize the Ordered Batch
-var batch = <span class="docApiCodeKeywordSpan">col.initializeUnorderedBulkOp</span>();
+var batch = col.<span class="docApiCodeKeywordSpan">initializeUnorderedBulkOp</span>();
 
 // Add some operations to be executed in order
 batch.insert({a:1});
@@ -3449,7 +3465,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>insert
       var col = db.collection('shouldPerformSimpleGroupAggregation');
       col.remove({}, function() {
         // Insert a single document
-        <span class="docApiCodeKeywordSpan">col.insert</span>([{a:1}, {a:1}, {a:1}], function(err, r) {
+        col.<span class="docApiCodeKeywordSpan">insert</span>([{a:1}, {a:1}, {a:1}], function(err, r) {
 test.equal(null, err);
 test.equal(3, r.result.n);
 
@@ -3514,7 +3530,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>insertMany
         test.equal(null, err);
         test.equal(1, result.result.ok);
 
-        <span class="docApiCodeKeywordSpan">col.insertMany</span>([{a:1}], {w:0}, function(err, result) {
+        col.<span class="docApiCodeKeywordSpan">insertMany</span>([{a:1}], {w:0}, function(err, result) {
 test.equal(null, err);
 test.equal(1, result.result.ok);
 
@@ -3554,7 +3570,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>insertOne
       test.equal(null, err);
 
       var col = db.collection('shouldCorrectlyExecuteInsertOneWithW0');
-      <span class="docApiCodeKeywordSpan">col.insertOne</span>({a:1}, {w:0}, function(err,result) {
+      col.<span class="docApiCodeKeywordSpan">insertOne</span>({a:1}, {w:0}, function(err,result) {
 test.equal(null, err);
 test.equal(1, result.result.ok);
 
@@ -3591,7 +3607,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>isCapped
     test.equal('test_collection_is_capped', collection.collectionName);
 
     // Let's fetch the collection options
-    <span class="docApiCodeKeywordSpan">collection.isCapped</span>(function(err, capped) {
+    collection.<span class="docApiCodeKeywordSpan">isCapped</span>(function(err, capped) {
       test.equal(true, capped);
 
       db.close();
@@ -3631,7 +3647,23 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>listIndexes
   // Get the query
   return this.s.topology.cursor(ns, {find: ns, query: {ns: this.s.namespace}}, options);
 }</pre></li>
-<li>example usage<pre class="docApiCodePre">n/a</pre></li>
+<li>example usage<pre class="docApiCodePre">...
+  test: function(configuration, test) {
+    var db = configuration.newDbInstance(configuration.writeConcernMax(), {poolSize:1});
+    db.open(function(err, db) {
+db.collection('testListIndexes').ensureIndex({a:1}, function(err, r) {
+  test.equal(null, err);
+
+  // Get the list of indexes
+  db.collection('testListIndexes').<span class="docApiCodeKeywordSpan">listIndexes</span>().toArray(function(err, indexes) {
+    test.equal(null, err);
+    test.equal(2, indexes.length);
+
+    db.close();
+    test.done();
+  });
+});
+...</pre></li>
 </ul>
 
 <h2><a href="#element.mongodb.Collection.mapReduce" id="element.mongodb.Collection.mapReduce">
@@ -3679,7 +3711,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>mapReduce
           var map = "function() { emit(this.user_id, 1); }";
           var reduce = "function(k,vals) { return 1; }";
 
-          <span class="docApiCodeKeywordSpan">collection.mapReduce</span>(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
+          collection.<span class="docApiCodeKeywordSpan">mapReduce</span>(map, reduce, {out: {replace : 'tempCollection'}}, function(err, collection) {
 collection.findOne({'_id':1}, function(err, result) {
   test.equal(1, result.value);
 });
@@ -3717,7 +3749,7 @@ db.createCollection('test_collection_options', {'capped':true, 'size':1024}, fun
   test.equal('test_collection_options', collection.collectionName);
 
   // Let's fetch the collection options
-  <span class="docApiCodeKeywordSpan">collection.options</span>(function(err, options) {
+  collection.<span class="docApiCodeKeywordSpan">options</span>(function(err, options) {
     test.equal(true, options.capped);
     test.ok(options.size &gt;= 1024);
 
@@ -3765,7 +3797,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>parallelCol
         var numCursors = 3;
 
         // Execute parallelCollectionScan command
-        <span class="docApiCodeKeywordSpan">collection.parallelCollectionScan</span>({numCursors:numCursors}, function(err, cursors) {
+        collection.<span class="docApiCodeKeywordSpan">parallelCollectionScan</span>({numCursors:numCursors}, function(err, cursors) {
 test.equal(null, err);
 test.ok(cursors != null);
 test.ok(cursors.length &gt; 0);
@@ -3805,7 +3837,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>reIndex
             , {unique:true, background:true, w:1}, function(err, indexName) {
 
             // Force a reindex of the collection
-            <span class="docApiCodeKeywordSpan">collection.reIndex</span>('create_and_drop_all_indexes', function(err, result) {
+            collection.<span class="docApiCodeKeywordSpan">reIndex</span>('create_and_drop_all_indexes', function(err, result) {
 test.equal(null, err);
 test.equal(true, result);
 
@@ -3842,7 +3874,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>remove
     db.open(function(err, db) {
       // Create a collection
       var col = db.collection('shouldPerformSimpleGroupAggregation');
-      <span class="docApiCodeKeywordSpan">col.remove</span>({}, function() {
+      col.<span class="docApiCodeKeywordSpan">remove</span>({}, function() {
         // Insert a single document
         col.insert([{a:1}, {a:1}, {a:1}], function(err, r) {
 test.equal(null, err);
@@ -3882,7 +3914,7 @@ test.equal(null, err);
 test.equal(2, r.insertedCount);
 
 // Update all documents
-<span class="docApiCodeKeywordSpan">col.removeMany</span>({a:1}, function(err, r) {
+col.<span class="docApiCodeKeywordSpan">removeMany</span>({a:1}, function(err, r) {
   test.equal(null, err);
   test.equal(2, r.deletedCount);
 
@@ -3922,7 +3954,7 @@ col.insertMany([{a:1}, {a:1}], function(err, r) {
   test.equal(null, err);
   test.equal(2, r.insertedCount);
 
-  <span class="docApiCodeKeywordSpan">col.removeOne</span>({a:1}, function(err, r) {
+  col.<span class="docApiCodeKeywordSpan">removeOne</span>({a:1}, function(err, r) {
     test.equal(null, err);
     test.equal(1, r.deletedCount);
     // Finish up test
@@ -3962,7 +3994,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>rename
       // Execute code
       db.createCollection('shouldCorrectlyHandleThrownErrorInRename', function(err, r) {
         db.collection('shouldCorrectlyHandleThrownError', function(err, collection) {
-          <span class="docApiCodeKeywordSpan">collection.rename</span>("shouldCorrectlyHandleThrownErrorInRename2", function(err, result) {
+          collection.<span class="docApiCodeKeywordSpan">rename</span>("shouldCorrectlyHandleThrownErrorInRename2", function(err, result) {
             debug(someUndefinedVariable);
           })
         });
@@ -3994,7 +4026,23 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>replaceOne
     });
   });
 }</pre></li>
-<li>example usage<pre class="docApiCodePre">n/a</pre></li>
+<li>example usage<pre class="docApiCodePre">...
+  });
+}
+
+//
+// Replace one method
+// -------------------------------------------------
+var replaceOne = function() {
+  db.collection('t3_3').<span class="docApiCodeKeywordSpan">replaceOne</span>({ a: 1 }
+    , { a : 2 }
+    , { upsert: true }, function(err, r) {
+    test.equal(null, err);
+    test.equal(1, r.result.n);
+    test.equal(1, r.matchedCount);
+    test.equal(1, r.ops.length);
+    test.ok(r.upsertedId != null);
+...</pre></li>
 </ul>
 
 <h2><a href="#element.mongodb.Collection.save" id="element.mongodb.Collection.save">
@@ -4026,7 +4074,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>save
     db.open(function(err, db) {
       db.createCollection('test_save', function(err, collection) {
         var doc = {'hello':'world'};
-        <span class="docApiCodeKeywordSpan">collection.save</span>(doc, configuration.writeConcernMax(), function(err, r) {
+        collection.<span class="docApiCodeKeywordSpan">save</span>(doc, configuration.writeConcernMax(), function(err, r) {
           test.ok(r.ops[0]._id != null);
 
           collection.count(function(err, count) {
@@ -4068,7 +4116,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>stats
   collection.insertMany([{a:1}, {hello:'world'}], configuration.writeConcernMax(), function(err, result) {
 
     // Retrieve the statistics for the collection
-    <span class="docApiCodeKeywordSpan">collection.stats</span>(function(err, stats) {
+    collection.<span class="docApiCodeKeywordSpan">stats</span>(function(err, stats) {
       test.equal(2, stats.count);
 
       db.close();
@@ -4105,7 +4153,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>update
       col.insert({a:1, b:1}, function(err, result) {
         test.equal(null, err);
 
-        <span class="docApiCodeKeywordSpan">col.update</span>({a:1}, {$bit: {b: {and: 0}}}, function(err, result) {
+        col.<span class="docApiCodeKeywordSpan">update</span>({a:1}, {$bit: {b: {and: 0}}}, function(err, result) {
 test.equal(null, err);
 
 col.findOne({a:1}, function(err, doc) {
@@ -4144,7 +4192,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>updateMany
             test.equal(null, err);
             test.equal(1, result.result.ok);
 
-            <span class="docApiCodeKeywordSpan">col.updateMany</span>({a:1}, {$set: {b:1}}, {w:0}, function(err, result) {
+            col.<span class="docApiCodeKeywordSpan">updateMany</span>({a:1}, {$set: {b:1}}, {w:0}, function(err, result) {
 test.equal(null, err);
 test.equal(1, result.result.ok);
 
@@ -4183,7 +4231,7 @@ function <span class="docApiSignatureSpan">mongodb.Collection.</span>updateOne
           test.equal(null, err);
           test.equal(1, result.result.ok);
 
-          <span class="docApiCodeKeywordSpan">col.updateOne</span>({a:1}, {$set: {b:1}}, {w:0}, function(err, result) {
+          col.<span class="docApiCodeKeywordSpan">updateOne</span>({a:1}, {$set: {b:1}}, {w:0}, function(err, result) {
 test.equal(null, err);
 test.equal(1, result.result.ok);
 
@@ -4239,7 +4287,7 @@ console.log('step ' + modeNext);
 switch (modeNext) {
 case 1:
     console.log('connecting to mongodb server');
-    local.<span class="docApiCodeKeywordSpan">mongodb.MongoClient.connect</span>(
+    local.mongodb.MongoClient.<span class="docApiCodeKeywordSpan">connect</span>(
         'mongodb://localhost:27017/test',
         onNext
     );
