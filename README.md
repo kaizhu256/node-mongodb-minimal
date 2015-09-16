@@ -2,7 +2,7 @@ mongodb-minimal
 ===============
 pure javascript version of mongodb-client @ https://www.npmjs.com/package/mongodb with zero npm-dependencies
 
-[![NPM](https://img.shields.io/npm/v/mongodb-minimal.svg?style=flat-square)](https://www.npmjs.org/package/mongodb-minimal)
+[![NPM](https://img.shields.io/npm/v/mongodb-minimal.svg?style=flat-square)](https://www.npmjs.org/package/mongodb-minimal) [![NPM](https://img.shields.io/npm/dm/mongodb-minimal.svg?style=flat-square)](https://www.npmjs.org/package/mongodb-minimal)
 
 
 
@@ -12,7 +12,6 @@ pure javascript version of mongodb-client @ https://www.npmjs.com/package/mongod
 
 
 # build-status [![travis-ci.org build-status](https://api.travis-ci.org/kaizhu256/node-mongodb-minimal.svg)](https://travis-ci.org/kaizhu256/node-mongodb-minimal)
-
 [![build commit status](https://kaizhu256.github.io/node-mongodb-minimal/build/build.badge.svg)](https://travis-ci.org/kaizhu256/node-mongodb-minimal)
 
 | git-branch : | [master](https://github.com/kaizhu256/node-mongodb-minimal/tree/master) | [beta](https://github.com/kaizhu256/node-mongodb-minimal/tree/beta) | [alpha](https://github.com/kaizhu256/node-mongodb-minimal/tree/alpha)|
@@ -37,20 +36,21 @@ pure javascript version of mongodb-client @ https://www.npmjs.com/package/mongod
 
 
 # documentation
-#### this package statically includes
+#### this package requires
+- darwin or linux os
+
+#### this package is derived from
 - bson@0.4.11
 - mongodb@2.0.42
 - mongodb-core@1.2.10
 - nedb@1.1.2
 
 #### [api-doc](https://kaizhu256.github.io/node-mongodb-minimal/build/doc.api.html)
-
 [![api-doc](https://kaizhu256.github.io/node-mongodb-minimal/build/screen-capture.docApiCreate.slimerjs._2Fhome_2Ftravis_2Fbuild_2Fkaizhu256_2Fnode-mongodb-minimal_2Ftmp_2Fbuild_2Fdoc.api.html.png)](https://kaizhu256.github.io/node-mongodb-minimal/build/doc.api.html)
 
 
 
 # quickstart node example
-
 #### to run this example, follow the instruction in the script below
 - example.js
 
@@ -258,7 +258,7 @@ npm run-script postinstall && \
 node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && \
 node_modules/.bin/utility2 test example.js"
     },
-    "version": "2015.8.1"
+    "version": "2015.8.2"
 }
 ```
 
@@ -269,10 +269,9 @@ node_modules/.bin/utility2 test example.js"
 
 
 
-# change since 01051b48
-- npm publish 2015.8.1
-- add api documentation
-- add npm-script build-doc
+# change since 9329868b
+- npm publish 2015.8.2
+- update README.md
 - none
 
 

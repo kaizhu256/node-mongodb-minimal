@@ -3,7 +3,7 @@
     "description": "pure javascript version of mongodb-client @ https://www.npmjs.com/package/mongodb with zero npm-dependenciess",
     "devDependencies": {
         "phantomjs-lite": "^2015.8.2",
-        "utility2": "2015.8.5"
+        "utility2": "~2015.8.5"
     },
     "engines": { "node": ">=0.10 <=0.12" },
     "keywords": [
@@ -26,5 +26,5 @@
         "start": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && npm run-script postinstall && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 start example.js",
         "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && npm run-script postinstall && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 test example.js"
     },
-    "version": "2015.8.1"
+    "version": "2015.8.2"
 }
