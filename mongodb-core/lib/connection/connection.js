@@ -4,8 +4,8 @@ var inherits = require('util').inherits
   , EventEmitter = require('events').EventEmitter
   , net = require('net')
   , tls = require('tls')
+  , crypto = require('crypto')
   , f = require('util').format
-  , getSingleProperty = require('./utils').getSingleProperty
   , debugOptions = require('./utils').debugOptions
   , Response = require('./commands').Response
   , MongoError = require('../error')
@@ -14,14 +14,15 @@ var inherits = require('util').inherits
 var _id = 0;
 var debugFields = ['host', 'port', 'size', 'keepAlive', 'keepAliveInitialDelay', 'noDelay'
   , 'connectionTimeout', 'socketTimeout', 'singleBufferSerializtion', 'ssl', 'ca', 'cert'
-  , 'rejectUnauthorized', 'promoteLongs'];
+  , 'rejectUnauthorized', 'promoteLongs', 'promoteValues', 'promoteBuffers', 'checkServerIdentity'];
+var connectionAccounting = false;
+var connections = {};
 
 /**
  * Creates a new Connection instance
  * @class
  * @param {string} options.host The server host
  * @param {number} options.port The server port
- * @param {number} [options.size=5] Server connection pool size
  * @param {boolean} [options.keepAlive=true] TCP Connection keep alive enabled
  * @param {number} [options.keepAliveInitialDelay=0] Initial delay before TCP keep alive enabled
  * @param {boolean} [options.noDelay=true] TCP Connection no delay
@@ -29,12 +30,15 @@ var debugFields = ['host', 'port', 'size', 'keepAlive', 'keepAliveInitialDelay',
  * @param {number} [options.socketTimeout=0] TCP Socket timeout setting
  * @param {boolean} [options.singleBufferSerializtion=true] Serialize into single buffer, trade of peak memory for serialization speed
  * @param {boolean} [options.ssl=false] Use SSL for connection
+ * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
  * @param {Buffer} [options.ca] SSL Certificate store binary buffer
  * @param {Buffer} [options.cert] SSL Certificate binary buffer
  * @param {Buffer} [options.key] SSL Key file binary buffer
  * @param {string} [options.passphrase] SSL Certificate pass phrase
  * @param {boolean} [options.rejectUnauthorized=true] Reject unauthorized server certificates
  * @param {boolean} [options.promoteLongs=true] Convert Long values from the db into Numbers if they fit into 53 bits
+ * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
+ * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
  * @fires Connection#connect
  * @fires Connection#close
  * @fires Connection#error
@@ -42,7 +46,7 @@ var debugFields = ['host', 'port', 'size', 'keepAlive', 'keepAliveInitialDelay',
  * @fires Connection#parseError
  * @return {Connection} A cursor instance
  */
-var Connection = function(options) {
+var Connection = function(messageHandler, options) {
   // Add event listener
   EventEmitter.call(this);
   // Set empty if no options passed
@@ -58,7 +62,7 @@ var Connection = function(options) {
   // Grouping tag used for debugging purposes
   this.tag = options.tag;
   // Message handler
-  this.messageHandler = options.messageHandler;
+  this.messageHandler = messageHandler;
 
   // Max BSON message size
   this.maxBsonMessageSize = options.maxBsonMessageSize || (1024 * 1024 * 16 * 4);
@@ -90,14 +94,18 @@ var Connection = function(options) {
   this.key = options.key || null;
   this.passphrase = options.passphrase || null;
   this.ssl = typeof options.ssl == 'boolean' ? options.ssl : false;
-  this.rejectUnauthorized = typeof options.rejectUnauthorized == 'boolean' ? options.rejectUnauthorized : true
+  this.rejectUnauthorized = typeof options.rejectUnauthorized == 'boolean' ? options.rejectUnauthorized : true;
+  this.checkServerIdentity = typeof options.checkServerIdentity == 'boolean'
+    || typeof options.checkServerIdentity == 'function' ? options.checkServerIdentity : true;
 
   // If ssl not enabled
   if(!this.ssl) this.rejectUnauthorized = false;
 
   // Response options
   this.responseOptions = {
-    promoteLongs: typeof options.promoteLongs == 'boolean' ?  options.promoteLongs : true
+    promoteLongs: typeof options.promoteLongs == 'boolean' ?  options.promoteLongs : true,
+    promoteValues: typeof options.promoteValues == 'boolean' ? options.promoteValues : true,
+    promoteBuffers: typeof options.promoteBuffers == 'boolean' ? options.promoteBuffers: false
   }
 
   // Flushing
@@ -107,14 +115,60 @@ var Connection = function(options) {
   // Internal state
   this.connection = null;
   this.writeStream = null;
+
+  // Create hash method
+  var hash = crypto.createHash('sha1');
+  hash.update(f('%s:%s', this.host, this.port));
+
+  // Create a hash name
+  this.hashedName = hash.digest('hex');
+
+  // All operations in flight on the connection
+  this.workItems = [];
 }
 
 inherits(Connection, EventEmitter);
+
+Connection.prototype.setSocketTimeout = function(value) {
+  if(this.connection) {
+    this.connection.setTimeout(value);
+  }
+}
+
+Connection.prototype.resetSocketTimeout = function() {
+  if(this.connection) {
+    this.connection.setTimeout(this.socketTimeout);
+  }
+}
+
+Connection.enableConnectionAccounting = function() {
+  connectionAccounting = true;
+  connections = {};
+}
+
+Connection.disableConnectionAccounting = function() {
+  connectionAccounting = false;
+}
+
+Connection.connections = function() {
+  return connections;
+}
+
+function deleteConnection(id) {
+  // console.log("=== delete connection :: " + id)
+  delete connections[id];
+}
+
+function addConnection(id, connection) {
+  // console.log("=== add connection :: " + id)
+  connections[id] = connection;
+}
 
 //
 // Connection handlers
 var errorHandler = function(self) {
   return function(err) {
+    if(connectionAccounting) deleteConnection(self.id);
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] errored out with [%s]', self.id, self.host, self.port, JSON.stringify(err)));
     // Emit the error
@@ -124,6 +178,7 @@ var errorHandler = function(self) {
 
 var timeoutHandler = function(self) {
   return function() {
+    if(connectionAccounting) deleteConnection(self.id);
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s for [%s:%s] timed out', self.id, self.host, self.port));
     // Emit timeout error
@@ -135,8 +190,10 @@ var timeoutHandler = function(self) {
 
 var closeHandler = function(self) {
   return function(hadError) {
+    if(connectionAccounting) deleteConnection(self.id);
     // Debug information
     if(self.logger.isDebug()) self.logger.debug(f('connection %s with for [%s:%s] closed', self.id, self.host, self.port));
+
     // Emit close event
     if(!hadError) {
       self.emit("close"
@@ -225,7 +282,7 @@ var dataHandler = function(self) {
             var sizeOfMessage = data[0] | data[1] << 8 | data[2] << 16 | data[3] << 24;
             // If we have a negative sizeOfMessage emit error and return
             if(sizeOfMessage < 0 || sizeOfMessage > self.maxBsonMessageSize) {
-              var errorObject = {err:"socketHandler", trace:'', bin:self.buffer, parseState:{
+              errorObject = {err:"socketHandler", trace:'', bin:self.buffer, parseState:{
                 sizeOfMessage: sizeOfMessage,
                 bytesRead: self.bytesRead,
                 stubBuffer: self.stubBuffer}};
@@ -250,7 +307,7 @@ var dataHandler = function(self) {
 
             } else if(sizeOfMessage > 4 && sizeOfMessage < self.maxBsonMessageSize && sizeOfMessage == data.length) {
               try {
-                var emitBuffer = data;
+                emitBuffer = data;
                 // Reset state of buffer
                 self.buffer = null;
                 self.sizeOfMessage = 0;
@@ -261,15 +318,10 @@ var dataHandler = function(self) {
                 // Emit the message
                 self.messageHandler(new Response(self.bson, emitBuffer, self.responseOptions), self);
               } catch (err) {
-                var errorObject = {err:"socketHandler", trace:err, bin:self.buffer, parseState:{
-                  sizeOfMessage:self.sizeOfMessage,
-                  bytesRead:self.bytesRead,
-                  stubBuffer:self.stubBuffer}};
-                // We got a parse Error fire it off then keep going
-                self.emit("parseError", errorObject, self);
+                self.emit("parseError", err, self);
               }
             } else if(sizeOfMessage <= 4 || sizeOfMessage > self.maxBsonMessageSize) {
-              var errorObject = {err:"socketHandler", trace:null, bin:data, parseState:{
+              errorObject = {err:"socketHandler", trace:null, bin:data, parseState:{
                 sizeOfMessage:sizeOfMessage,
                 bytesRead:0,
                 buffer:null,
@@ -285,7 +337,7 @@ var dataHandler = function(self) {
               // Exit parsing loop
               data = new Buffer(0);
             } else {
-              var emitBuffer = data.slice(0, sizeOfMessage);
+              emitBuffer = data.slice(0, sizeOfMessage);
               // Reset state of buffer
               self.buffer = null;
               self.sizeOfMessage = 0;
@@ -310,6 +362,21 @@ var dataHandler = function(self) {
   }
 }
 
+// List of socket level valid ssl options
+var legalSslSocketOptions = ['pfx', 'key', 'passphrase', 'cert', 'ca', 'ciphers'
+  , 'NPNProtocols', 'ALPNProtocols', 'servername'
+  , 'secureProtocol', 'secureContext', 'session'
+  , 'minDHSize'];
+
+function merge(options1, options2) {
+  // Merge in any allowed ssl options
+  for(var name in options2) {
+    if(options2[name] != null && legalSslSocketOptions.indexOf(name) != -1) {
+      options1[name] = options2[name];
+    }
+  }
+}
+
 /**
  * Connect
  * @method
@@ -317,9 +384,13 @@ var dataHandler = function(self) {
 Connection.prototype.connect = function(_options) {
   var self = this;
   _options = _options || {};
+  // Set the connections
+  if(connectionAccounting) addConnection(this.id, this);
   // Check if we are overriding the promoteLongs
   if(typeof _options.promoteLongs == 'boolean') {
     self.responseOptions.promoteLongs = _options.promoteLongs;
+    self.responseOptions.promoteValues = _options.promoteValues;
+    self.responseOptions.promoteBuffers = _options.promoteBuffers;
   }
 
   // Create new connection instance
@@ -339,10 +410,31 @@ Connection.prototype.connect = function(_options) {
       , rejectUnauthorized: self.rejectUnauthorized
     }
 
+    // Merge in options
+    merge(sslOptions, this.options);
+    merge(sslOptions, _options);
+
+    // Set options for ssl
     if(self.ca) sslOptions.ca = self.ca;
     if(self.cert) sslOptions.cert = self.cert;
     if(self.key) sslOptions.key = self.key;
     if(self.passphrase) sslOptions.passphrase = self.passphrase;
+
+    // Override checkServerIdentity behavior
+    if(self.checkServerIdentity == false) {
+      // Skip the identiy check by retuning undefined as per node documents
+      // https://nodejs.org/api/tls.html#tls_tls_connect_options_callback
+      sslOptions.checkServerIdentity = function() {
+        return undefined;
+      }
+    } else if(typeof self.checkServerIdentity == 'function') {
+      sslOptions.checkServerIdentity = self.checkServerIdentity;
+    }
+
+    // Set default sni servername to be the same as host
+    if(sslOptions.servername == null) {
+      sslOptions.servername = self.host;
+    }
 
     // Attempt SSL connection
     self.connection = tls.connect(self.port, self.host, sslOptions, function() {
@@ -374,11 +466,32 @@ Connection.prototype.connect = function(_options) {
 }
 
 /**
+ * Unref this connection
+ * @method
+ * @return {boolean}
+ */
+Connection.prototype.unref = function() {
+  if (this.connection) this.connection.unref();
+  else {
+    var self = this;
+    this.once('connect', function() {
+      self.connection.unref();
+    });
+  }
+}
+
+/**
  * Destroy connection
  * @method
  */
 Connection.prototype.destroy = function() {
-  if(this.connection) this.connection.destroy();
+  // Set the connections
+  if(connectionAccounting) deleteConnection(this.id);
+  if(this.connection) {
+    this.connection.end();
+    this.connection.destroy();
+  }
+
   this.destroyed = true;
 }
 
@@ -388,12 +501,21 @@ Connection.prototype.destroy = function() {
  * @param {Command} command Command to write out need to implement toBin and toBinUnified
  */
 Connection.prototype.write = function(buffer) {
-  // Debug log
-  if(this.logger.isDebug()) this.logger.debug(f('writing buffer [%s] to %s:%s', buffer.toString('hex'), this.host, this.port));
+  var i;
+  // Debug Log
+  if(this.logger.isDebug()) {
+    if(!Array.isArray(buffer)) {
+      this.logger.debug(f('writing buffer [%s] to %s:%s', buffer.toString('hex'), this.host, this.port));
+    } else {
+      for(i = 0; i < buffer.length; i++)
+        this.logger.debug(f('writing buffer [%s] to %s:%s', buffer[i].toString('hex'), this.host, this.port));
+    }
+  }
+
   // Write out the command
   if(!Array.isArray(buffer)) return this.connection.write(buffer, 'binary');
   // Iterate over all buffers and write them in order to the socket
-  for(var i = 0; i < buffer.length; i++) this.connection.write(buffer[i], 'binary');
+  for(i = 0; i < buffer.length; i++) this.connection.write(buffer[i], 'binary');
 }
 
 /**

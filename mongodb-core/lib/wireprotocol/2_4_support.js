@@ -3,16 +3,15 @@
 var Insert = require('./commands').Insert
   , Update = require('./commands').Update
   , Remove = require('./commands').Remove
-  , Query = require('../connection/commands').Query
   , copy = require('../connection/utils').copy
   , KillCursor = require('../connection/commands').KillCursor
   , GetMore = require('../connection/commands').GetMore
   , Query = require('../connection/commands').Query
-  , ReadPreference = require('../topologies/read_preference')
   , f = require('util').format
-  , CommandResult = require('../topologies/command_result')
+  , CommandResult = require('../connection/command_result')
   , MongoError = require('../error')
-  , Long = require('bson').Long;
+  , Long = require('bson').Long
+  , getReadPreference = require('./shared').getReadPreference;
 
 // Write concern fields
 var writeConcernFields = ['w', 'wtimeout', 'j', 'fsync'];
@@ -23,11 +22,10 @@ var WireProtocol = function() {}
 // Needs to support legacy mass insert as well as ordered/unordered legacy
 // emulation
 //
-WireProtocol.prototype.insert = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+WireProtocol.prototype.insert = function(pool, ismaster, ns, bson, ops, options, callback) {
   options = options || {};
   // Default is ordered execution
   var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
-  var legacy = typeof options.legacy == 'boolean' ? options.legacy : false;
   ops = Array.isArray(ops) ? ops :[ops];
 
   // If we have more than a 1000 ops fails
@@ -38,13 +36,13 @@ WireProtocol.prototype.insert = function(topology, ismaster, ns, bson, pool, cal
 
   // We are unordered
   if(!ordered || writeConcern.w == 0) {
-    return executeUnordered('insert', Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    return executeUnordered('insert', Insert, ismaster, ns, bson, pool, ops, options, callback);
   }
 
-  return executeOrdered('insert', Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+  return executeOrdered('insert', Insert, ismaster, ns, bson, pool, ops, options, callback);
 }
 
-WireProtocol.prototype.update = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+WireProtocol.prototype.update = function(pool, ismaster, ns, bson, ops, options, callback) {
   options = options || {};
   // Default is ordered execution
   var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
@@ -55,13 +53,13 @@ WireProtocol.prototype.update = function(topology, ismaster, ns, bson, pool, cal
 
   // We are unordered
   if(!ordered || writeConcern.w == 0) {
-    return executeUnordered('update', Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    return executeUnordered('update', Update, ismaster, ns, bson, pool, ops, options, callback);
   }
 
-  return executeOrdered('update', Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+  return executeOrdered('update', Update, ismaster, ns, bson, pool, ops, options, callback);
 }
 
-WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options, callback) {
   options = options || {};
   // Default is ordered execution
   var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
@@ -72,34 +70,39 @@ WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, cal
 
   // We are unordered
   if(!ordered || writeConcern.w == 0) {
-    return executeUnordered('remove', Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+    return executeUnordered('remove', Remove, ismaster, ns, bson, pool, ops, options, callback);
   }
 
-  return executeOrdered('remove', Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+  return executeOrdered('remove', Remove, ismaster, ns, bson, pool, ops, options, callback);
 }
 
-WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, callbacks, callback) {
+WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback) {
   // Create a kill cursor command
   var killCursor = new KillCursor(bson, [cursorId]);
   // Execute the kill cursor command
-  if(connection && connection.isConnected()) connection.write(killCursor.toBin());
-  // Set cursor to 0
-  cursorId = Long.ZERO;
-  // Return to caller
-  if(callback) callback(null, null);
+  if(pool && pool.isConnected()) {
+    pool.write(killCursor, {
+      immediateRelease:true, noResponse: true
+    });
+  }
+
+  // Callback
+  if(typeof callback == 'function') callback(null, null);
 }
 
-WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {
+WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, options, callback) {
   // Create getMore command
   var getMore = new GetMore(bson, ns, cursorState.cursorId, {numberToReturn: batchSize});
 
   // Query callback
-  var queryCallback = function(err, r) {
+  var queryCallback = function(err, result) {
     if(err) return callback(err);
+    // Get the raw message
+    var r = result.message;
 
     // If we have a timed out query or a cursor that was killed
     if((r.responseFlags & (1 << 0)) != 0) {
-      return callback(new MongoError("cursor killed or timed out"), null);
+      return callback(new MongoError("cursor does not exist, was killed or timed out"), null);
     }
 
     // Ensure we have a Long valie cursor id
@@ -112,7 +115,7 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
     cursorState.cursorId = cursorId;
 
     // Return
-    callback(null);
+    callback(null, null, r.connection);
   }
 
   // If we have a raw query decorate the function
@@ -120,10 +123,21 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
     queryCallback.raw = raw;
   }
 
-  // Register a callback
-  callbacks.register(getMore.requestId, queryCallback);
+  // Check if we need to promote longs
+  if(typeof cursorState.promoteLongs == 'boolean') {
+    queryCallback.promoteLongs = cursorState.promoteLongs;
+  }
+
+  if(typeof cursorState.promoteValues == 'boolean') {
+    queryCallback.promoteValues = cursorState.promoteValues;
+  }
+
+  if(typeof cursorState.promoteBuffers == 'boolean') {
+    queryCallback.promoteBuffers = cursorState.promoteBuffers;
+  }
+
   // Write out the getMore command
-  connection.write(getMore.toBin());
+  connection.write(getMore, queryCallback);
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
@@ -131,6 +145,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
   if(cmd.find) {
     return setupClassicFind(bson, ns, cmd, cursorState, topology, options)
   } else if(cursorState.cursorId != null) {
+    return;
   } else if(cmd) {
     return setupCommand(bson, ns, cmd, cursorState, topology, options);
   } else {
@@ -141,12 +156,10 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
 //
 // Execute a find command
 var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
-  var readPreference = options.readPreference || new ReadPreference('primary');
-  if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
-  if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
-
   // Ensure we have at least some options
   options = options || {};
+  // Get the readPreference
+  var readPreference = getReadPreference(cmd, options);
   // Set the optional batchSize
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
   var numberToReturn = 0;
@@ -184,9 +197,10 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   if(cmd.comment) findCmd['$comment'] = cmd.comment, usesSpecialModifier = true;
   if(cmd.maxTimeMS) findCmd['$maxTimeMS'] = cmd.maxTimeMS, usesSpecialModifier = true;
 
-  // If we have explain, return a single document and close cursor
   if(cmd.explain) {
-    numberToReturn = -1;
+	// nToReturn must be 0 (match all) or negative (match N and close cursor)
+	// nToReturn > 0 will give explain results equivalent to limit(0)
+    numberToReturn = -Math.abs(cmd.limit || 0);
     usesSpecialModifier = true;
     findCmd['$explain'] = true;
   }
@@ -198,10 +212,28 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
     findCmd = cmd.query;
   }
 
+  // Throw on majority readConcern passed in
+  if(cmd.readConcern && cmd.readConcern.level != 'local') {
+    throw new MongoError(f('server find command does not support a readConcern level of %s', cmd.readConcern.level));
+  }
+
+  // Remove readConcern, ensure no failing commands
+  if(cmd.readConcern) {
+    cmd = copy(cmd);
+    delete cmd['readConcern'];
+  }
+
+  // Set up the serialize and ignoreUndefined fields
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
+    ? options.serializeFunctions : false;
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
+    ? options.ignoreUndefined : false;
+
   // Build Query object
   var query = new Query(bson, ns, findCmd, {
       numberToSkip: numberToSkip, numberToReturn: numberToReturn
     , checkKeys: false, returnFieldSelector: cmd.fields
+    , serializeFunctions: serializeFunctions, ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags
@@ -212,7 +244,6 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
   if(typeof cmd.oplogReplay == 'boolean') query.oplogReplay = cmd.oplogReplay;
   if(typeof cmd.noCursorTimeout == 'boolean') query.noCursorTimeout = cmd.noCursorTimeout;
   if(typeof cmd.awaitData == 'boolean') query.awaitData = cmd.awaitData;
-  if(typeof cmd.exhaust == 'boolean') query.exhaust = cmd.exhaust;
   if(typeof cmd.partial == 'boolean') query.partial = cmd.partial;
   // Return the query
   return query;
@@ -221,13 +252,10 @@ var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
 //
 // Set up a command cursor
 var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
-  var readPreference = options.readPreference || new ReadPreference('primary');
-  if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
-  if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
-
   // Set empty options object
   options = options || {}
-
+  // Get the readPreference
+  var readPreference = getReadPreference(cmd, options);
   // Final query
   var finalCmd = {};
   for(var name in cmd) {
@@ -237,15 +265,37 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   // Build command namespace
   var parts = ns.split(/\./);
 
+  // Throw on majority readConcern passed in
+  if(cmd.readConcern && cmd.readConcern.level != 'local') {
+    throw new MongoError(f('server %s command does not support a readConcern level of %s', JSON.stringify(cmd), cmd.readConcern.level));
+  }
+
+  // Remove readConcern, ensure no failing commands
+  if(cmd.readConcern) delete cmd['readConcern'];
+
+  // Serialize functions
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
+    ? options.serializeFunctions : false;
+
+  // Set up the serialize and ignoreUndefined fields
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
+    ? options.ignoreUndefined : false;
+
   // We have a Mongos topology, check if we need to add a readPreference
-  if(topology.type == 'mongos' && readPreference) {
-    finalCmd['$readPreference'] = readPreference.toJSON();
+  if(topology.type == 'mongos'
+    && readPreference
+    && readPreference.preference != 'primary') {
+    finalCmd = {
+      '$query': finalCmd,
+      '$readPreference': readPreference.toJSON()
+    };
   }
 
   // Build Query object
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {
       numberToSkip: 0, numberToReturn: -1
-    , checkKeys: false
+    , checkKeys: false, serializeFunctions: serializeFunctions
+    , ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags
@@ -253,18 +303,6 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Return the query
   return query;
-}
-
-/**
- * @ignore
- */
-var bindToCurrentDomain = function(callback) {
-  var domain = process.domain;
-  if(domain == null || callback == null) {
-    return callback;
-  } else {
-    return domain.bind(callback);
-  }
 }
 
 var hasWriteConcern = function(writeConcern) {
@@ -292,6 +330,9 @@ var cloneWriteConcern = function(writeConcern) {
 //
 var aggregateWriteOperationResults = function(opType, ops, results, connection) {
   var finalResult = { ok: 1, n: 0 }
+  if(opType == 'update') {
+    finalResult.nModified = 0;
+  }
 
   // Map all the results coming back
   for(var i = 0; i < results.length; i++) {
@@ -310,6 +351,8 @@ var aggregateWriteOperationResults = function(opType, ops, results, connection) 
     // We have an upsert where we passed in a _id
     if(result.updatedExisting == false && result.n == 1 && result.upserted == null) {
       finalResult.upserted.push({index: i, _id: op.q._id});
+    } else if(result.updatedExisting == true) {
+      finalResult.nModified += result.n;
     }
 
     // We have an insert command
@@ -361,23 +404,21 @@ var aggregateWriteOperationResults = function(opType, ops, results, connection) 
 //
 // Execute all inserts in an ordered manner
 //
-var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, ops, options, callback) {
   var _ops = ops.slice(0);
-  // Bind to current domain
-  callback = bindToCurrentDomain(callback);
   // Collect all the getLastErrors
   var getLastErrors = [];
-
   // Execute an operation
   var executeOp = function(list, _callback) {
-    // Get a pool connection
-    var connection = pool.get();
     // No more items in the list
-    if(list.length == 0) return _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+    if(list.length == 0) {
+      return process.nextTick(function() {
+        _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));
+      });
+    }
 
     // Get the first operation
     var doc = list.shift();
-
     // Create an insert command
     var op = new command(Query.getRequestId(), ismaster, bson, ns, [doc], options);
     // Write concern
@@ -388,47 +429,51 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
     // Get the db name
     var db = ns.split('.').shift();
 
-    // Error out if no connection available
-    if(connection == null)
-      return _callback(new MongoError("no connection available"));
-
     try {
-      // Execute the insert
-      connection.write(op.toBin());
+      // Add binary message to list of commands to execute
+      var commands = [op];
 
-      // If write concern 0 don't fire getLastError
-      if(hasWriteConcern(writeConcern)) {
-        var getLastErrorCmd = {getlasterror: 1};
-        // Merge all the fields
-        for(var i = 0; i < writeConcernFields.length; i++) {
-          if(writeConcern[writeConcernFields[i]] != null)
-            getLastErrorCmd[writeConcernFields[i]] = writeConcern[writeConcernFields[i]];
+      // Add getLastOrdered
+      var getLastErrorCmd = {getlasterror: 1};
+      // Merge all the fields
+      for(var i = 0; i < writeConcernFields.length; i++) {
+        if(writeConcern[writeConcernFields[i]] != null) {
+          getLastErrorCmd[writeConcernFields[i]] = writeConcern[writeConcernFields[i]];
+        }
+      }
+
+      // Create a getLastError command
+      var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});
+      // Add getLastError command to list of ops to execute
+      commands.push(getLastErrorOp);
+
+      // getLastError callback
+      var getLastErrorCallback = function(err, result) {
+        if(err) return callback(err);
+        // Get the document
+        var doc = result.result;
+        // Save the getLastError document
+        getLastErrors.push(doc);
+
+        // If we have an error terminate
+        if(doc.ok == 0 || doc.err || doc.errmsg) {
+          return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, result.connection));
         }
 
-        // Create a getLastError command
-        var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});
-        // Write the lastError message
-        connection.write(getLastErrorOp.toBin());
-        // Register the callback
-        callbacks.register(getLastErrorOp.requestId, function(err, result) {
-          if(err) return callback(err);
-          // Get the document
-          var doc = result.documents[0];
-          // Save the getLastError document
-          getLastErrors.push(doc);
-          // If we have an error terminate
-          if(doc.ok == 0 || doc.err || doc.errmsg) return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
-          // Execute the next op in the list
-          executeOp(list, callback);
-        });
+        // Execute the next op in the list
+        executeOp(list, callback);
       }
+
+      // Write both commands out at the same time
+      pool.write(commands, getLastErrorCallback);
     } catch(err) {
-      if(typeof err == 'string') err = new MongoError(err);
       // We have a serialization error, rewrite as a write error to have same behavior as modern
       // write commands
-      getLastErrors.push({ ok: 1, errmsg: err.message, code: 14 });
+      getLastErrors.push({ ok: 1, errmsg: typeof err == 'string' ? err : err.message, code: 14 });
       // Return due to an error
-      return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+      process.nextTick(function() {
+        _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));
+      });
     }
   }
 
@@ -436,9 +481,7 @@ var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbac
   executeOp(_ops, callback);
 }
 
-var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
-  // Bind to current domain
-  callback = bindToCurrentDomain(callback);
+var executeUnordered = function(opType, command, ismaster, ns, bson, pool, ops, options, callback) {
   // Total operations to write
   var totalOps = ops.length;
   // Collect all the getLastErrors
@@ -457,16 +500,10 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
     // Get db name
     var db = ns.split('.').shift();
 
-    // Get a pool connection
-    var connection = pool.get();
-
-    // Error out if no connection available
-    if(connection == null)
-      return _callback(new MongoError("no connection available"));
-
     try {
-      // Execute the insert
-      connection.write(op.toBin());
+      // Add binary message to list of commands to execute
+      var commands = [op];
+
       // If write concern 0 don't fire getLastError
       if(hasWriteConcern(writeConcern)) {
         var getLastErrorCmd = {getlasterror: 1};
@@ -478,8 +515,8 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
 
         // Create a getLastError command
         var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});
-        // Write the lastError message
-        connection.write(getLastErrorOp.toBin());
+        // Add getLastError command to list of ops to execute
+        commands.push(getLastErrorOp);
 
         // Give the result from getLastError the right index
         var callbackOp = function(_index) {
@@ -488,28 +525,31 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
             // Update the number of operations executed
             totalOps = totalOps - 1;
             // Save the getLastError document
-            if(!err) getLastErrors[_index] = result.documents[0];
+            if(!err) getLastErrors[_index] = result.result;
             // Check if we are done
             if(totalOps == 0) {
-              if(error) return callback(error);
-              callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+              process.nextTick(function() {
+                if(error) return callback(error);
+                callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, result.connection));
+              });
             }
           }
         }
 
-        // Register the callback
-        callbacks.register(getLastErrorOp.requestId, callbackOp(i));
+        // Write both commands out at the same time
+        pool.write(commands, callbackOp(i));
+      } else {
+        pool.write(commands, {immediateRelease:true, noResponse:true});
       }
     } catch(err) {
-      if(typeof err == 'string') err = new MongoError(err);
       // Update the number of operations executed
       totalOps = totalOps - 1;
       // We have a serialization error, rewrite as a write error to have same behavior as modern
       // write commands
-      getLastErrors[i] = { ok: 1, errmsg: err.message, code: 14 };
+      getLastErrors[i] = { ok: 1, errmsg: typeof err == 'string' ? err : err.message, code: 14 };
       // Check if we are done
       if(totalOps == 0) {
-        callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+        callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, null));
       }
     }
   }
@@ -517,7 +557,7 @@ var executeUnordered = function(opType, command, ismaster, ns, bson, pool, callb
   // Empty w:0 return
   if(writeConcern
     && writeConcern.w == 0 && callback) {
-    callback(null, null);
+    callback(null, new CommandResult({ok:1}, null));
   }
 }
 

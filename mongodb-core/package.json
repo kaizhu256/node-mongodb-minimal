@@ -1,66 +1,109 @@
 {
-  "name": "mongodb-core",
-  "version": "1.2.10",
-  "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
-  "main": "index.js",
-  "scripts": {
-    "test": "node test/runner.js -t functional"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/christkv/mongodb-core.git"
-  },
-  "keywords": [
-    "mongodb",
-    "core"
+  "_args": [
+    [
+      {
+        "raw": "mongodb-core@2.0.14",
+        "scope": null,
+        "escapedName": "mongodb-core",
+        "name": "mongodb-core",
+        "rawSpec": "2.0.14",
+        "spec": "2.0.14",
+        "type": "version"
+      },
+      "/private/tmp/100/node_modules/mongodb"
+    ]
   ],
-  "dependencies": {
-    "bson": "~0.4",
-    "kerberos": "~0.0"
+  "_from": "mongodb-core@2.0.14",
+  "_id": "mongodb-core@2.0.14",
+  "_inCache": true,
+  "_location": "/mongodb-core",
+  "_nodeVersion": "7.1.0",
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/mongodb-core-2.0.14.tgz_1480414053968_0.9173268575686961"
   },
-  "devDependencies": {
-    "integra": "0.1.8",
-    "optimist": "latest",
-    "jsdoc": "3.3.0-alpha8",
-    "semver": "4.1.0",
-    "gleak": "0.5.0",
-    "mongodb-tools": "~1.0",
-    "mkdirp": "0.5.0",
-    "rimraf": "2.2.6",
-    "mongodb-version-manager": "^0.7.1",
-    "co": "4.5.4"
-  },
-  "optionalDependencies": {
-    "kerberos": "~0.0"
-  },
-  "author": {
-    "name": "Christian Kvalheim"
-  },
-  "license": "Apache 2.0",
-  "bugs": {
-    "url": "https://github.com/christkv/mongodb-core/issues"
-  },
-  "homepage": "https://github.com/christkv/mongodb-core",
-  "gitHead": "10a69e505d188415dc5ac5210523a4b02d956d2e",
-  "_id": "mongodb-core@1.2.10",
-  "_shasum": "ece17201bd395a647fb98f48be8fbae15be0afd9",
-  "_from": "mongodb-core@1.2.10",
-  "_npmVersion": "2.13.0",
-  "_nodeVersion": "2.4.0",
   "_npmUser": {
     "name": "christkv",
     "email": "christkv@gmail.com"
   },
+  "_npmVersion": "3.10.9",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "mongodb-core@2.0.14",
+    "scope": null,
+    "escapedName": "mongodb-core",
+    "name": "mongodb-core",
+    "rawSpec": "2.0.14",
+    "spec": "2.0.14",
+    "type": "version"
+  },
+  "_requiredBy": [
+    "/mongodb"
+  ],
+  "_resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-2.0.14.tgz",
+  "_shasum": "4e8743b87343d169a7622535edbd47dcacd790be",
+  "_shrinkwrap": null,
+  "_spec": "mongodb-core@2.0.14",
+  "_where": "/private/tmp/100/node_modules/mongodb",
+  "author": {
+    "name": "Christian Kvalheim"
+  },
+  "bugs": {
+    "url": "https://github.com/christkv/mongodb-core/issues"
+  },
+  "dependencies": {
+    "bson": "~0.5.7",
+    "require_optional": "~1.0.0"
+  },
+  "description": "Core MongoDB driver functionality, no bells and whistles and meant for integration not end applications",
+  "devDependencies": {
+    "co": "^4.5.4",
+    "coveralls": "^2.11.6",
+    "es6-promise": "^3.0.2",
+    "gleak": "0.5.0",
+    "integra": "0.1.8",
+    "jsdoc": "3.3.0-alpha8",
+    "mkdirp": "0.5.0",
+    "mongodb-topology-manager": "1.0.6",
+    "mongodb-version-manager": "github:christkv/mongodb-version-manager#master",
+    "nyc": "^5.5.0",
+    "optimist": "latest",
+    "rimraf": "2.2.6",
+    "semver": "4.1.0"
+  },
+  "directories": {},
+  "dist": {
+    "shasum": "4e8743b87343d169a7622535edbd47dcacd790be",
+    "tarball": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-2.0.14.tgz"
+  },
+  "gitHead": "90884c683392b9c4643ac4f9c94f9f9d08bd3ff7",
+  "homepage": "https://github.com/christkv/mongodb-core",
+  "keywords": [
+    "mongodb",
+    "core"
+  ],
+  "license": "Apache-2.0",
+  "main": "index.js",
   "maintainers": [
     {
       "name": "christkv",
       "email": "christkv@gmail.com"
     }
   ],
-  "dist": {
-    "shasum": "ece17201bd395a647fb98f48be8fbae15be0afd9",
-    "tarball": "http://registry.npmjs.org/mongodb-core/-/mongodb-core-1.2.10.tgz"
+  "name": "mongodb-core",
+  "optionalDependencies": {},
+  "peerOptionalDependencies": {
+    "kerberos": "~0.0"
   },
-  "directories": {},
-  "_resolved": "https://registry.npmjs.org/mongodb-core/-/mongodb-core-1.2.10.tgz"
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/christkv/mongodb-core.git"
+  },
+  "scripts": {
+    "coverage": "nyc node test/runner.js -t functional -l && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls",
+    "lint": "eslint lib",
+    "test": "node test/runner.js -t functional"
+  },
+  "version": "2.0.14"
 }

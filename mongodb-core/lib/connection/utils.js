@@ -1,5 +1,7 @@
 "use strict";
 
+var f = require('util').format;
+
 // Set property function
 var setProperty = function(obj, prop, flag, values) {
   Object.defineProperty(obj, prop.name, {
@@ -7,7 +9,7 @@ var setProperty = function(obj, prop, flag, values) {
       set: function(value) {
         if(typeof value != 'boolean') throw new Error(f("%s required a boolean", prop.name));
         // Flip the bit to 1
-        if(value == true) values.flags |= flag;        
+        if(value == true) values.flags |= flag;
         // Flip the bit to 0 if it's set, otherwise ignore
         if(value == false && (values.flags & flag) == flag) values.flags ^= flag;
         prop.value = value;
@@ -20,7 +22,7 @@ var setProperty = function(obj, prop, flag, values) {
 var getProperty = function(obj, propName, fieldName, values, func) {
   Object.defineProperty(obj, propName, {
     enumerable:true,
-    get: function() { 
+    get: function() {
       // Not parsed yet, parse it
       if(values[fieldName] == null && obj.isParsed && !obj.isParsed()) {
         obj.parse();
@@ -39,9 +41,9 @@ var getSingleProperty = function(obj, name, value) {
   Object.defineProperty(obj, name, {
     enumerable:true,
     get: function() {
-      return value 
+      return value
     }
-  });  
+  });
 }
 
 // Shallow copy
@@ -60,18 +62,8 @@ var debugOptions = function(debugFields, options) {
   return finaloptions;
 }
 
-/**
- * @ignore
- */
-var bindToCurrentDomain = function(callback) {
-  var domain = process.domain;
-  if(domain == null || callback == null) return callback;
-  return domain.bind(callback);
-}
-
 exports.setProperty = setProperty;
 exports.getProperty = getProperty;
 exports.getSingleProperty = getSingleProperty;
 exports.copy = copy;
-exports.bindToCurrentDomain = bindToCurrentDomain;
 exports.debugOptions = debugOptions;

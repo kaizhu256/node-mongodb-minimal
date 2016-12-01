@@ -4,12 +4,27 @@ var EventEmitter = require('events').EventEmitter
   , inherits = require('util').inherits
   , f = require('util').format
   , ServerCapabilities = require('./topology_base').ServerCapabilities
-  , MongoCR = require('mongodb-core').MongoCR
+  , MongoError = require('mongodb-core').MongoError
   , CMongos = require('mongodb-core').Mongos
   , Cursor = require('./cursor')
+  , AggregationCursor = require('./aggregation_cursor')
+  , CommandCursor = require('./command_cursor')
+  , Define = require('./metadata')
   , Server = require('./server')
   , Store = require('./topology_base').Store
-  , shallowClone = require('./utils').shallowClone;
+  , MAX_JS_INT = require('./utils').MAX_JS_INT
+  , translateOptions = require('./utils').translateOptions
+  , filterOptions = require('./utils').filterOptions
+  , mergeOptions = require('./utils').mergeOptions
+  , os = require('os');
+
+// Get package.json variable
+var driverVersion = require(__dirname + '/../package.json').version;
+var nodejsversion = f('Node.js %s, %s', process.version, os.endianness());
+var type = os.type();
+var name = process.platform;
+var architecture = process.arch;
+var release = os.release();
 
 /**
  * @fileOverview The **Mongos** class is a class that represents a Mongos Proxy topology and is
@@ -30,6 +45,15 @@ var EventEmitter = require('events').EventEmitter
  * });
  */
 
+ // Allowed parameters
+ var legalOptionNames = ['ha', 'haInterval', 'acceptableLatencyMS'
+   , 'poolSize', 'ssl', 'checkServerIdentity', 'sslValidate'
+   , 'sslCA', 'sslCert', 'sslKey', 'sslPass', 'socketOptions', 'bufferMaxEntries'
+   , 'store', 'auto_reconnect', 'autoReconnect', 'emitError'
+   , 'keepAlive', 'noDelay', 'connectTimeoutMS', 'socketTimeoutMS'
+   , 'loggerLevel', 'logger', 'reconnectTries', 'appname', 'domainsEnabled'
+   , 'servername', 'promoteLongs', 'promoteValues', 'promoteBuffers'];
+
 /**
  * Creates a new Mongos instance
  * @class
@@ -39,17 +63,21 @@ var EventEmitter = require('events').EventEmitter
  * @param {booelan} [options.ha=true] Turn on high availability monitoring.
  * @param {number} [options.haInterval=5000] Time between each replicaset status check.
  * @param {number} [options.poolSize=5] Number of connections in the connection pool for each server instance, set to 5 as default for legacy reasons.
+ * @param {number} [options.acceptableLatencyMS=15] Cutoff latency point in MS for MongoS proxy selection
  * @param {boolean} [options.ssl=false] Use ssl connection (needs to have a mongod server with ssl support)
+ * @param {boolean|function} [options.checkServerIdentity=true] Ensure we check server identify during SSL, set to false to disable checking. Only works for Node 0.12.x or higher. You can pass in a boolean or your own checkServerIdentity override function.
  * @param {object} [options.sslValidate=true] Validate mongod server certificate against ca (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {array} [options.sslCA=null] Array of valid certificates either as Buffers or Strings (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {(Buffer|string)} [options.sslCert=null] String or buffer containing the certificate we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {(Buffer|string)} [options.sslKey=null] String or buffer containing the certificate private key we wish to present (needs to have a mongod server with ssl support, 2.4 or higher)
  * @param {(Buffer|string)} [options.sslPass=null] String or buffer containing the certificate password (needs to have a mongod server with ssl support, 2.4 or higher)
+ * @param {string} [options.servername=null] String containing the server name requested via TLS SNI.
  * @param {object} [options.socketOptions=null] Socket options
  * @param {boolean} [options.socketOptions.noDelay=true] TCP Socket NoDelay option.
  * @param {number} [options.socketOptions.keepAlive=0] TCP KeepAlive on the socket with a X ms delay before start.
  * @param {number} [options.socketOptions.connectTimeoutMS=0] TCP Connection timeout setting
  * @param {number} [options.socketOptions.socketTimeoutMS=0] TCP Socket timeout setting
+ * @param {boolean} [options.domainsEnabled=false] Enable the wrapping of the callback in the current domain, disabled by default to avoid perf hit.
  * @fires Mongos#connect
  * @fires Mongos#ha
  * @fires Mongos#joined
@@ -67,6 +95,9 @@ var Mongos = function(servers, options) {
   options = options || {};
   var self = this;
 
+  // Filter the options
+  options = filterOptions(options, legalOptionNames);
+
   // Ensure all the instances are Server
   for(var i = 0; i < servers.length; i++) {
     if(!(servers[i] instanceof Server)) {
@@ -74,10 +105,10 @@ var Mongos = function(servers, options) {
     }
   }
 
-  // Store option defaults
+  // Stored options
   var storeOptions = {
       force: false
-    , bufferMaxEntries: -1
+    , bufferMaxEntries: typeof options.bufferMaxEntries == 'number' ? options.bufferMaxEntries : MAX_JS_INT
   }
 
   // Shared global store
@@ -86,85 +117,64 @@ var Mongos = function(servers, options) {
   // Set up event emitter
   EventEmitter.call(this);
 
-  // Debug tag
-  var tag = options.tag;
-
   // Build seed list
   var seedlist = servers.map(function(x) {
     return {host: x.host, port: x.port}
   });
 
-  // Final options
-  var finalOptions = shallowClone(options);
+  // Get the reconnect option
+  var reconnect = typeof options.auto_reconnect == 'boolean' ? options.auto_reconnect : true;
+  reconnect = typeof options.autoReconnect == 'boolean' ? options.autoReconnect : reconnect;
 
-  // Default values
-  finalOptions.size = typeof options.poolSize == 'number' ? options.poolSize : 5;
-  finalOptions.reconnect = typeof options.auto_reconnect == 'boolean' ? options.auto_reconnect : true;
-  finalOptions.emitError = typeof options.emitError == 'boolean' ? options.emitError : true;
-  finalOptions.cursorFactory = Cursor;
+  // Clone options
+  var clonedOptions = mergeOptions({}, {
+    disconnectHandler: store,
+    cursorFactory: Cursor,
+    reconnect: reconnect,
+    emitError: typeof options.emitError == 'boolean' ? options.emitError : true,
+    size: typeof options.poolSize == 'number' ? options.poolSize : 5
+  });
 
-  // Add the store
-  finalOptions.disconnectHandler = store;
+  // Translate any SSL options and other connectivity options
+  clonedOptions = translateOptions(clonedOptions, options);
 
-  // Ensure we change the sslCA option to ca if available
-  if(options.sslCA) finalOptions.ca = options.sslCA;
-  if(typeof options.sslValidate == 'boolean') finalOptions.rejectUnauthorized = options.sslValidate;
-  if(options.sslKey) finalOptions.key = options.sslKey;
-  if(options.sslCert) finalOptions.cert = options.sslCert;
-  if(options.sslPass) finalOptions.passphrase = options.sslPass;
+  // Socket options
+  var socketOptions = options.socketOptions && Object.keys(options.socketOptions).length > 0
+    ? options.socketOptions : options;
 
-  // Socket options passed down
-  if(options.socketOptions) {
-    if(options.socketOptions.connectTimeoutMS) {
-      this.connectTimeoutMS = options.socketOptions.connectTimeoutMS;
-      finalOptions.connectionTimeout = options.socketOptions.connectTimeoutMS;
-    }
-    if(options.socketOptions.socketTimeoutMS)
-      finalOptions.socketTimeout = options.socketOptions.socketTimeoutMS;
+  // Translate all the options to the mongodb-core ones
+  clonedOptions = translateOptions(clonedOptions, socketOptions);
+  if(typeof clonedOptions.keepAlive == 'number') {
+    clonedOptions.keepAliveInitialDelay = clonedOptions.keepAlive;
+    clonedOptions.keepAlive = clonedOptions.keepAlive > 0;
   }
 
-  // Are we running in debug mode
-  var debug = typeof options.debug == 'boolean' ? options.debug : false;
-  if(debug) {
-    finalOptions.debug = debug;
+  // Build default client information
+  this.clientInfo = {
+    driver: {
+      name: "nodejs",
+      version: driverVersion
+    },
+    os: {
+      type: type,
+      name: name,
+      architecture: architecture,
+      version: release
+    },
+    platform: nodejsversion
   }
 
-  // Map keep alive setting
-  if(options.socketOptions && typeof options.socketOptions.keepAlive == 'number') {
-    finalOptions.keepAlive = true;
-    if(typeof options.socketOptions.keepAlive == 'number') {
-      finalOptions.keepAliveInitialDelay = options.socketOptions.keepAlive;
-    }
+  // Build default client information
+  clonedOptions.clientInfo = this.clientInfo;
+  // Do we have an application specific string
+  if(options.appname) {
+    clonedOptions.clientInfo.application = { name: options.appname };
   }
-
-  // Connection timeout
-  if(options.socketOptions && typeof options.socketOptions.connectionTimeout == 'number') {
-    finalOptions.connectionTimeout = options.socketOptions.connectionTimeout;
-  }
-
-  // Socket timeout
-  if(options.socketOptions && typeof options.socketOptions.socketTimeout == 'number') {
-    finalOptions.socketTimeout = options.socketOptions.socketTimeout;
-  }
-
-  // noDelay
-  if(options.socketOptions && typeof options.socketOptions.noDelay == 'boolean') {
-    finalOptions.noDelay = options.socketOptions.noDelay;
-  }
-
-  if(typeof options.secondaryAcceptableLatencyMS == 'number') {
-    finalOptions.acceptableLatency = options.secondaryAcceptableLatencyMS;
-  }
-
-  // Add the non connection store
-  finalOptions.disconnectHandler = store;
 
   // Create the Mongos
-  var mongos = new CMongos(seedlist, finalOptions)
+  var mongos = new CMongos(seedlist, clonedOptions)
   // Server capabilities
   var sCapabilities = null;
-  // Add auth prbufferMaxEntriesoviders
-  mongos.addAuthProvider('mongocr', new MongoCR());
 
   // Internal state
   this.s = {
@@ -173,46 +183,40 @@ var Mongos = function(servers, options) {
     // Server capabilities
     , sCapabilities: sCapabilities
     // Debug turned on
-    , debug: debug
+    , debug: clonedOptions.debug
     // Store option defaults
     , storeOptions: storeOptions
     // Cloned options
-    , clonedOptions: finalOptions
+    , clonedOptions: clonedOptions
     // Actual store of callbacks
     , store: store
     // Options
     , options: options
   }
-
-
-  // Last ismaster
-  Object.defineProperty(this, 'isMasterDoc', {
-    enumerable:true, get: function() { return self.s.mongos.lastIsMaster(); }
-  });
-
-  // Last ismaster
-  Object.defineProperty(this, 'numberOfConnectedServers', {
-    enumerable:true, get: function() { 
-      return self.s.mongos.s.mongosState.connectedServers().length; 
-    }
-  });
-
-  // BSON property
-  Object.defineProperty(this, 'bson', {
-    enumerable: true, get: function() {
-      return self.s.mongos.bson;
-    }
-  });
-
-  Object.defineProperty(this, 'haInterval', {
-    enumerable:true, get: function() { return self.s.mongos.haInterval; }
-  });
 }
+
+var define = Mongos.define = new Define('Mongos', Mongos, false);
 
 /**
  * @ignore
  */
 inherits(Mongos, EventEmitter);
+
+// Last ismaster
+Object.defineProperty(Mongos.prototype, 'isMasterDoc', {
+  enumerable:true, get: function() { return this.s.mongos.lastIsMaster(); }
+});
+
+// BSON property
+Object.defineProperty(Mongos.prototype, 'bson', {
+  enumerable: true, get: function() {
+    return this.s.mongos.s.bson;
+  }
+});
+
+Object.defineProperty(Mongos.prototype, 'haInterval', {
+  enumerable:true, get: function() { return this.s.mongos.s.haInterval; }
+});
 
 // Connect
 Mongos.prototype.connect = function(db, _options, callback) {
@@ -226,7 +230,7 @@ Mongos.prototype.connect = function(db, _options, callback) {
   self.s.storeOptions.bufferMaxEntries = db.bufferMaxEntries;
 
   // Error handler
-  var connectErrorHandler = function(event) {
+  var connectErrorHandler = function() {
     return function(err) {
       // Remove all event handlers
       var events = ['timeout', 'error', 'close'];
@@ -255,15 +259,24 @@ Mongos.prototype.connect = function(db, _options, callback) {
   }
 
   // Error handler
-  var reconnectHandler = function(err) {
+  var reconnectHandler = function() {
     self.emit('reconnect');
     self.s.store.execute();
+  }
+
+  // relay the event
+  var relay = function(event) {
+    return function(t, server) {
+      self.emit(event, t, server);
+    }
   }
 
   // Connect handler
   var connectHandler = function() {
     // Clear out all the current handlers left over
-    ["timeout", "error", "close"].forEach(function(e) {
+    ["timeout", "error", "close", 'serverOpening', 'serverDescriptionChanged', 'serverHeartbeatStarted',
+      'serverHeartbeatSucceeded', 'serverHeartbeatFailed', 'serverClosed', 'topologyOpening',
+      'topologyClosed', 'topologyDescriptionChanged'].forEach(function(e) {
       self.s.mongos.removeAllListeners(e);
     });
 
@@ -272,16 +285,18 @@ Mongos.prototype.connect = function(db, _options, callback) {
     self.s.mongos.once('error', errorHandler('error'));
     self.s.mongos.once('close', errorHandler('close'));
 
-    // relay the event
-    var relay = function(event) {
-      return function(t, server) {
-        self.emit(event, t, server);
-      }
-    }
+    // Set up SDAM listeners
+    self.s.mongos.on('serverDescriptionChanged', relay('serverDescriptionChanged'));
+    self.s.mongos.on('serverHeartbeatStarted', relay('serverHeartbeatStarted'));
+    self.s.mongos.on('serverHeartbeatSucceeded', relay('serverHeartbeatSucceeded'));
+    self.s.mongos.on('serverHeartbeatFailed', relay('serverHeartbeatFailed'));
+    self.s.mongos.on('serverOpening', relay('serverOpening'));
+    self.s.mongos.on('serverClosed', relay('serverClosed'));
+    self.s.mongos.on('topologyOpening', relay('topologyOpening'));
+    self.s.mongos.on('topologyClosed', relay('topologyClosed'));
+    self.s.mongos.on('topologyDescriptionChanged', relay('topologyDescriptionChanged'));
 
     // Set up serverConfig listeners
-    self.s.mongos.on('joined', relay('joined'));
-    self.s.mongos.on('left', relay('left'));
     self.s.mongos.on('fullsetup', relay('fullsetup'));
 
     // Emit open event
@@ -300,6 +315,10 @@ Mongos.prototype.connect = function(db, _options, callback) {
   self.s.mongos.once('error', connectErrorHandler('error'));
   self.s.mongos.once('close', connectErrorHandler('close'));
   self.s.mongos.once('connect', connectHandler);
+  // Join and leave events
+  self.s.mongos.on('joined', relay('joined'));
+  self.s.mongos.on('left', relay('left'));
+
   // Reconnect server
   self.s.mongos.on('reconnect', reconnectHandler);
 
@@ -307,22 +326,22 @@ Mongos.prototype.connect = function(db, _options, callback) {
   self.s.mongos.connect(_options);
 }
 
-Mongos.prototype.parserType = function() {
-  return this.s.mongos.parserType();
-}
-
 // Server capabilities
 Mongos.prototype.capabilities = function() {
   if(this.s.sCapabilities) return this.s.sCapabilities;
-  if(this.s.mongos.lastIsMaster() == null) throw MongoError.create({message: 'cannot establish topology capabilities as driver is still in process of connecting', driver:true});
+  if(this.s.mongos.lastIsMaster() == null) return null;
   this.s.sCapabilities = new ServerCapabilities(this.s.mongos.lastIsMaster());
   return this.s.sCapabilities;
 }
+
+define.classMethod('capabilities', {callback: false, promise:false, returns: [ServerCapabilities]});
 
 // Command
 Mongos.prototype.command = function(ns, cmd, options, callback) {
   this.s.mongos.command(ns, cmd, options, callback);
 }
+
+define.classMethod('command', {callback: true, promise:false});
 
 // Insert
 Mongos.prototype.insert = function(ns, ops, options, callback) {
@@ -331,14 +350,25 @@ Mongos.prototype.insert = function(ns, ops, options, callback) {
   });
 }
 
+define.classMethod('insert', {callback: true, promise:false});
+
 // Update
 Mongos.prototype.update = function(ns, ops, options, callback) {
   this.s.mongos.update(ns, ops, options, callback);
 }
 
+define.classMethod('update', {callback: true, promise:false});
+
 // Remove
 Mongos.prototype.remove = function(ns, ops, options, callback) {
   this.s.mongos.remove(ns, ops, options, callback);
+}
+
+define.classMethod('remove', {callback: true, promise:false});
+
+// Destroyed
+Mongos.prototype.isDestroyed = function() {
+  return this.s.mongos.isDestroyed();
 }
 
 // IsConnected
@@ -346,15 +376,15 @@ Mongos.prototype.isConnected = function() {
   return this.s.mongos.isConnected();
 }
 
+define.classMethod('isConnected', {callback: false, promise:false, returns: [Boolean]});
+
 // Insert
 Mongos.prototype.cursor = function(ns, cmd, options) {
   options.disconnectHandler = this.s.store;
   return this.s.mongos.cursor(ns, cmd, options);
 }
 
-Mongos.prototype.setBSONParserType = function(type) {
-  return this.s.mongos.setBSONParserType(type);
-}
+define.classMethod('cursor', {callback: false, promise:false, returns: [Cursor, AggregationCursor, CommandCursor]});
 
 Mongos.prototype.lastIsMaster = function() {
   return this.s.mongos.lastIsMaster();
@@ -369,10 +399,21 @@ Mongos.prototype.close = function(forceClosed) {
   }
 }
 
+define.classMethod('close', {callback: false, promise:false});
+
 Mongos.prototype.auth = function() {
   var args = Array.prototype.slice.call(arguments, 0);
   this.s.mongos.auth.apply(this.s.mongos, args);
 }
+
+define.classMethod('auth', {callback: true, promise:false});
+
+Mongos.prototype.logout = function() {
+  var args = Array.prototype.slice.call(arguments, 0);
+  this.s.mongos.logout.apply(this.s.mongos, args);
+}
+
+define.classMethod('logout', {callback: true, promise:false});
 
 /**
  * All raw connections
@@ -382,6 +423,8 @@ Mongos.prototype.auth = function() {
 Mongos.prototype.connections = function() {
   return this.s.mongos.connections();
 }
+
+define.classMethod('connections', {callback: false, promise:false, returns:[Array]});
 
 /**
  * A mongos connect event, used to verify that the connection is up and running

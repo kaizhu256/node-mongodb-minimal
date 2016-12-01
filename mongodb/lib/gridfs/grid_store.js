@@ -38,13 +38,15 @@ var Chunk = require('./chunk'),
   ObjectID = require('mongodb-core').BSON.ObjectID,
   ReadPreference = require('../read_preference'),
   Buffer = require('buffer').Buffer,
+  Collection = require('../collection'),
   fs = require('fs'),
-  timers = require('timers'),
   f = require('util').format,
   util = require('util'),
+  Define = require('../metadata'),
   MongoError = require('mongodb-core').MongoError,
   inherits = util.inherits,
-  Duplex = require('stream').Duplex || require('readable-stream').Duplex;
+  Duplex = require('stream').Duplex || require('readable-stream').Duplex,
+  shallowClone = require('../utils').shallowClone;
 
 var REFERENCE_BY_FILENAME = 0,
   REFERENCE_BY_ID = 1;
@@ -81,10 +83,10 @@ var REFERENCE_BY_FILENAME = 0,
  * @property {number} md5 The md5 checksum for this file.
  * @property {number} chunkNumber The current chunk number the gridstore has materialized into memory
  * @return {GridStore} a GridStore instance.
+ * @deprecated Use GridFSBucket API instead
  */
 var GridStore = function GridStore(db, id, filename, mode, options) {
   if(!(this instanceof GridStore)) return new GridStore(db, id, filename, mode, options);
-  var self = this;
   this.db = db;
 
   // Handle options
@@ -125,7 +127,7 @@ var GridStore = function GridStore(db, id, filename, mode, options) {
   // Set the root if overridden
   this.root = this.options['root'] == null ? GridStore.DEFAULT_ROOT_COLLECTION : this.options['root'];
   this.position = 0;
-  this.readPreference = this.options.readPreference || ReadPreference.PRIMARY;
+  this.readPreference = this.options.readPreference || db.options.readPreference || ReadPreference.PRIMARY;
   this.writeConcern = _getWriteConcern(db, this.options);
   // Set default chunk size
   this.internalChunkSize = this.options['chunkSize'] == null ? Chunk.DEFAULT_CHUNK_SIZE : this.options['chunkSize'];
@@ -168,6 +170,8 @@ var GridStore = function GridStore(db, id, filename, mode, options) {
   });
 }
 
+var define = GridStore.define = new Define('Gridstore', GridStore, true);
+
 /**
  * The callback format for the Gridstore.open method
  * @callback GridStore~openCallback
@@ -182,6 +186,7 @@ var GridStore = function GridStore(db, id, filename, mode, options) {
  * @method
  * @param {GridStore~openCallback} [callback] this will be called after executing this method
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.open = function(callback) {
   var self = this;
@@ -209,11 +214,14 @@ var open = function(self, callback) {
     // Get files collection
     var collection = self.collection();
     // Put index on filename
-    collection.ensureIndex([['filename', 1]], writeConcern, function(err, index) {
+    collection.ensureIndex([['filename', 1]], writeConcern, function() {
       // Get chunk collection
       var chunkCollection = self.chunkCollection();
+      // Make an unique index for compatibility with mongo-cxx-driver:legacy
+      var chunkIndexOptions = shallowClone(writeConcern);
+      chunkIndexOptions.unique = true;
       // Ensure index on chunk collection
-      chunkCollection.ensureIndex([['files_id', 1], ['n', 1]], writeConcern, function(err, index) {
+      chunkCollection.ensureIndex([['files_id', 1], ['n', 1]], chunkIndexOptions, function() {
         // Open the connection
         _open(self, writeConcern, function(err, r) {
           if(err) return callback(err);
@@ -232,15 +240,21 @@ var open = function(self, callback) {
   }
 }
 
+// Push the definition for open
+define.classMethod('open', {callback: true, promise:true});
+
 /**
  * Verify if the file is at EOF.
  *
  * @method
  * @return {boolean} true if the read/write head is at the end of this file.
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.eof = function() {
   return this.position == this.length ? true : false;
 }
+
+define.classMethod('eof', {callback: false, promise:false, returns: [Boolean]});
 
 /**
  * The callback result format.
@@ -255,6 +269,7 @@ GridStore.prototype.eof = function() {
  * @method
  * @param {GridStore~resultCallback} [callback] this gets called after this method is executed. Passes null to the first parameter and the character read to the second or null to the second if the read/write head is at the end of the file.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.getc = function(callback) {
   var self = this;
@@ -284,6 +299,8 @@ var eof = function(self, callback) {
   }
 }
 
+define.classMethod('getc', {callback: true, promise:true});
+
 /**
  * Writes a string to the file with a newline character appended at the end if
  * the given string does not have one.
@@ -292,6 +309,7 @@ var eof = function(self, callback) {
  * @param {string} string the string to write.
  * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.puts = function(string, callback) {
   var self = this;
@@ -307,15 +325,20 @@ GridStore.prototype.puts = function(string, callback) {
   });
 }
 
+define.classMethod('puts', {callback: true, promise:true});
+
 /**
  * Return a modified Readable stream including a possible transform method.
  *
  * @method
  * @return {GridStoreStream}
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.stream = function() {
   return new GridStoreStream(this);
 }
+
+define.classMethod('stream', {callback: false, promise:false, returns: [GridStoreStream]});
 
 /**
  * Writes some data. This method will work properly only if initialized with mode "w" or "w+".
@@ -325,6 +348,7 @@ GridStore.prototype.stream = function() {
  * @param {boolean} [close] closes this file after writing if set to true.
  * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.write = function write(data, close, callback) {
   var self = this;
@@ -339,11 +363,14 @@ GridStore.prototype.write = function write(data, close, callback) {
   });
 }
 
+define.classMethod('write', {callback: true, promise:true});
+
 /**
  * Handles the destroy part of a stream
  *
  * @method
  * @result {null}
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.destroy = function destroy() {
   // close and do not emit any more events. queued data is not sent.
@@ -356,6 +383,8 @@ GridStore.prototype.destroy = function destroy() {
   }
 }
 
+define.classMethod('destroy', {callback: false, promise:false});
+
 /**
  * Stores a file from the file system to the GridFS database.
  *
@@ -363,6 +392,7 @@ GridStore.prototype.destroy = function destroy() {
  * @param {(string|Buffer|FileHandle)} file the file to store.
  * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.writeFile = function (file, callback) {
   var self = this;
@@ -394,7 +424,6 @@ var writeFile = function(self, file, callback) {
 
       var offset = 0;
       var index = 0;
-      var numberOfChunksLeft = Math.min(stats.size / self.chunkSize);
 
       // Write a chunk
       var writeChunk = function() {
@@ -408,7 +437,7 @@ var writeFile = function(self, file, callback) {
           chunk.write(data, function(err, chunk) {
             if(err) return callback(err, self);
 
-            chunk.save({}, function(err, result) {
+            chunk.save({}, function(err) {
               if(err) return callback(err, self);
 
               self.position = self.position + data.length;
@@ -418,7 +447,7 @@ var writeFile = function(self, file, callback) {
 
               if(offset >= stats.size) {
                 fs.close(file);
-                self.close(function(err, result) {
+                self.close(function(err) {
                   if(err) return callback(err, self);
                   return callback(null, self);
                 });
@@ -436,6 +465,8 @@ var writeFile = function(self, file, callback) {
   });
 }
 
+define.classMethod('writeFile', {callback: true, promise:true});
+
 /**
  * Saves this file to the database. This will overwrite the old entry if it
  * already exists. This will work properly only if mode was initialized to
@@ -444,6 +475,7 @@ var writeFile = function(self, file, callback) {
  * @method
  * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.close = function(callback) {
   var self = this;
@@ -464,7 +496,7 @@ var close = function(self, callback) {
     var options = self.writeConcern;
 
     if(self.currentChunk != null && self.currentChunk.position > 0) {
-      self.currentChunk.save({}, function(err, chunk) {
+      self.currentChunk.save({}, function(err) {
         if(err && typeof callback == 'function') return callback(err);
 
         self.collection(function(err, files) {
@@ -472,18 +504,14 @@ var close = function(self, callback) {
 
           // Build the mongo object
           if(self.uploadDate != null) {
-            files.remove({'_id':self.fileId}, self.writeConcern, function(err, collection) {
-              if(err && typeof callback == 'function') return callback(err);
+            buildMongoObject(self, function(err, mongoObject) {
+              if(err) {
+                if(typeof callback == 'function') return callback(err); else throw err;
+              }
 
-              buildMongoObject(self, function(err, mongoObject) {
-                if(err) {
-                  if(typeof callback == 'function') return callback(err); else throw err;
-                }
-
-                files.save(mongoObject, options, function(err) {
-                  if(typeof callback == 'function')
-                    callback(err, mongoObject);
-                });
+              files.save(mongoObject, options, function(err) {
+                if(typeof callback == 'function')
+                  callback(err, mongoObject);
               });
             });
           } else {
@@ -527,6 +555,8 @@ var close = function(self, callback) {
   }
 }
 
+define.classMethod('close', {callback: true, promise:true});
+
 /**
  * The collection callback format.
  * @callback GridStore~collectionCallback
@@ -540,6 +570,7 @@ var close = function(self, callback) {
  * @method
  * @param {GridStore~collectionCallback} callback the command callback.
  * @return {Collection}
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.chunkCollection = function(callback) {
   if(typeof callback == 'function')
@@ -547,12 +578,15 @@ GridStore.prototype.chunkCollection = function(callback) {
   return this.db.collection((this.root + ".chunks"));
 };
 
+define.classMethod('chunkCollection', {callback: true, promise:false, returns: [Collection]});
+
 /**
  * Deletes all the chunks of this file in the database.
  *
  * @method
  * @param {GridStore~resultCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.unlink = function(callback) {
   var self = this;
@@ -587,18 +621,23 @@ var unlink = function(self, callback) {
   });
 }
 
+define.classMethod('unlink', {callback: true, promise:true});
+
 /**
  * Retrieves the file collection associated with this object.
  *
  * @method
  * @param {GridStore~collectionCallback} callback the command callback.
  * @return {Collection}
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.collection = function(callback) {
   if(typeof callback == 'function')
     this.db.collection(this.root + ".files", callback);
   return this.db.collection(this.root + ".files");
 };
+
+define.classMethod('collection', {callback: true, promise:false, returns: [Collection]});
 
 /**
  * The readlines callback format.
@@ -614,6 +653,7 @@ GridStore.prototype.collection = function(callback) {
  * @param {string} [separator] The character to be recognized as the newline separator.
  * @param {GridStore~readlinesCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.readlines = function(separator, callback) {
   var self = this;
@@ -649,6 +689,8 @@ var readlines = function(self, separator, callback) {
   });
 }
 
+define.classMethod('readlines', {callback: true, promise:true});
+
 /**
  * Deletes all the chunks of this file in the database if mode was set to "w" or
  * "w+" and resets the read/write head to the initial position.
@@ -656,6 +698,7 @@ var readlines = function(self, separator, callback) {
  * @method
  * @param {GridStore~resultCallback} [callback] this will be called after executing this method. The first parameter will contain null and the second one will contain a reference to this object.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.rewind = function(callback) {
   var self = this;
@@ -673,7 +716,7 @@ GridStore.prototype.rewind = function(callback) {
 var rewind = function(self, callback) {
   if(self.currentChunk.chunkNumber != 0) {
     if(self.mode[0] == "w") {
-      deleteChunks(self, function(err, gridStore) {
+      deleteChunks(self, function(err) {
         if(err) return callback(err);
         self.currentChunk = new Chunk(self, {'n': 0}, self.writeConcern);
         self.position = 0;
@@ -694,6 +737,8 @@ var rewind = function(self, callback) {
     callback(null, self);
   }
 }
+
+define.classMethod('rewind', {callback: true, promise:true});
 
 /**
  * The read callback format.
@@ -716,6 +761,7 @@ var rewind = function(self, callback) {
  * @param {(string|Buffer)} [buffer] a string to hold temporary data. This is used for storing the string data read so far when recursively calling this method.
  * @param {GridStore~readCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.read = function(length, buffer, callback) {
   var self = this;
@@ -756,7 +802,7 @@ var read = function(self, length, buffer, callback) {
   }
 
   // Read the next chunk
-  var slice = self.currentChunk.readSlice(self.currentChunk.length() - self.currentChunk.position);
+  slice = self.currentChunk.readSlice(self.currentChunk.length() - self.currentChunk.position);
   // Copy content to final buffer
   slice.copy(finalBuffer, finalBuffer._index);
   // Update index position
@@ -779,6 +825,8 @@ var read = function(self, length, buffer, callback) {
   });
 }
 
+define.classMethod('read', {callback: true, promise:true});
+
 /**
  * The tell callback format.
  * @callback GridStore~tellCallback
@@ -794,16 +842,19 @@ var read = function(self, length, buffer, callback) {
  * @param {(string|Buffer)} [buffer] a string to hold temporary data. This is used for storing the string data read so far when recursively calling this method.
  * @param {GridStore~tellCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.tell = function(callback) {
   var self = this;
   // We provided a callback leg
   if(typeof callback == 'function') return callback(null, this.position);
   // Return promise
-  return new self.promiseLibrary(function(resolve, reject) {
+  return new self.promiseLibrary(function(resolve) {
     resolve(self.position);
   });
 };
+
+define.classMethod('tell', {callback: true, promise:true});
 
 /**
  * The tell callback format.
@@ -827,6 +878,7 @@ GridStore.prototype.tell = function(callback) {
  * @param {number} [seekLocation] seek mode. Use one of the Seek Location modes.
  * @param {GridStore~gridStoreCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.prototype.seek = function(position, seekLocation, callback) {
   var self = this;
@@ -870,6 +922,10 @@ var seek = function(self, position, seekLocation, callback) {
   var newChunkNumber = Math.floor(targetPosition/self.chunkSize);
   var seekChunk = function() {
     nthChunk(self, newChunkNumber, function(err, chunk) {
+      if(err) return callback(err, null);
+      if(chunk == null) return callback(new Error('no chunk found'));
+
+      // Set the current chunk
       self.currentChunk = chunk;
       self.position = targetPosition;
       self.currentChunk.position = (self.position % self.chunkSize);
@@ -879,6 +935,8 @@ var seek = function(self, position, seekLocation, callback) {
 
   seekChunk();
 }
+
+define.classMethod('seek', {callback: true, promise:true});
 
 /**
  * @ignore
@@ -913,9 +971,9 @@ var _open = function(self, options, callback) {
         self.internalChunkSize = self.internalChunkSize == null ? Chunk.DEFAULT_CHUNK_SIZE : self.internalChunkSize;
         self.length = 0;
       } else {
-         self.length = 0;
-         var txtId = self.fileId instanceof ObjectID ? self.fileId.toHexString() : self.fileId;
-         return error(MongoError.create({message: f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? txtId : self.filename)), driver:true}), self);
+        self.length = 0;
+        var txtId = self.fileId instanceof ObjectID ? self.fileId.toHexString() : self.fileId;
+        return error(MongoError.create({message: f("file with id %s not opened for writing", (self.referenceBy == REFERENCE_BY_ID ? txtId : self.filename)), driver:true}), self);
       }
 
       // Process the mode of the object
@@ -926,9 +984,9 @@ var _open = function(self, options, callback) {
           self.position = 0;
           callback(null, self);
         });
-      } else if(self.mode == "w") {
+      } else if(self.mode == "w" && doc) {
         // Delete any existing chunks
-        deleteChunks(self, options, function(err, result) {
+        deleteChunks(self, options, function(err) {
           if(err) return error(err);
           self.currentChunk = new Chunk(self, {'n':0}, self.writeConcern);
           self.contentType = self.options['content_type'] == null ? self.contentType : self.options['content_type'];
@@ -938,6 +996,14 @@ var _open = function(self, options, callback) {
           self.position = 0;
           callback(null, self);
         });
+      } else if(self.mode == "w") {
+        self.currentChunk = new Chunk(self, {'n':0}, self.writeConcern);
+        self.contentType = self.options['content_type'] == null ? self.contentType : self.options['content_type'];
+        self.internalChunkSize = self.options['chunk_size'] == null ? self.internalChunkSize : self.options['chunk_size'];
+        self.metadata = self.options['metadata'] == null ? self.metadata : self.options['metadata'];
+        self.aliases = self.options['aliases'] == null ? self.aliases : self.options['aliases'];
+        self.position = 0;
+        callback(null, self);
       } else if(self.mode == "w+") {
         nthChunk(self, lastChunkNumber(self), options, function(err, chunk) {
           if(err) return error(err);
@@ -958,11 +1024,10 @@ var _open = function(self, options, callback) {
     self.internalChunkSize = self.internalChunkSize == null ? Chunk.DEFAULT_CHUNK_SIZE : self.internalChunkSize;
     self.length = 0;
 
-    var collection2 = self.chunkCollection();
     // No file exists set up write mode
     if(self.mode == "w") {
       // Delete any existing chunks
-      deleteChunks(self, options, function(err, result) {
+      deleteChunks(self, options, function(err) {
         if(err) return error(err);
         self.currentChunk = new Chunk(self, {'n':0}, self.writeConcern);
         self.contentType = self.options['content_type'] == null ? self.contentType : self.options['content_type'];
@@ -1016,7 +1081,7 @@ var writeBuffer = function(self, buffer, close, callback) {
       while(leftOverData.length >= self.chunkSize) {
         // Create a new chunk and write to it
         var newChunk = new Chunk(self, {'n': (previousChunkNumber + 1)}, self.writeConcern);
-        var firstChunkData = leftOverData.slice(0, self.chunkSize);
+        firstChunkData = leftOverData.slice(0, self.chunkSize);
         leftOverData = leftOverData.slice(self.chunkSize);
         // Update chunk number
         previousChunkNumber = previousChunkNumber + 1;
@@ -1037,7 +1102,7 @@ var writeBuffer = function(self, buffer, close, callback) {
       var numberOfChunksToWrite = chunksToWrite.length;
 
       for(var i = 0; i < chunksToWrite.length; i++) {
-        chunksToWrite[i].save({}, function(err, result) {
+        chunksToWrite[i].save({}, function(err) {
           if(err) return callback(err);
 
           numberOfChunksToWrite = numberOfChunksToWrite - 1;
@@ -1045,7 +1110,7 @@ var writeBuffer = function(self, buffer, close, callback) {
           if(numberOfChunksToWrite <= 0) {
             // We care closing the file before returning
             if(finalClose) {
-              return self.close(function(err, result) {
+              return self.close(function(err) {
                 callback(err, self);
               });
             }
@@ -1062,7 +1127,7 @@ var writeBuffer = function(self, buffer, close, callback) {
       self.currentChunk.write(buffer);
       // We care closing the file before returning
       if(finalClose) {
-        return self.close(function(err, result) {
+        return self.close(function(err) {
           callback(err, self);
         });
       }
@@ -1154,7 +1219,7 @@ var deleteChunks = function(self, options, callback) {
   options = options || self.writeConcern;
 
   if(self.fileId != null) {
-    self.chunkCollection().remove({'files_id':self.fileId}, options, function(err, result) {
+    self.chunkCollection().remove({'files_id':self.fileId}, options, function(err) {
       if(err) return callback(err, false);
       callback(null, true);
     });
@@ -1211,6 +1276,7 @@ GridStore.IO_SEEK_END = 2;
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
  * @param {GridStore~resultCallback} [callback] result from exists.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.exist = function(db, fileIdObject, rootCollection, options, callback) {
   var args = Array.prototype.slice.call(arguments, 2);
@@ -1268,6 +1334,8 @@ var exists = function(db, fileIdObject, rootCollection, options, callback) {
   });
 }
 
+define.staticMethod('exist', {callback: true, promise:true});
+
 /**
  * Gets the list of files stored in the GridFS.
  *
@@ -1280,6 +1348,7 @@ var exists = function(db, fileIdObject, rootCollection, options, callback) {
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
  * @param {GridStore~resultCallback} [callback] result from exists.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.list = function(db, rootCollection, options, callback) {
   var args = Array.prototype.slice.call(arguments, 1);
@@ -1340,6 +1409,8 @@ var list = function(db, rootCollection, options, callback) {
   });
 }
 
+define.staticMethod('list', {callback: true, promise:true});
+
 /**
  * Reads the contents of a file.
  *
@@ -1361,8 +1432,8 @@ var list = function(db, rootCollection, options, callback) {
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
  * @param {GridStore~readCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
-
 GridStore.read = function(db, name, length, offset, options, callback) {
   var args = Array.prototype.slice.call(arguments, 2);
   callback = args.pop();
@@ -1411,6 +1482,8 @@ var readStatic = function(db, name, length, offset, options, callback) {
   });
 }
 
+define.staticMethod('read', {callback: true, promise:true});
+
 /**
  * Read the entire file as a list of strings splitting by the provided separator.
  *
@@ -1424,6 +1497,7 @@ var readStatic = function(db, name, length, offset, options, callback) {
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
  * @param {GridStore~readlinesCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.readlines = function(db, name, separator, options, callback) {
   var args = Array.prototype.slice.call(arguments, 2);
@@ -1461,6 +1535,8 @@ var readlinesStatic = function(db, name, separator, options, callback) {
   });
 }
 
+define.staticMethod('readlines', {callback: true, promise:true});
+
 /**
  * Deletes the chunks and metadata information of a file from GridFS.
  *
@@ -1472,6 +1548,7 @@ var readlinesStatic = function(db, name, separator, options, callback) {
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
  * @param {GridStore~resultCallback} [callback] the command callback.
  * @return {Promise} returns Promise if no callback passed
+ * @deprecated Use GridFSBucket API instead
  */
 GridStore.unlink = function(db, names, options, callback) {
   var self = this;
@@ -1511,20 +1588,20 @@ var unlinkStatic = function(self, db, names, options, callback) {
     var tc = 0;
     for(var i = 0; i < names.length; i++) {
       ++tc;
-      GridStore.unlink(db, names[i], options, function(result) {
+      GridStore.unlink(db, names[i], options, function() {
         if(--tc == 0) {
-            callback(null, self);
+          callback(null, self);
         }
       });
     }
   } else {
     new GridStore(db, names, "w", options).open(function(err, gridStore) {
       if(err) return callback(err);
-      deleteChunks(gridStore, function(err, result) {
+      deleteChunks(gridStore, function(err) {
         if(err) return callback(err);
         gridStore.collection(function(err, collection) {
           if(err) return callback(err);
-          collection.remove({'_id':gridStore.fileId}, writeConcern, function(err, result) {
+          collection.remove({'_id':gridStore.fileId}, writeConcern, function(err) {
             callback(err, self);
           });
         });
@@ -1532,6 +1609,8 @@ var unlinkStatic = function(self, db, names, options, callback) {
     });
   }
 }
+
+define.staticMethod('unlink', {callback: true, promise:true});
 
 /**
  *  @ignore
@@ -1595,9 +1674,9 @@ var _getWriteConcern = function(self, options) {
  * @class
  * @extends external:Duplex
  * @return {GridStoreStream} a GridStoreStream instance.
+ * @deprecated Use GridFSBucket API instead
  */
 var GridStoreStream = function(gs) {
-  var self = this;
   // Initialize the duplex stream
   Duplex.call(this);
 
@@ -1633,10 +1712,12 @@ GridStoreStream.prototype.pipe = function(destination) {
     self.totalBytesToRead = self.gs.length - self.gs.position;
     self._pipe.apply(self, [destination]);
   }
+
+  return destination;
 }
 
 // Called by stream
-GridStoreStream.prototype._read = function(n) {
+GridStoreStream.prototype._read = function() {
   var self = this;
 
   var read = function() {
@@ -1665,7 +1746,7 @@ GridStoreStream.prototype._read = function(n) {
   // Set read length
   var length = self.gs.length < self.gs.chunkSize ? self.gs.length - self.seekPosition : self.gs.chunkSize;
   if(!self.gs.isOpen) {
-    self.gs.open(function(err, gs) {
+    self.gs.open(function(err) {
       self.totalBytesToRead = self.gs.length - self.gs.position;
       if(err) return self.emit('error', err);
       read();
@@ -1682,7 +1763,7 @@ GridStoreStream.prototype.destroy = function() {
   this.emit('end');
 }
 
-GridStoreStream.prototype.write = function(chunk, encoding, callback) {
+GridStoreStream.prototype.write = function(chunk) {
   var self = this;
   if(self.endCalled) return self.emit('error', MongoError.create({message: 'attempting to write to stream after end called', driver:true}))
   // Do we have to open the gridstore

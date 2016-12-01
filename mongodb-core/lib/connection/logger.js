@@ -26,18 +26,17 @@ var Logger = function(className, options) {
   options = options || {};
 
   // Current reference
-  var self = this;
   this.className = className;
 
   // Current logger
-  if(currentLogger == null && options.logger) {
+  if(options.logger) {
     currentLogger = options.logger;
   } else if(currentLogger == null) {
     currentLogger = console.log;
   }
 
   // Set level of logging, default is error
-  if(level == null) {
+  if(options.loggerLevel) {
     level = options.loggerLevel || 'error';
   }
 
@@ -53,10 +52,11 @@ var Logger = function(className, options) {
  * @return {null}
  */
 Logger.prototype.debug = function(message, object) {
-  if(this.isDebug() 
-    && classFilters[this.className] && (filteredClasses[this.className] || Object.keys(filteredClasses).length == 0)) {
+  if(this.isDebug()
+    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
+      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
     var dateTime = new Date().getTime();
-    var msg = f("[%s-%s:%s] %s %s", 'DEBUG', this.className, pid, dateTime, message);        
+    var msg = f("[%s-%s:%s] %s %s", 'DEBUG', this.className, pid, dateTime, message);
     var state = {
       type: 'debug', message: message, className: this.className, pid: pid, date: dateTime
     };
@@ -64,6 +64,27 @@ Logger.prototype.debug = function(message, object) {
     currentLogger(msg, state);
   }
 }
+
+/**
+ * Log a message at the warn level
+ * @method
+ * @param {string} message The message to log
+ * @param {object} object additional meta data to log
+ * @return {null}
+ */
+Logger.prototype.warn = function(message, object) {
+  if(this.isWarn()
+    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
+      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
+    var dateTime = new Date().getTime();
+    var msg = f("[%s-%s:%s] %s %s", 'WARN', this.className, pid, dateTime, message);
+    var state = {
+      type: 'warn', message: message, className: this.className, pid: pid, date: dateTime
+    };
+    if(object) state.meta = object;
+    currentLogger(msg, state);
+  }
+},
 
 /**
  * Log a message at the info level
@@ -74,7 +95,8 @@ Logger.prototype.debug = function(message, object) {
  */
 Logger.prototype.info = function(message, object) {
   if(this.isInfo()
-    && classFilters[this.className] && (filteredClasses[this.className] || Object.keys(filteredClasses).length == 0)) {
+    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
+      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
     var dateTime = new Date().getTime();
     var msg = f("[%s-%s:%s] %s %s", 'INFO', this.className, pid, dateTime, message);
     var state = {
@@ -93,8 +115,9 @@ Logger.prototype.info = function(message, object) {
  * @return {null}
  */
 Logger.prototype.error = function(message, object) {
-  if(this.isError() 
-    && classFilters[this.className] && (filteredClasses[this.className] || Object.keys(filteredClasses).length == 0)) {
+  if(this.isError()
+    && ((Object.keys(filteredClasses).length > 0 && filteredClasses[this.className])
+      || (Object.keys(filteredClasses).length == 0 && classFilters[this.className]))) {
     var dateTime = new Date().getTime();
     var msg = f("[%s-%s:%s] %s %s", 'ERROR', this.className, pid, dateTime, message);
     var state = {
@@ -121,6 +144,15 @@ Logger.prototype.isInfo = function() {
  */
 Logger.prototype.isError = function() {
   return level == 'error' || level == 'info' || level == 'debug';
+},
+
+/**
+ * Is the logger set at error level
+ * @method
+ * @return {boolean}
+ */
+Logger.prototype.isWarn = function() {
+  return level == 'error' || level == 'warn' || level == 'info' || level == 'debug';
 },
 
 /**
@@ -186,7 +218,10 @@ Logger.filter = function(type, values) {
  * @return {null}
  */
 Logger.setLevel = function(_level) {
-  if(_level != 'info' && _level != 'error' && _level != 'debug') throw new Error(f("%s is an illegal logging level", _level));
+  if(_level != 'info' && _level != 'error' && _level != 'debug' && _level != 'warn') {
+    throw new Error(f("%s is an illegal logging level", _level));
+  }
+
   level = _level;
 }
 

@@ -5,7 +5,7 @@
  * @class
  * @augments Error
  * @param {string} message The error message
- * @return {MongoError} A cursor instance
+ * @return {MongoError} A MongoError instance
  */
 function MongoError(message) {
   this.name = 'MongoError';
@@ -15,9 +15,9 @@ function MongoError(message) {
 
 /**
  * Creates a new MongoError object
- * @class
+ * @method
  * @param {object} options The error options
- * @return {MongoError} A cursor instance
+ * @return {MongoError} A MongoError instance
  */
 MongoError.create = function(options) {
   var err = null;
@@ -39,6 +39,6 @@ MongoError.create = function(options) {
 }
 
 // Extend JavaScript error
-MongoError.prototype = new Error; 
+MongoError.prototype = new Error;
 
 module.exports = MongoError;

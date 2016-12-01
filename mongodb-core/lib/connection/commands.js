@@ -1,10 +1,6 @@
 "use strict";
 
-var f = require('util').format
-  , Long = require('bson').Long
-  , setProperty = require('./utils').setProperty
-  , getProperty = require('./utils').getProperty
-  , getSingleProperty = require('./utils').getSingleProperty;
+var Long = require('bson').Long;
 
 // Incrementing request id
 var _requestId = 0;
@@ -15,7 +11,6 @@ var OP_GETMORE = 2005;
 var OP_KILL_CURSORS = 2007;
 
 // Query flags
-var OPTS_NONE = 0;
 var OPTS_TAILABLE_CURSOR = 2;
 var OPTS_SLAVE = 4;
 var OPTS_OPLOG_REPLAY = 8;
@@ -56,18 +51,19 @@ var Query = function(bson, ns, query, options) {
   this.numberToSkip = options.numberToSkip || 0;
   this.numberToReturn = options.numberToReturn || 0;
   this.returnFieldSelector = options.returnFieldSelector || null;
-  this.requestId = _requestId++;
+  this.requestId = Query.getRequestId();
 
   // Serialization option
   this.serializeFunctions = typeof options.serializeFunctions == 'boolean' ? options.serializeFunctions : false;
+  this.ignoreUndefined = typeof options.ignoreUndefined == 'boolean' ? options.ignoreUndefined : false;
   this.maxBsonSize = options.maxBsonSize || 1024 * 1024 * 16;
   this.checkKeys = typeof options.checkKeys == 'boolean' ? options.checkKeys : true;
   this.batchSize = self.numberToReturn;
 
   // Flags
   this.tailable = false;
-  this.slaveOk = false;
-  this.oplogReply = false;
+  this.slaveOk = typeof options.slaveOk == 'boolean'? options.slaveOk : false;
+  this.oplogReplay = false;
   this.noCursorTimeout = false;
   this.awaitData = false;
   this.exhaust = false;
@@ -95,13 +91,33 @@ Query.prototype.toBin = function() {
 
   // Set up the flags
   var flags = 0;
-  if(this.tailable) flags |= OPTS_TAILABLE_CURSOR;
-  if(this.slaveOk) flags |= OPTS_SLAVE;
-  if(this.oplogReply) flags |= OPTS_OPLOG_REPLAY;
-  if(this.noCursorTimeout) flags |= OPTS_NO_CURSOR_TIMEOUT;
-  if(this.awaitData) flags |= OPTS_AWAIT_DATA;
-  if(this.exhaust) flags |= OPTS_EXHAUST;
-  if(this.partial) flags |= OPTS_PARTIAL;
+  if(this.tailable) {
+    flags |= OPTS_TAILABLE_CURSOR;
+  }
+
+  if(this.slaveOk) {
+    flags |= OPTS_SLAVE;
+  }
+
+  if(this.oplogReplay) {
+    flags |= OPTS_OPLOG_REPLAY;
+  }
+
+  if(this.noCursorTimeout) {
+    flags |= OPTS_NO_CURSOR_TIMEOUT;
+  }
+
+  if(this.awaitData) {
+    flags |= OPTS_AWAIT_DATA;
+  }
+
+  if(this.exhaust) {
+    flags |= OPTS_EXHAUST;
+  }
+
+  if(this.partial) {
+    flags |= OPTS_PARTIAL;
+  }
 
   // If batchSize is different to self.numberToReturn
   if(self.batchSize != self.numberToReturn) self.numberToReturn = self.batchSize;
@@ -122,14 +138,15 @@ Query.prototype.toBin = function() {
   var query = self.bson.serialize(this.query
     , this.checkKeys
     , true
-    , this.serializeFunctions)
+    , this.serializeFunctions
+    , 0, this.ignoreUndefined);
 
   // Add query document
   buffers.push(query);
 
   if(self.returnFieldSelector && Object.keys(self.returnFieldSelector).length > 0) {
     // Serialize the projection document
-    projection = self.bson.serialize(this.returnFieldSelector, this.checkKeys, true, this.serializeFunctions);
+    projection = self.bson.serialize(this.returnFieldSelector, this.checkKeys, true, this.serializeFunctions, this.ignoreUndefined);
     // Add projection document
     buffers.push(projection);
   }
@@ -372,7 +389,7 @@ KillCursor.prototype.toBin = function() {
 }
 
 var Response = function(bson, data, opts) {
-  opts = opts || {promoteLongs: true};
+  opts = opts || {promoteLongs: true, promoteValues: true, promoteBuffers: false};
   this.parsed = false;
 
   //
@@ -428,21 +445,13 @@ var Response = function(bson, data, opts) {
   this.shardConfigStale = (this.responseFlags & SHARD_CONFIG_STALE) != 0;
   this.awaitCapable = (this.responseFlags & AWAIT_CAPABLE) != 0;
   this.promoteLongs = typeof opts.promoteLongs == 'boolean' ? opts.promoteLongs : true;
+  this.promoteValues = typeof opts.promoteValues == 'boolean' ? opts.promoteValues : true;
+  this.promoteBuffers = typeof opts.promoteBuffers == 'boolean' ? opts.promoteBuffers : false;
 }
 
 Response.prototype.isParsed = function() {
   return this.parsed;
 }
-
-// Validation buffers
-var firstBatch = new Buffer('firstBatch', 'utf8');
-var nextBatch = new Buffer('nextBatch', 'utf8');
-var cursorId = new Buffer('id', 'utf8').toString('hex');
-
-var documentBuffers = {
-  firstBatch: firstBatch.toString('hex'),
-  nextBatch: nextBatch.toString('hex')
-};
 
 Response.prototype.parse = function(options) {
   // Don't parse again if not needed
@@ -452,20 +461,35 @@ Response.prototype.parse = function(options) {
   // Allow the return of raw documents instead of parsing
   var raw = options.raw || false;
   var documentsReturnedIn = options.documentsReturnedIn || null;
+  var promoteLongs = typeof options.promoteLongs == 'boolean'
+    ? options.promoteLongs
+    : this.opts.promoteLongs;
+  var promoteValues = typeof options.promoteValues == 'boolean'
+    ? options.promoteValues
+    : this.opts.promoteValues;
+  var promoteBuffers = typeof options.promoteBuffers == 'boolean'
+    ? options.promoteBuffers
+    : this.opts.promoteBuffers
+  var bsonSize, _options;
 
   //
   // Single document and documentsReturnedIn set
   //
   if(this.numberReturned == 1 && documentsReturnedIn != null && raw) {
     // Calculate the bson size
-    var bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
+    bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
     // Slice out the buffer containing the command result document
     var document = this.data.slice(this.index, this.index + bsonSize);
     // Set up field we wish to keep as raw
     var fieldsAsRaw = {}
     fieldsAsRaw[documentsReturnedIn] = true;
     // Set up the options
-    var _options = {promoteLongs: this.opts.promoteLongs, fieldsAsRaw: fieldsAsRaw};
+    _options = {
+      promoteLongs: promoteLongs,
+      promoteValues: promoteValues,
+      promoteBuffers: promoteBuffers,
+      fieldsAsRaw: fieldsAsRaw
+    };
 
     // Deserialize but keep the array of documents in non-parsed form
     var doc = this.bson.deserialize(document, _options);
@@ -490,9 +514,9 @@ Response.prototype.parse = function(options) {
   // Parse Body
   //
   for(var i = 0; i < this.numberReturned; i++) {
-    var bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
+    bsonSize = this.data[this.index] | this.data[this.index + 1] << 8 | this.data[this.index + 2] << 16 | this.data[this.index + 3] << 24;
     // Parse options
-    var _options = {promoteLongs: this.opts.promoteLongs};
+    _options = {promoteLongs: promoteLongs, promoteValues: promoteValues, promoteBuffers: promoteBuffers};
 
     // If we have raw results specified slice the return document
     if(raw) {

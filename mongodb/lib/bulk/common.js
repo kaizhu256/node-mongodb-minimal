@@ -1,6 +1,7 @@
 "use strict";
 
-var utils = require('../utils');
+var Long = require('mongodb-core').BSON.Long,
+  Timestamp = require('mongodb-core').BSON.Timestamp;
 
 // Error codes
 var UNKNOWN_ERROR = 8;
@@ -16,13 +17,22 @@ var REMOVE = 3
 
 // Get write concern
 var writeConcern = function(target, col, options) {
-  if(options.w != null || options.j != null || options.fsync != null) {
-    target.writeConcern = options;
-  } else if(col.writeConcern.w != null || col.writeConcern.j != null || col.writeConcern.fsync != null) {
-    target.writeConcern = col.writeConcern;
-  }
+  var writeConcern = {};
 
-  return target
+  // Collection level write concern
+  if(col.writeConcern && col.writeConcern.w != null) writeConcern.w = col.writeConcern.w;
+  if(col.writeConcern && col.writeConcern.j != null) writeConcern.j = col.writeConcern.j;
+  if(col.writeConcern && col.writeConcern.fsync != null) writeConcern.fsync = col.writeConcern.fsync;
+  if(col.writeConcern && col.writeConcern.wtimeout != null) writeConcern.wtimeout = col.writeConcern.wtimeout;
+
+  // Options level write concern
+  if(options && options.w != null) writeConcern.w = options.w;
+  if(options && options.wtimeout != null) writeConcern.wtimeout = options.wtimeout;
+  if(options && options.j != null) writeConcern.j = options.j;
+  if(options && options.fsync != null) writeConcern.fsync = options.fsync;
+
+  // Return write concern
+  return writeConcern;
 }
 
 /**
@@ -281,7 +291,7 @@ var mergeBatchResults = function(ordered, batch, bulkResult, err, result) {
   // Do we have a top level error stop processing and return
   if(result.ok == 0 && bulkResult.ok == 1) {
     bulkResult.ok = 0;
-    // bulkResult.error = utils.toError(result);
+
     var writeError = {
         index: 0
       , code: result.code || 0
@@ -295,9 +305,45 @@ var mergeBatchResults = function(ordered, batch, bulkResult, err, result) {
     return;
   }
 
-  // Add lastop if available
-  if(result.lastOp) {
-    bulkResult.lastOp = result.lastOp;
+  // Deal with opTime if available
+  if(result.opTime || result.lastOp) {
+    var opTime = result.lastOp || result.opTime;
+    var lastOpTS = null;
+    var lastOpT = null;
+
+    // We have a time stamp
+    if(opTime instanceof Timestamp) {
+      if(bulkResult.lastOp == null) {
+        bulkResult.lastOp = opTime;
+      } else if(opTime.greaterThan(bulkResult.lastOp)) {
+        bulkResult.lastOp = opTime;
+      }
+    } else {
+      // Existing TS
+      if(bulkResult.lastOp) {
+        lastOpTS = typeof bulkResult.lastOp.ts == 'number'
+          ? Long.fromNumber(bulkResult.lastOp.ts) : bulkResult.lastOp.ts;
+        lastOpT = typeof bulkResult.lastOp.t == 'number'
+          ? Long.fromNumber(bulkResult.lastOp.t) : bulkResult.lastOp.t;
+      }
+
+      // Current OpTime TS
+      var opTimeTS = typeof opTime.ts == 'number'
+        ? Long.fromNumber(opTime.ts) : opTime.ts;
+      var opTimeT = typeof opTime.t == 'number'
+        ? Long.fromNumber(opTime.t) : opTime.t;
+
+      // Compare the opTime's
+      if(bulkResult.lastOp == null) {
+        bulkResult.lastOp = opTime;
+      } else if(opTimeTS.greaterThan(lastOpTS)) {
+        bulkResult.lastOp = opTime;
+      } else if(opTimeTS.equals(lastOpTS)) {
+        if(opTimeT.greaterThan(lastOpT)) {
+          bulkResult.lastOp = opTime;
+        }
+      }
+    }
   }
 
   // If we have an insert Batch type
@@ -346,9 +392,9 @@ var mergeBatchResults = function(ordered, batch, bulkResult, err, result) {
   }
 
   if(Array.isArray(result.writeErrors)) {
-    for(var i = 0; i < result.writeErrors.length; i++) {
+    for(i = 0; i < result.writeErrors.length; i++) {
 
-      var writeError = {
+      writeError = {
           index: batch.originalZeroIndex + result.writeErrors[i].index
         , code: result.writeErrors[i].code
         , errmsg: result.writeErrors[i].errmsg

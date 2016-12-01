@@ -1,19 +1,95 @@
 "use strict";
 
-var ReadPreference = require('./read_preference');
+var ReadPreference = require('./read_preference'),
+  parser = require('url'),
+  f = require('util').format;
 
-module.exports = function(url, options) {
-  // Ensure we have a default options object if none set
-  options = options || {};
+module.exports = function(url) {
   // Variables
   var connection_part = '';
   var auth_part = '';
   var query_string_part = '';
   var dbName = 'admin';
 
-  // Must start with mongodb
-  if(url.indexOf("mongodb://") != 0)
-    throw Error("URL must be in the format mongodb://user:pass@host:port/dbname");
+  // Url parser result
+  var result = parser.parse(url, true);
+
+  if(result.protocol != 'mongodb:') {
+    throw new Error('invalid schema, expected mongodb');
+  }
+
+  if((result.hostname == null || result.hostname == '') && url.indexOf('.sock') == -1) {
+    throw new Error('no hostname or hostnames provided in connection string');
+  }
+
+  if(result.port == '0') {
+    throw new Error('invalid port (zero) with hostname');
+  }
+
+  if(!isNaN(parseInt(result.port, 10)) && parseInt(result.port, 10) > 65535) {
+    throw new Error('invalid port (larger than 65535) with hostname');
+  }
+
+  if(result.path
+    && result.path.length > 0
+    && result.path[0] != '/'
+    && url.indexOf('.sock') == -1) {
+    throw new Error('missing delimiting slash between hosts and options');
+  }
+
+  if(result.query) {
+    for(var name in result.query) {
+      if(name.indexOf('::') != -1) {
+        throw new Error('double colon in host identifier');
+      }
+
+      if(result.query[name] == '') {
+        throw new Error('query parameter ' + name + ' is an incomplete value pair');
+      }
+    }
+  }
+
+  if(result.auth) {
+    var parts = result.auth.split(':');
+    if(url.indexOf(result.auth) != -1 && parts.length > 2) {
+      throw new Error('Username with password containing an unescaped colon');
+    }
+
+    if(url.indexOf(result.auth) != -1 && result.auth.indexOf('@') != -1) {
+      throw new Error('Username containing an unescaped at-sign');
+    }
+  }
+
+  // Remove query
+  var clean = url.split('?').shift();
+
+  // Extract the list of hosts
+  var strings = clean.split(',');
+  var hosts = [];
+
+  for(var i = 0; i < strings.length; i++) {
+    var hostString = strings[i];
+
+    if(hostString.indexOf('mongodb') != -1) {
+      if(hostString.indexOf('@') != -1) {
+        hosts.push(hostString.split('@').pop())
+      } else {
+        hosts.push(hostString.substr('mongodb://'.length));
+      }
+    } else if(hostString.indexOf('/') != -1) {
+      hosts.push(hostString.split('/').shift());
+    } else if(hostString.indexOf('/') == -1) {
+      hosts.push(hostString.trim());
+    }
+  }
+
+  for(i = 0; i < hosts.length; i++) {
+    var r = parser.parse(f('mongodb://%s', hosts[i].trim()));
+    if(r.path && r.path.indexOf(':') != -1) {
+      throw new Error('double colon in host identifier');
+    }
+  }
+
   // If we have a ? mark cut the query elements off
   if(url.indexOf("?") != -1) {
     query_string_part = url.substr(url.indexOf("?") + 1);
@@ -32,9 +108,23 @@ module.exports = function(url, options) {
   if(connection_part.indexOf(".sock") != -1) {
     if(connection_part.indexOf(".sock/") != -1) {
       dbName = connection_part.split(".sock/")[1];
+      // Check if multiple database names provided, or just an illegal trailing backslash
+      if (dbName.indexOf("/") != -1) {
+        if (dbName.split("/").length == 2 && dbName.split("/")[1].length == 0) {
+          throw new Error('Illegal trailing backslash after database name');
+        }
+        throw new Error('More than 1 database name in URL');
+      }
       connection_part = connection_part.split("/", connection_part.indexOf(".sock") + ".sock".length);
     }
   } else if(connection_part.indexOf("/") != -1) {
+    // Check if multiple database names provided, or just an illegal trailing backslash
+    if (connection_part.split("/").length > 2) {
+      if (connection_part.split("/")[2].length == 0) {
+        throw new Error('Illegal trailing backslash after database name');
+      }
+      throw new Error('More than 1 database name in URL');
+    }
     dbName = connection_part.split("/")[1];
     connection_part = connection_part.split("/")[0];
   }
@@ -62,11 +152,12 @@ module.exports = function(url, options) {
   var serverOptions = {socketOptions: {}};
   var dbOptions = {read_preference_tags: []};
   var replSetServersOptions = {socketOptions: {}};
+  var mongosOptions = {socketOptions: {}};
   // Add server options to final object
   object.server_options = serverOptions;
   object.db_options = dbOptions;
   object.rs_options = replSetServersOptions;
-  object.mongos_options = {};
+  object.mongos_options = mongosOptions;
 
   // Let's check if we are using a domain socket
   if(url.match(/\.sock/)) {
@@ -130,6 +221,9 @@ module.exports = function(url, options) {
         serverOptions.poolSize = parseInt(value, 10);
         replSetServersOptions.poolSize = parseInt(value, 10);
         break;
+      case 'appname':
+        object.appname = decodeURIComponent(value);
+        break;
       case 'autoReconnect':
       case 'auto_reconnect':
         serverOptions.auto_reconnect = (value == 'true');
@@ -148,10 +242,17 @@ module.exports = function(url, options) {
         if(value == 'prefer') {
           serverOptions.ssl = value;
           replSetServersOptions.ssl = value;
+          mongosOptions.ssl = value;
           break;
         }
         serverOptions.ssl = (value == 'true');
         replSetServersOptions.ssl = (value == 'true');
+        mongosOptions.ssl = (value == 'true');
+        break;
+      case 'sslValidate':
+        serverOptions.sslValidate = (value == 'true');
+        replSetServersOptions.sslValidate = (value == 'true');
+        mongosOptions.sslValidate = (value == 'true');
         break;
       case 'replicaSet':
       case 'rs_name':
@@ -180,13 +281,18 @@ module.exports = function(url, options) {
       case 'native_parser':
         dbOptions.native_parser = (value == 'true');
         break;
+      case 'readConcernLevel':
+        dbOptions.readConcern = {level: value};
+        break;
       case 'connectTimeoutMS':
         serverOptions.socketOptions.connectTimeoutMS = parseInt(value, 10);
         replSetServersOptions.socketOptions.connectTimeoutMS = parseInt(value, 10);
+        mongosOptions.socketOptions.connectTimeoutMS = parseInt(value, 10);
         break;
       case 'socketTimeoutMS':
         serverOptions.socketOptions.socketTimeoutMS = parseInt(value, 10);
         replSetServersOptions.socketOptions.socketTimeoutMS = parseInt(value, 10);
+        mongosOptions.socketOptions.socketTimeoutMS = parseInt(value, 10);
         break;
       case 'w':
         dbOptions.w = parseInt(value, 10);
@@ -216,9 +322,10 @@ module.exports = function(url, options) {
         if(value != 'GSSAPI'
           && value != 'MONGODB-X509'
           && value != 'MONGODB-CR'
+          && value != 'DEFAULT'
           && value != 'SCRAM-SHA-1'
           && value != 'PLAIN')
-            throw new Error("only GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism");
+            throw new Error("only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism");
 
         // Authentication mechanism
         dbOptions.authMechanism = value;
@@ -237,13 +344,18 @@ module.exports = function(url, options) {
         dbOptions.authMechanismProperties = o;
         // Set the service name value
         if(typeof o.SERVICE_NAME == 'string') dbOptions.gssapiServiceName = o.SERVICE_NAME;
+        if(typeof o.SERVICE_REALM == 'string') dbOptions.gssapiServiceRealm = o.SERVICE_REALM;
+        if(typeof o.CANONICALIZE_HOST_NAME == 'string') dbOptions.gssapiCanonicalizeHostName = o.CANONICALIZE_HOST_NAME == 'true' ? true : false;
         break;
       case 'wtimeoutMS':
         dbOptions.wtimeout = parseInt(value, 10);
         break;
       case 'readPreference':
         if(!ReadPreference.isValid(value)) throw new Error("readPreference must be either primary/primaryPreferred/secondary/secondaryPreferred/nearest");
-        dbOptions.read_preference = value;
+        dbOptions.readPreference = value;
+        break;
+      case 'maxStalenessSeconds':
+        dbOptions.maxStalenessSeconds = parseInt(value, 10);
         break;
       case 'readPreferenceTags':
         // Decode the value
@@ -282,7 +394,9 @@ module.exports = function(url, options) {
       || dbOptions.safe == true)) throw new Error("w set to -1 or 0 cannot be combined with safe/w/journal/fsync")
 
   // If no read preference set it to primary
-  if(!dbOptions.read_preference) dbOptions.read_preference = 'primary';
+  if(!dbOptions.readPreference) {
+    dbOptions.readPreference = 'primary';
+  }
 
   // Add servers to result
   object.servers = servers;

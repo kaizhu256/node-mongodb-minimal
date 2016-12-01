@@ -68,13 +68,9 @@ var Long = require('bson').Long
  */
 var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   options = options || {};
-  // Cursor reference
-  var self = this;
-  // Initial query
-  var query = null;
 
-  // Cursor connection
-  this.connection = null;
+  // Cursor pool
+  this.pool = null;
   // Cursor server
   this.server = null;
 
@@ -106,18 +102,38 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     , transforms: options.transforms
   }
 
-  // Callback controller
-  this.callbacks = null;
+  // Add promoteLong to cursor state
+  if(typeof topologyOptions.promoteLongs == 'boolean') {
+    this.cursorState.promoteLongs = topologyOptions.promoteLongs;
+  } else if(typeof options.promoteLongs == 'boolean') {
+    this.cursorState.promoteLongs = options.promoteLongs;
+  }
+
+  // Add promoteValues to cursor state
+  if(typeof topologyOptions.promoteValues == 'boolean') {
+    this.cursorState.promoteValues = topologyOptions.promoteValues;
+  } else if(typeof options.promoteValues == 'boolean') {
+    this.cursorState.promoteValues = options.promoteValues;
+  }
+
+  // Add promoteBuffers to cursor state
+  if(typeof topologyOptions.promoteBuffers == 'boolean') {
+    this.cursorState.promoteBuffers = topologyOptions.promoteBuffers;
+  } else if(typeof options.promoteBuffers == 'boolean') {
+    this.cursorState.promoteBuffers = options.promoteBuffers;
+  }
 
   // Logger
-  this.logger = Logger('Cursor', options);
+  this.logger = Logger('Cursor', topologyOptions);
 
   //
   // Did we pass in a cursor id
   if(typeof cmd == 'number') {
     this.cursorState.cursorId = Long.fromNumber(cmd);
+    this.cursorState.lastCursorId = this.cursorState.cursorId;
   } else if(cmd instanceof Long) {
     this.cursorState.cursorId = cmd;
+    this.cursorState.lastCursorId = cmd;
   }
 }
 
@@ -145,98 +161,6 @@ Cursor.prototype.cursorSkip = function() {
   return this.cursorState.skip;
 }
 
-// //
-// // Execute getMore command
-// var execGetMore = function(self, callback) {
-// }
-
-//
-// Execute the first query
-var execInitialQuery = function(self, query, cmd, options, cursorState, connection, logger, callbacks, callback) {
-  if(logger.isDebug()) {
-    logger.debug(f("issue initial query [%s] with flags [%s]"
-      , JSON.stringify(cmd)
-      , JSON.stringify(query)));
-  }
-
-  var queryCallback = function(err, result) {
-    if(err) return callback(err);
-
-    if(result.queryFailure) {
-      return callback(MongoError.create(result.documents[0]), null);
-    }
-
-    // Check if we have a command cursor
-    if(Array.isArray(result.documents) && result.documents.length == 1
-      && (!cmd.find || (cmd.find && cmd.virtual == false))
-      && (result.documents[0].cursor != 'string'
-        || result.documents[0]['$err']
-        || result.documents[0]['errmsg']
-        || Array.isArray(result.documents[0].result))
-      ) {
-
-      // We have a an error document return the error
-      if(result.documents[0]['$err']
-        || result.documents[0]['errmsg']) {
-        return callback(MongoError.create(result.documents[0]), null);
-      }
-
-      // We have a cursor document
-      if(result.documents[0].cursor != null
-        && typeof result.documents[0].cursor != 'string') {
-          var id = result.documents[0].cursor.id;
-          // If we have a namespace change set the new namespace for getmores
-          if(result.documents[0].cursor.ns) {
-            self.ns = result.documents[0].cursor.ns;
-          }
-          // Promote id to long if needed
-          cursorState.cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
-          // If we have a firstBatch set it
-          if(Array.isArray(result.documents[0].cursor.firstBatch)) {
-            cursorState.documents = result.documents[0].cursor.firstBatch;//.reverse();
-          }
-
-          // Return after processing command cursor
-          return callback(null, null);
-      }
-
-      if(Array.isArray(result.documents[0].result)) {
-        cursorState.documents = result.documents[0].result;
-        cursorState.cursorId = Long.ZERO;
-        return callback(null, null);
-      }
-    }
-
-    // Otherwise fall back to regular find path
-    cursorState.cursorId = result.cursorId;
-    cursorState.documents = result.documents;
-
-    // Transform the results with passed in transformation method if provided
-    if(cursorState.transforms && typeof cursorState.transforms.query == 'function') {
-      cursorState.documents = cursorState.transforms.query(result);
-    }
-
-    // Return callback
-    callback(null, null);
-  }
-
-  // If we have a raw query decorate the function
-  if(options.raw || cmd.raw) {
-    queryCallback.raw = options.raw || cmd.raw;
-  }
-
-  // Do we have documentsReturnedIn set on the query
-  if(typeof query.documentsReturnedIn == 'string') {
-    queryCallback.documentsReturnedIn = query.documentsReturnedIn;
-  }
-
-  // Set up callback
-  callbacks.register(query.requestId, queryCallback);
-
-  // Write the initial command out
-  connection.write(query.toBin());
-}
-
 //
 // Handle callback (including any exceptions thrown)
 var handleCallback = function(callback, err, result) {
@@ -249,20 +173,23 @@ var handleCallback = function(callback, err, result) {
   }
 }
 
-
 // Internal methods
 Cursor.prototype._find = function(callback) {
   var self = this;
-  // execInitialQuery(self, self.query, self.cmd, self.options, self.cursorState, self.connection, self.logger, self.callbacks, function(err, r) {
+
   if(self.logger.isDebug()) {
-    self.logger.debug(f("issue initial query [%s] with flags [%s]"
+    self.logger.debug(f('issue initial query [%s] with flags [%s]'
       , JSON.stringify(self.cmd)
       , JSON.stringify(self.query)));
   }
 
-  var queryCallback = function(err, result) {
+  var queryCallback = function(err, r) {
     if(err) return callback(err);
 
+    // Get the raw message
+    var result = r.message;
+
+    // Query failure bit set
     if(result.queryFailure) {
       return callback(MongoError.create(result.documents[0]), null);
     }
@@ -292,6 +219,7 @@ Cursor.prototype._find = function(callback) {
           }
           // Promote id to long if needed
           self.cursorState.cursorId = typeof id == 'number' ? Long.fromNumber(id) : id;
+          self.cursorState.lastCursorId = self.cursorState.cursorId;
           // If we have a firstBatch set it
           if(Array.isArray(result.documents[0].cursor.firstBatch)) {
             self.cursorState.documents = result.documents[0].cursor.firstBatch;//.reverse();
@@ -311,6 +239,7 @@ Cursor.prototype._find = function(callback) {
     // Otherwise fall back to regular find path
     self.cursorState.cursorId = result.cursorId;
     self.cursorState.documents = result.documents;
+    self.cursorState.lastCursorId = result.cursorId;
 
     // Transform the results with passed in transformation method if provided
     if(self.cursorState.transforms && typeof self.cursorState.transforms.query == 'function') {
@@ -320,34 +249,58 @@ Cursor.prototype._find = function(callback) {
     // Return callback
     callback(null, null);
   }
-  // console.log("------------------------- 2")
+
+  // Options passed to the pool
+  var queryOptions = {};
 
   // If we have a raw query decorate the function
   if(self.options.raw || self.cmd.raw) {
-    queryCallback.raw = self.options.raw || self.cmd.raw;
+    // queryCallback.raw = self.options.raw || self.cmd.raw;
+    queryOptions.raw = self.options.raw || self.cmd.raw;
   }
-  // console.log("------------------------- 3")
 
   // Do we have documentsReturnedIn set on the query
   if(typeof self.query.documentsReturnedIn == 'string') {
-    queryCallback.documentsReturnedIn = self.query.documentsReturnedIn;
+    // queryCallback.documentsReturnedIn = self.query.documentsReturnedIn;
+    queryOptions.documentsReturnedIn = self.query.documentsReturnedIn;
   }
-  // console.log("------------------------- 4")
 
-  // Set up callback
-  self.callbacks.register(self.query.requestId, queryCallback);
+  // Add promote Long value if defined
+  if(typeof self.cursorState.promoteLongs == 'boolean') {
+    queryOptions.promoteLongs = self.cursorState.promoteLongs;
+  }
+
+  // Add promote values if defined
+  if(typeof self.cursorState.promoteValues == 'boolean') {
+    queryOptions.promoteValues = self.cursorState.promoteValues;
+  }
+
+  // Add promote values if defined
+  if(typeof self.cursorState.promoteBuffers == 'boolean') {
+    queryOptions.promoteBuffers = self.cursorState.promoteBuffers;
+  }
 
   // Write the initial command out
-  self.connection.write(self.query.toBin());
-// console.log("------------------------- 5")
+  self.server.s.pool.write(self.query, queryOptions, queryCallback);
 }
 
 Cursor.prototype._getmore = function(callback) {
-  if(this.logger.isDebug()) this.logger.debug(f("schedule getMore call for query [%s]", JSON.stringify(this.query)))
+  if(this.logger.isDebug()) this.logger.debug(f('schedule getMore call for query [%s]', JSON.stringify(this.query)))
   // Determine if it's a raw query
   var raw = this.options.raw || this.cmd.raw;
+
+  // Set the current batchSize
+  var batchSize = this.cursorState.batchSize;
+  if(this.cursorState.limit > 0
+    && ((this.cursorState.currentLimit + batchSize) > this.cursorState.limit)) {
+    batchSize = this.cursorState.limit - this.cursorState.currentLimit;
+  }
+
+  // Default pool
+  var pool = this.server.s.pool;
+
   // We have a wire protocol handler
-  this.server.wireProtocolHandler.getMore(this.bson, this.ns, this.cursorState, this.cursorState.batchSize, raw, this.connection, this.callbacks, this.options, callback);
+  this.server.wireProtocolHandler.getMore(this.bson, this.ns, this.cursorState, batchSize, raw, pool, this.options, callback);
 }
 
 Cursor.prototype._killcursor = function(callback) {
@@ -363,8 +316,10 @@ Cursor.prototype._killcursor = function(callback) {
     return;
   }
 
+  // Default pool
+  var pool = this.server.s.pool;
   // Execute command
-  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState.cursorId, this.connection, this.callbacks, callback);
+  this.server.wireProtocolHandler.killCursor(this.bson, this.ns, this.cursorState.cursorId, pool, callback);
 }
 
 /**
@@ -477,16 +432,16 @@ Cursor.prototype.rewind = function() {
 }
 
 /**
- * Validate if the connection is dead and return error
+ * Validate if the pool is dead and return error
  */
 var isConnectionDead = function(self, callback) {
-  if(self.connection
-    && !self.connection.isConnected()) {
+  if(self.pool
+    && self.pool.isDestroyed()) {
     self.cursorState.notified = true;
     self.cursorState.killed = true;
     self.cursorState.documents = [];
     self.cursorState.cursorIndex = 0;
-    callback(MongoError.create(f('connection to host %s:%s was destroyed', self.connection.host, self.connection.port)))
+    callback(MongoError.create(f('connection to host %s:%s was destroyed', self.pool.host, self.pool.port)))
     return true;
   }
 
@@ -515,7 +470,7 @@ var isCursorDeadButNotkilled = function(self, callback) {
  */
 var isCursorDeadAndKilled = function(self, callback) {
   if(self.cursorState.dead && self.cursorState.killed) {
-    handleCallback(callback, MongoError.create("cursor is dead"));
+    handleCallback(callback, MongoError.create('cursor is dead'));
     return true;
   }
 
@@ -578,86 +533,58 @@ var nextFunction = function(self, callback) {
     // Topology is not connected, save the call in the provided store to be
     // Executed at some point when the handler deems it's reconnected
     if(!self.topology.isConnected(self.options) && self.disconnectHandler != null) {
+      if (self.topology.isDestroyed()) {
+        // Topology was destroyed, so don't try to wait for it to reconnect
+        return callback(new MongoError('Topology was destroyed'));
+      }
       return self.disconnectHandler.addObjectAndMethod('cursor', self, 'next', [callback], callback);
     }
 
     try {
-      // Get a server
       self.server = self.topology.getServer(self.options);
-      // Get a connection
-      self.connection = self.server.getConnection();
-      // Get the callbacks
-      self.callbacks = self.server.getCallbacks();
     } catch(err) {
+      // Handle the error and add object to next method call
+      if(self.disconnectHandler != null) {
+        return self.disconnectHandler.addObjectAndMethod('cursor', self, 'next', [callback], callback);
+      }
+
+      // Otherwise return the error
       return callback(err);
     }
 
     // Set as init
     self.cursorState.init = true;
 
-    // Get the right wire protocol command
-    self.query = self.server.wireProtocolHandler.command(self.bson, self.ns, self.cmd, self.cursorState, self.topology, self.options);
-  }
+    // Server does not support server
+    if(self.cmd
+      && self.cmd.collation
+      && self.server.ismaster.maxWireVersion < 5) {
+      return callback(new MongoError(f('server %s does not support collation', self.server.name)));
+    }
 
-  // Process exhaust messages
-  var processExhaustMessages = function(err, result) {
-    if(err) {
-      self.cursorState.dead = true;
-      self.callbacks.unregister(self.query.requestId);
+    try {
+      self.query = self.server.wireProtocolHandler.command(self.bson, self.ns, self.cmd, self.cursorState, self.topology, self.options);
+    } catch(err) {
       return callback(err);
     }
-
-    // Concatenate all the documents
-    self.cursorState.documents = self.cursorState.documents.concat(result.documents);
-
-    // If we have no documents left
-    if(Long.ZERO.equals(result.cursorId)) {
-      self.cursorState.cursorId = Long.ZERO;
-      self.callbacks.unregister(self.query.requestId);
-      return nextFunction(self, callback);
-    }
-
-    // Set up next listener
-    self.callbacks.register(result.requestId, processExhaustMessages)
-
-    // Initial result
-    if(self.cursorState.cursorId == null) {
-      self.cursorState.cursorId = result.cursorId;
-      nextFunction(self, callback);
-    }
-  }
-
-  // If we have exhaust
-  if(self.cmd.exhaust && self.cursorState.cursorId == null) {
-    // Handle all the exhaust responses
-    self.callbacks.register(self.query.requestId, processExhaustMessages);
-    // Write the initial command out
-    return self.connection.write(self.query.toBin());
-  } else if(self.cmd.exhaust && self.cursorState.cursorIndex < self.cursorState.documents.length) {
-    return handleCallback(callback, null, self.cursorState.documents[self.cursorState.cursorIndex++]);
-  } else if(self.cmd.exhaust && Long.ZERO.equals(self.cursorState.cursorId)) {
-    self.callbacks.unregister(self.query.requestId);
-    return setCursorNotified(self, callback);
-  } else if(self.cmd.exhaust) {
-    return setTimeout(function() {
-      if(Long.ZERO.equals(self.cursorState.cursorId)) return;
-      nextFunction(self, callback);
-    }, 1);
   }
 
   // If we don't have a cursorId execute the first query
   if(self.cursorState.cursorId == null) {
-    // Check if connection is dead and return if not possible to
+    // Check if pool is dead and return if not possible to
     // execute the query against the db
     if(isConnectionDead(self, callback)) return;
 
     // Check if topology is destroyed
-    if(self.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
+    if(self.topology.isDestroyed()) return callback(new MongoError('connection destroyed, not possible to instantiate cursor'));
 
     // query, cmd, options, cursorState, callback
-    self._find(function(err, r) {
+    self._find(function(err) {
       if(err) return handleCallback(callback, err, null);
-      if(self.cursorState.documents.length == 0 && !self.cmd.tailable && !self.cmd.awaitData) {
+
+      if(self.cursorState.documents.length == 0
+        && self.cursorState.cursorId && self.cursorState.cursorId.isZero()
+        && !self.cmd.tailable && !self.cmd.awaitData) {
         return setCursorNotified(self, callback);
       }
 
@@ -675,29 +602,33 @@ var nextFunction = function(self, callback) {
       self.cursorState.cursorIndex = 0;
 
       // Check if topology is destroyed
-      if(self.topology.isDestroyed()) return callback(new MongoError(f('connection destroyed, not possible to instantiate cursor')));
+      if(self.topology.isDestroyed()) return callback(new MongoError('connection destroyed, not possible to instantiate cursor'));
 
       // Check if connection is dead and return if not possible to
       // execute a getmore on this connection
       if(isConnectionDead(self, callback)) return;
 
       // Execute the next get more
-      self._getmore(function(err, doc) {
+      self._getmore(function(err, doc, connection) {
         if(err) return handleCallback(callback, err);
-        if(self.cursorState.documents.length == 0
-          && Long.ZERO.equals(self.cursorState.cursorId)) {
-            self.cursorState.dead = true;
-          }
+
+        // Save the returned connection to ensure all getMore's fire over the same connection
+        self.connection = connection;
 
         // Tailable cursor getMore result, notify owner about it
         // No attempt is made here to retry, this is left to the user of the
         // core module to handle to keep core simple
-        if(self.cursorState.documents.length == 0 && self.cmd.tailable) {
+        if(self.cursorState.documents.length == 0
+          && self.cmd.tailable && Long.ZERO.equals(self.cursorState.cursorId)) {
+          // No more documents in the tailed cursor
           return handleCallback(callback, MongoError.create({
-              message: "No more documents in tailed cursor"
+              message: 'No more documents in tailed cursor'
             , tailable: self.cmd.tailable
             , awaitData: self.cmd.awaitData
           }));
+        } else if(self.cursorState.documents.length == 0
+          && self.cmd.tailable && !Long.ZERO.equals(self.cursorState.cursorId)) {
+          return nextFunction(self, callback);
         }
 
         if(self.cursorState.limit > 0 && self.cursorState.currentLimit >= self.cursorState.limit) {
@@ -707,9 +638,9 @@ var nextFunction = function(self, callback) {
         nextFunction(self, callback);
       });
   } else if(self.cursorState.documents.length == self.cursorState.cursorIndex
-    && self.cmd.tailable) {
+    && self.cmd.tailable && Long.ZERO.equals(self.cursorState.cursorId)) {
       return handleCallback(callback, MongoError.create({
-          message: "No more documents in tailed cursor"
+          message: 'No more documents in tailed cursor'
         , tailable: self.cmd.tailable
         , awaitData: self.cmd.awaitData
       }));
@@ -729,6 +660,16 @@ var nextFunction = function(self, callback) {
 
     // Get the document
     var doc = self.cursorState.documents[self.cursorState.cursorIndex++];
+
+    // Doc overflow
+    if(doc.$err) {
+      // Ensure we kill the cursor on the server
+      self.kill();
+      // Set cursor in dead and notified state
+      return setCursorDeadAndNotified(self, function() {
+        handleCallback(callback, new MongoError(doc.$err));
+      });
+    }
 
     // Transform the doc with passed in transformation method if provided
     if(self.cursorState.transforms && typeof self.cursorState.transforms.doc == 'function') {

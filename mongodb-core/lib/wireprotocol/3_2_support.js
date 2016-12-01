@@ -1,18 +1,10 @@
 "use strict";
 
-var Insert = require('./commands').Insert
-  , Update = require('./commands').Update
-  , Remove = require('./commands').Remove
-  , Query = require('../connection/commands').Query
-  , copy = require('../connection/utils').copy
-  , KillCursor = require('../connection/commands').KillCursor
-  , GetMore = require('../connection/commands').GetMore
-  , Query = require('../connection/commands').Query
-  , ReadPreference = require('../topologies/read_preference')
+var Query = require('../connection/commands').Query
   , f = require('util').format
-  , CommandResult = require('../topologies/command_result')
   , MongoError = require('../error')
-  , Long = require('bson').Long;
+  , Long = require('bson').Long
+  , getReadPreference = require('./shared').getReadPreference;
 
 var WireProtocol = function(legacyWireProtocol) {
   this.legacyWireProtocol = legacyWireProtocol;
@@ -20,11 +12,12 @@ var WireProtocol = function(legacyWireProtocol) {
 
 //
 // Execute a write operation
-var executeWrite = function(topology, type, opsField, ns, ops, options, callback) {
+var executeWrite = function(pool, bson, type, opsField, ns, ops, options, callback) {
   if(ops.length == 0) throw new MongoError("insert must contain at least one document");
   if(typeof options == 'function') {
     callback = options;
     options = {};
+    options = options || {};
   }
 
   // Split the ns up to get db and collection
@@ -32,40 +25,70 @@ var executeWrite = function(topology, type, opsField, ns, ops, options, callback
   var d = p.shift();
   // Options
   var ordered = typeof options.ordered == 'boolean' ? options.ordered : true;
-  var writeConcern = options.writeConcern || {};
+  var writeConcern = options.writeConcern;
+
   // return skeleton
   var writeCommand = {};
   writeCommand[type] = p.join('.');
   writeCommand[opsField] = ops;
   writeCommand.ordered = ordered;
-  writeCommand.writeConcern = writeConcern;
+
+  // Did we specify a write concern
+  if(writeConcern && Object.keys(writeConcern).length > 0) {
+    writeCommand.writeConcern = writeConcern;
+  }
+
+  // If we have collation passed in
+  if(options.collation) {
+    for(var i = 0; i < writeCommand[opsField].length; i++) {
+      if(!writeCommand[opsField][i].collation) {
+        writeCommand[opsField][i].collation = options.collation;
+      }
+    }
+  }
+
+  // Do we have bypassDocumentValidation set, then enable it on the write command
+  if(typeof options.bypassDocumentValidation == 'boolean') {
+    writeCommand.bypassDocumentValidation = options.bypassDocumentValidation;
+  }
 
   // Options object
-  var opts = {};
-  if(type == 'insert') opts.checkKeys = true;
+  var opts = { command: true };
+  var queryOptions = { checkKeys : false, numberToSkip: 0, numberToReturn: 1 };
+  if(type == 'insert') queryOptions.checkKeys = true;
+
   // Ensure we support serialization of functions
-  if(options.serializeFunctions) opts.serializeFunctions = options.serializeFunctions;
-  // Execute command
-  topology.command(f("%s.$cmd", d), writeCommand, opts, callback);
+  if(options.serializeFunctions) queryOptions.serializeFunctions = options.serializeFunctions;
+  // Do not serialize the undefined fields
+  if(options.ignoreUndefined) queryOptions.ignoreUndefined = options.ignoreUndefined;
+
+  try {
+    // Create write command
+    var cmd = new Query(bson, f("%s.$cmd", d), writeCommand, queryOptions);
+    // Execute command
+    pool.write(cmd, opts, callback);
+  } catch(err) {
+    callback(err);
+  }
 }
 
 //
 // Needs to support legacy mass insert as well as ordered/unordered legacy
 // emulation
 //
-WireProtocol.prototype.insert = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
-  executeWrite(topology, 'insert', 'documents', ns, ops, options, callback);
+WireProtocol.prototype.insert = function(pool, ismaster, ns, bson, ops, options, callback) {
+  executeWrite(pool, bson, 'insert', 'documents', ns, ops, options, callback);
 }
 
-WireProtocol.prototype.update = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
-  executeWrite(topology, 'update', 'updates', ns, ops, options, callback);
+WireProtocol.prototype.update = function(pool, ismaster, ns, bson, ops, options, callback) {
+  executeWrite(pool, bson, 'update', 'updates', ns, ops, options, callback);
 }
 
-WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
-  executeWrite(topology, 'delete', 'deletes', ns, ops, options, callback);
+WireProtocol.prototype.remove = function(pool, ismaster, ns, bson, ops, options, callback) {
+  executeWrite(pool, bson, 'delete', 'deletes', ns, ops, options, callback);
 }
 
-WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, callbacks, callback) {
+WireProtocol.prototype.killCursor = function(bson, ns, cursorId, pool, callback) {
   // Build command namespace
   var parts = ns.split(/\./);
   // Command namespace
@@ -85,18 +108,15 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, cal
   // Set query flags
   query.slaveOk = true;
 
-  // Execute the kill cursor command
-  if(connection && connection.isConnected()) {
-    connection.write(query.toBin());
-  }
-
   // Kill cursor callback
-  var killCursorCallback = function(err, r) {
+  var killCursorCallback = function(err, result) {
     if(err) {
       if(typeof callback != 'function') return;
       return callback(err);
     }
 
+    // Result
+    var r = result.message;
     // If we have a timed out query or a cursor that was killed
     if((r.responseFlags & (1 << 0)) != 0) {
       if(typeof callback != 'function') return;
@@ -105,7 +125,7 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, cal
 
     if(!Array.isArray(r.documents) || r.documents.length == 0) {
       if(typeof callback != 'function') return;
-      return callback(new MongoError(f('invalid getMore result returned for cursor id %s', cursorState.cursorId)));
+      return callback(new MongoError(f('invalid killCursors result returned for cursor id %s', cursorId)));
     }
 
     // Return the result
@@ -114,28 +134,31 @@ WireProtocol.prototype.killCursor = function(bson, ns, cursorId, connection, cal
     }
   }
 
-  // Register a callback
-  callbacks.register(query.requestId, killCursorCallback);
+  // Execute the kill cursor command
+  if(pool && pool.isConnected()) {
+    pool.write(query, {
+      command: true
+    }, killCursorCallback);
+  }
 }
 
-WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {
-  var readPreference = options.readPreference || new ReadPreference('primary');
-  if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
-  if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
+WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw, connection, options, callback) {
+  options = options || {};
   // Build command namespace
   var parts = ns.split(/\./);
   // Command namespace
   var commandns = f('%s.$cmd', parts.shift());
 
-  // Check if we have an maxTimeMS set
-  var maxTimeMS = typeof cursorState.cmd.maxTimeMS == 'number' ? cursorState.cmd.maxTimeMS : 3000;
-
   // Create getMore command
   var getMoreCmd = {
     getMore: cursorState.cursorId,
     collection: parts.join('.'),
-    batchSize: batchSize,
-    maxTimeMS: maxTimeMS
+    batchSize: Math.abs(batchSize)
+  }
+
+  if(cursorState.cmd.tailable
+    && typeof cursorState.cmd.maxAwaitTimeMS == 'number') {
+    getMoreCmd.maxTimeMS = cursorState.cmd.maxAwaitTimeMS;
   }
 
   // Build Query object
@@ -145,19 +168,18 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
   });
 
   // Set query flags
-  query.slaveOk = readPreference.slaveOk();
+  query.slaveOk = true;
 
   // Query callback
-  var queryCallback = function(err, r) {
+  var queryCallback = function(err, result) {
     if(err) return callback(err);
+    // Get the raw message
+    var r = result.message;
 
     // If we have a timed out query or a cursor that was killed
     if((r.responseFlags & (1 << 0)) != 0) {
       return callback(new MongoError("cursor killed or timed out"), null);
     }
-
-    if(!Array.isArray(r.documents) || r.documents.length == 0)
-      return callback(new MongoError(f('invalid getMore result returned for cursor id %s', cursorState.cursorId)));
 
     // Raw, return all the extracted documents
     if(raw) {
@@ -166,7 +188,12 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
       return callback(null, r.documents);
     }
 
-    // Ensure we have a Long valie cursor id
+    // We have an error detected
+    if(r.documents[0].ok == 0) {
+      return callback(MongoError.create(r.documents[0]));
+    }
+
+    // Ensure we have a Long valid cursor id
     var cursorId = typeof r.documents[0].cursor.id == 'number'
       ? Long.fromNumber(r.documents[0].cursor.id)
       : r.documents[0].cursor.id;
@@ -176,30 +203,40 @@ WireProtocol.prototype.getMore = function(bson, ns, cursorState, batchSize, raw,
     cursorState.cursorId = cursorId;
 
     // Return the result
-    callback(null, r.documents[0]);
+    callback(null, r.documents[0], r.connection);
   }
+
+  // Query options
+  var queryOptions = { command: true };
 
   // If we have a raw query decorate the function
   if(raw) {
-    queryCallback.raw = raw;
+    queryOptions.raw = raw;
   }
 
   // Add the result field needed
-  queryCallback.documentsReturnedIn = 'nextBatch';
+  queryOptions.documentsReturnedIn = 'nextBatch';
 
-  // Register a callback
-  callbacks.register(query.requestId, queryCallback);
+  // Check if we need to promote longs
+  if(typeof cursorState.promoteLongs == 'boolean') {
+    queryOptions.promoteLongs = cursorState.promoteLongs;
+  }
+
+  if(typeof cursorState.promoteValues == 'boolean') {
+    queryCallback.promoteValues = cursorState.promoteValues;
+  }
+
+  if(typeof cursorState.promoteBuffers == 'boolean') {
+    queryCallback.promoteBuffers = cursorState.promoteBuffers;
+  }
+
   // Write out the getMore command
-  connection.write(query.toBin());
+  connection.write(query, queryOptions, queryCallback);
 }
 
 WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
   // Establish type of command
   if(cmd.find) {
-    if(cmd.exhaust) {
-      return this.legacyWireProtocol.command(bson, ns, cmd, cursorState, topology, options);
-    }
-
     // Create the find command
     var query = executeFindCommand(bson, ns, cmd, cursorState, topology, options)
     // Mark the cmd as virtual
@@ -209,6 +246,7 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
     // Return the query
     return query;
   } else if(cursorState.cursorId != null) {
+    return;
   } else if(cmd) {
     return setupCommand(bson, ns, cmd, cursorState, topology, options);
   } else {
@@ -274,12 +312,10 @@ WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, 
 //
 // Execute a find command
 var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options) {
-  var readPreference = options.readPreference || new ReadPreference('primary');
-  if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
-  if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
-
   // Ensure we have at least some options
   options = options || {};
+  // Get the readPreference
+  var readPreference = getReadPreference(cmd, options);
   // Set the optional batchSize
   cursorState.batchSize = cmd.batchSize || cursorState.batchSize;
 
@@ -294,7 +330,14 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   };
 
   // I we provided a filter
-  if(cmd.query) findCmd.filter = cmd.query;
+  if(cmd.query) {
+    // Check if the user is passing in the $query parameter
+    if(cmd.query['$query']) {
+      findCmd.filter = cmd.query['$query'];
+    } else {
+      findCmd.filter = cmd.query;
+    }
+  }
 
   // Sort value
   var sortValue = cmd.sort;
@@ -316,7 +359,7 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
       sortObject[sortValue[0]] = sortDirection;
     } else {
       for(var i = 0; i < sortValue.length; i++) {
-        var sortDirection = sortValue[i][1];
+        sortDirection = sortValue[i][1];
         // Translate the sort order text
         if(sortDirection == 'asc') {
           sortDirection = 1;
@@ -330,7 +373,7 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
     }
 
     sortValue = sortObject;
-  };
+  }
 
   // Add sort to command
   if(cmd.sort) findCmd.sort = sortValue;
@@ -343,7 +386,7 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   // Add a limit
   if(cmd.limit) findCmd.limit = cmd.limit;
   // Add a batchSize
-  if(cmd.batchSize) findCmd.batchSize = cmd.batchSize;
+  if(typeof cmd.batchSize == 'number') findCmd.batchSize = Math.abs(cmd.batchSize);
 
   // Check if we wish to have a singleBatch
   if(cmd.limit < 0) {
@@ -391,13 +434,8 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
   // If we have partial set
   if(cmd.partial) findCmd.partial = cmd.partial;
 
-  // Set query flags
-  findCmd.slaveOk = readPreference.slaveOk();
-
-  // We have a Mongos topology, check if we need to add a readPreference
-  if(topology.type == 'mongos' && readPreference) {
-    findCmd['$readPreference'] = readPreference.toJSON();
-  }
+  // If we have collation passed in
+  if(cmd.collation) findCmd.collation = cmd.collation;
 
   // If we have explain, we need to rewrite the find command
   // to wrap it in the explain command
@@ -407,10 +445,30 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
     }
   }
 
+  // Did we provide a readConcern
+  if(cmd.readConcern) findCmd.readConcern = cmd.readConcern;
+
+  // Set up the serialize and ignoreUndefined fields
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
+    ? options.serializeFunctions : false;
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
+    ? options.ignoreUndefined : false;
+
+  // We have a Mongos topology, check if we need to add a readPreference
+  if(topology.type == 'mongos'
+    && readPreference
+    && readPreference.preference != 'primary') {
+    findCmd = {
+      '$query': findCmd,
+      '$readPreference': readPreference.toJSON()
+    };
+  }
+
   // Build Query object
   var query = new Query(bson, commandns, findCmd, {
-      numberToSkip: 0, numberToReturn: -1
+      numberToSkip: 0, numberToReturn: 1
     , checkKeys: false, returnFieldSelector: null
+    , serializeFunctions: serializeFunctions, ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags
@@ -423,12 +481,10 @@ var executeFindCommand = function(bson, ns, cmd, cursorState, topology, options)
 //
 // Set up a command cursor
 var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
-  var readPreference = options.readPreference || new ReadPreference('primary');
-  if(typeof readPreference == 'string') readPreference = new ReadPreference(readPreference);
-  if(!(readPreference instanceof ReadPreference)) throw new MongoError('readPreference must be a ReadPreference instance');
-
   // Set empty options object
   options = options || {}
+  // Get the readPreference
+  var readPreference = getReadPreference(cmd, options);
 
   // Final query
   var finalCmd = {};
@@ -439,15 +495,29 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
   // Build command namespace
   var parts = ns.split(/\./);
 
+  // Serialize functions
+  var serializeFunctions = typeof options.serializeFunctions == 'boolean'
+    ? options.serializeFunctions : false;
+
+  // Set up the serialize and ignoreUndefined fields
+  var ignoreUndefined = typeof options.ignoreUndefined == 'boolean'
+    ? options.ignoreUndefined : false;
+
   // We have a Mongos topology, check if we need to add a readPreference
-  if(topology.type == 'mongos' && readPreference) {
-    finalCmd['$readPreference'] = readPreference.toJSON();
+  if(topology.type == 'mongos'
+    && readPreference
+    && readPreference.preference != 'primary') {
+    finalCmd = {
+      '$query': finalCmd,
+      '$readPreference': readPreference.toJSON()
+    };
   }
 
   // Build Query object
   var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {
       numberToSkip: 0, numberToReturn: -1
-    , checkKeys: false
+    , checkKeys: false, serializeFunctions: serializeFunctions
+    , ignoreUndefined: ignoreUndefined
   });
 
   // Set query flags
@@ -455,18 +525,6 @@ var setupCommand = function(bson, ns, cmd, cursorState, topology, options) {
 
   // Return the query
   return query;
-}
-
-/**
- * @ignore
- */
-var bindToCurrentDomain = function(callback) {
-  var domain = process.domain;
-  if(domain == null || callback == null) {
-    return callback;
-  } else {
-    return domain.bind(callback);
-  }
 }
 
 module.exports = WireProtocol;

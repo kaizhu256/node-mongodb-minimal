@@ -1,6 +1,7 @@
 "use strict";
 
 var toError = require('./utils').toError,
+  Define = require('./metadata'),
   shallowClone = require('./utils').shallowClone;
 
 /**
@@ -34,7 +35,6 @@ var toError = require('./utils').toError,
  */
 var Admin = function(db, topology, promiseLibrary) {
   if(!(this instanceof Admin)) return new Admin(db, topology);
-  var self = this;
 
   // Internal state
   this.s = {
@@ -43,6 +43,8 @@ var Admin = function(db, topology, promiseLibrary) {
     , promiseLibrary: promiseLibrary
   }
 }
+
+var define = Admin.define = new Define('Admin', Admin, false);
 
 /**
  * The callback format for results
@@ -80,8 +82,9 @@ Admin.prototype.command = function(command, options, callback) {
       resolve(doc);
     });
   });
-
 }
+
+define.classMethod('command', {callback: true, promise:true});
 
 /**
  * Retrieve the server information for the current
@@ -103,6 +106,8 @@ Admin.prototype.buildInfo = function(callback) {
     });
   });
 }
+
+define.classMethod('buildInfo', {callback: true, promise:true});
 
 /**
  * Retrieve the server information for the current
@@ -127,6 +132,8 @@ Admin.prototype.serverInfo = function(callback) {
     });
   });
 }
+
+define.classMethod('serverInfo', {callback: true, promise:true});
 
 /**
  * Retrieve this db's server status.
@@ -160,6 +167,8 @@ var serverStatus = function(self, callback) {
   });
 }
 
+define.classMethod('serverStatus', {callback: true, promise:true});
+
 /**
  * Retrieve the current profiling Level for MongoDB
  *
@@ -183,8 +192,6 @@ Admin.prototype.profilingLevel = function(callback) {
 
 var profilingLevel = function(self, callback) {
   self.s.db.executeDbAdminCommand({profile:-1}, function(err, doc) {
-    doc = doc;
-
     if(err == null && doc.ok === 1) {
       var was = doc.was;
       if(was == 0) return callback(null, "off");
@@ -196,6 +203,8 @@ var profilingLevel = function(self, callback) {
     }
   });
 }
+
+define.classMethod('profilingLevel', {callback: true, promise:true});
 
 /**
  * Ping the MongoDB server and retrieve results
@@ -221,6 +230,8 @@ Admin.prototype.ping = function(options, callback) {
   });
 }
 
+define.classMethod('ping', {callback: true, promise:true});
+
 /**
  * Authenticate a user against the server.
  * @method
@@ -229,19 +240,25 @@ Admin.prototype.ping = function(options, callback) {
  * @param {Admin~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
-Admin.prototype.authenticate = function(username, password, callback) {
+Admin.prototype.authenticate = function(username, password, options, callback) {
   var self = this;
+  if(typeof options == 'function') callback = options, options = {};
+  options = shallowClone(options);
+  options.authdb = 'admin';
+
   // Execute using callback
-  if(typeof callback == 'function') return this.s.db.authenticate(username, password, {authdb: 'admin'}, callback);
+  if(typeof callback == 'function') return this.s.db.authenticate(username, password, options, callback);
 
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
-    self.s.db.authenticate(username, password, {authdb: 'admin'}, function(err, r) {
+    self.s.db.authenticate(username, password, options, function(err, r) {
       if(err) return reject(err);
       resolve(r);
     });
   });
 }
+
+define.classMethod('authenticate', {callback: true, promise:true});
 
 /**
  * Logout user from server, fire off on all connections and remove all auth info
@@ -252,16 +269,18 @@ Admin.prototype.authenticate = function(username, password, callback) {
 Admin.prototype.logout = function(callback) {
   var self = this;
   // Execute using callback
-  if(typeof callback == 'function') return this.s.db.logout({authdb: 'admin'}, callback);
+  if(typeof callback == 'function') return this.s.db.logout({dbName: 'admin'}, callback);
 
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
-    self.s.db.logout({authdb: 'admin'}, function(err, r) {
+    self.s.db.logout({dbName: 'admin'}, function(err) {
       if(err) return reject(err);
-      resolve(r);
+      resolve(true);
     });
   });
 }
+
+define.classMethod('logout', {callback: true, promise:true});
 
 // Get write concern
 var writeConcern = function(options, db) {
@@ -324,6 +343,8 @@ Admin.prototype.addUser = function(username, password, options, callback) {
   });
 }
 
+define.classMethod('addUser', {callback: true, promise:true});
+
 /**
  * Remove a user from a database
  * @method
@@ -360,6 +381,8 @@ Admin.prototype.removeUser = function(username, options, callback) {
     });
   });
 }
+
+define.classMethod('removeUser', {callback: true, promise:true});
 
 /**
  * Set the current profiling level of MongoDB
@@ -401,13 +424,13 @@ var setProfilingLevel = function(self, level, callback) {
   command['profile'] = profile;
 
   self.s.db.executeDbAdminCommand(command, function(err, doc) {
-    doc = doc;
-
     if(err == null && doc.ok === 1)
       return callback(null, level);
     return err != null ? callback(err, null) : callback(new Error("Error with profile command"), null);
   });
 }
+
+define.classMethod('setProfilingLevel', {callback: true, promise:true});
 
 /**
  * Retrive the current profiling information for MongoDB
@@ -437,6 +460,8 @@ var profilingInfo = function(self, callback) {
     return callback(err, null);
   }
 }
+
+define.classMethod('profilingLevel', {callback: true, promise:true});
 
 /**
  * Validate an existing collection
@@ -494,6 +519,8 @@ var validateCollection = function(self, collectionName, options, callback) {
   });
 }
 
+define.classMethod('validateCollection', {callback: true, promise:true});
+
 /**
  * List the available databases
  *
@@ -513,6 +540,8 @@ Admin.prototype.listDatabases = function(callback) {
     });
   });
 }
+
+define.classMethod('listDatabases', {callback: true, promise:true});
 
 /**
  * Get ReplicaSet status
@@ -541,5 +570,7 @@ var replSetGetStatus = function(self, callback) {
     callback(toError(doc), false);
   });
 }
+
+define.classMethod('replSetGetStatus', {callback: true, promise:true});
 
 module.exports = Admin;

@@ -2,17 +2,14 @@
 
 var inherits = require('util').inherits
   , f = require('util').format
-  , toError = require('./utils').toError
-  , getSingleProperty = require('./utils').getSingleProperty
   , formattedOrderClause = require('./utils').formattedOrderClause
   , handleCallback = require('./utils').handleCallback
-  , Logger = require('mongodb-core').Logger
-  , EventEmitter = require('events').EventEmitter
   , ReadPreference = require('./read_preference')
   , MongoError = require('mongodb-core').MongoError
   , Readable = require('stream').Readable || require('readable-stream').Readable
+  , Define = require('./metadata')
   , CoreCursor = require('mongodb-core').Cursor
-  , Query = require('mongodb-core').Query
+  , Map = require('mongodb-core').BSON.Map
   , CoreReadPreference = require('mongodb-core').ReadPreference;
 
 /**
@@ -56,6 +53,7 @@ var inherits = require('util').inherits
 // Flags allowed for cursor
 var flags = ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'];
 var fields = ['numberOfRetries', 'tailableRetryInterval'];
+var push = Array.prototype.push;
 
 /**
  * Creates a new Cursor instance (INTERNAL TYPE, do not instantiate directly)
@@ -71,7 +69,33 @@ var fields = ['numberOfRetries', 'tailableRetryInterval'];
  * @fires Cursor#readable
  * @return {Cursor} a Cursor instance.
  * @example
- * Some example
+ * Cursor cursor options.
+ *
+ * collection.find({}).project({a:1})                             // Create a projection of field a
+ * collection.find({}).skip(1).limit(10)                          // Skip 1 and limit 10
+ * collection.find({}).batchSize(5)                               // Set batchSize on cursor to 5
+ * collection.find({}).filter({a:1})                              // Set query on the cursor
+ * collection.find({}).comment('add a comment')                   // Add a comment to the query, allowing to correlate queries
+ * collection.find({}).addCursorFlag('tailable', true)            // Set cursor as tailable
+ * collection.find({}).addCursorFlag('oplogReplay', true)         // Set cursor as oplogReplay
+ * collection.find({}).addCursorFlag('noCursorTimeout', true)     // Set cursor as noCursorTimeout
+ * collection.find({}).addCursorFlag('awaitData', true)           // Set cursor as awaitData
+ * collection.find({}).addCursorFlag('partial', true)             // Set cursor as partial
+ * collection.find({}).addQueryModifier('$orderby', {a:1})        // Set $orderby {a:1}
+ * collection.find({}).max(10)                                    // Set the cursor maxScan
+ * collection.find({}).maxScan(10)                                // Set the cursor maxScan
+ * collection.find({}).maxTimeMS(1000)                            // Set the cursor maxTimeMS
+ * collection.find({}).min(100)                                   // Set the cursor min
+ * collection.find({}).returnKey(10)                              // Set the cursor returnKey
+ * collection.find({}).setReadPreference(ReadPreference.PRIMARY)  // Set the cursor readPreference
+ * collection.find({}).showRecordId(true)                         // Set the cursor showRecordId
+ * collection.find({}).snapshot(true)                             // Set the cursor snapshot
+ * collection.find({}).sort([['a', 1]])                           // Sets the sort order of the cursor query
+ * collection.find({}).hint('a_1')                                // Set the cursor hint
+ *
+ * All options are chainable, so one can do the following.
+ *
+ * collection.find({}).maxTimeMS(1000).maxScan(100).skip(1).toArray(..)
  */
 var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
   CoreCursor.apply(this, Array.prototype.slice.call(arguments, 0));
@@ -124,10 +148,13 @@ var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
     , currentDoc: null
   }
 
-  // Legacy fields
-  this.timeout = self.s.options.noCursorTimeout == true;
+  // Translate correctly
+  if(self.s.options.noCursorTimeout == true) {
+    self.addCursorFlag('noCursorTimeout', true);
+  }
+
+  // Set the sort value
   this.sortValue = self.s.cmd.sort;
-  this.readPreference = self.s.options.readPreference;
 }
 
 /**
@@ -168,43 +195,54 @@ for(var name in CoreCursor.prototype) {
   Cursor.prototype[name] = CoreCursor.prototype[name];
 }
 
+var define = Cursor.define = new Define('Cursor', Cursor, true);
+
 /**
  * Check if there is any document still available in the cursor
  * @method
  * @param {Cursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
- * @deprecated
  * @return {Promise} returns Promise if no callback passed
  */
 Cursor.prototype.hasNext = function(callback) {
   var self = this;
 
   // Execute using callback
-  if(typeof callback == 'function') return nextObject(self, function(err, doc) {
-    if(!doc) return callback(null, false);
-    self.s.currentDoc = doc;
-    callback(null, true);
-  });
+  if(typeof callback == 'function') {
+    if(self.s.currentDoc){
+      return callback(null, true);
+    } else {
+      return nextObject(self, function(err, doc) {
+        if(!doc) return callback(null, false);
+        self.s.currentDoc = doc;
+        callback(null, true);
+      });
+    }
+  }
 
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
-    nextObject(self, function(err, doc) {
-      if(self.s.state == Cursor.CLOSED || self.isDead()) return resolve(false);
-      if(err) return reject(err);
-      if(!doc) return resolve(false);
-      self.s.currentDoc = doc;
+    if(self.s.currentDoc){
       resolve(true);
-    });
+    } else {
+      nextObject(self, function(err, doc) {
+        if(self.s.state == Cursor.CLOSED || self.isDead()) return resolve(false);
+        if(err) return reject(err);
+        if(!doc) return resolve(false);
+        self.s.currentDoc = doc;
+        resolve(true);
+      });
+    }
   });
 }
 
+define.classMethod('hasNext', {callback: true, promise:true});
 
 /**
  * Get the next available document from the cursor, returns null if no more documents are available.
  * @method
  * @param {Cursor~resultCallback} [callback] The result callback.
  * @throws {MongoError}
- * @deprecated
  * @return {Promise} returns Promise if no callback passed
  */
 Cursor.prototype.next = function(callback) {
@@ -221,7 +259,7 @@ Cursor.prototype.next = function(callback) {
 
     // Return the next object
     return nextObject(self, callback)
-  };
+  }
 
   // Return a Promise
   return new this.s.promiseLibrary(function(resolve, reject) {
@@ -239,6 +277,8 @@ Cursor.prototype.next = function(callback) {
   });
 }
 
+define.classMethod('next', {callback: true, promise:true});
+
 /**
  * Set the cursor query
  * @method
@@ -250,6 +290,8 @@ Cursor.prototype.filter = function(filter) {
   this.s.cmd.query = filter;
   return this;
 }
+
+define.classMethod('filter', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Set the cursor maxScan
@@ -263,6 +305,8 @@ Cursor.prototype.maxScan = function(maxScan) {
   return this;
 }
 
+define.classMethod('maxScan', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * Set the cursor hint
  * @method
@@ -274,6 +318,8 @@ Cursor.prototype.hint = function(hint) {
   this.s.cmd.hint = hint;
   return this;
 }
+
+define.classMethod('hint', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Set the cursor min
@@ -287,6 +333,8 @@ Cursor.prototype.min = function(min) {
   return this;
 }
 
+define.classMethod('min', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * Set the cursor max
  * @method
@@ -298,6 +346,8 @@ Cursor.prototype.max = function(max) {
   this.s.cmd.max = max;
   return this;
 }
+
+define.classMethod('max', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Set the cursor returnKey
@@ -311,6 +361,8 @@ Cursor.prototype.returnKey = function(value) {
   return this;
 }
 
+define.classMethod('returnKey', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * Set the cursor showRecordId
  * @method
@@ -323,6 +375,8 @@ Cursor.prototype.showRecordId = function(value) {
   return this;
 }
 
+define.classMethod('showRecordId', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * Set the cursor snapshot
  * @method
@@ -334,6 +388,8 @@ Cursor.prototype.snapshot = function(value) {
   this.s.cmd.snapshot = value;
   return this;
 }
+
+define.classMethod('snapshot', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Set a node.js specific cursor option
@@ -352,10 +408,12 @@ Cursor.prototype.setCursorOption = function(field, value) {
   return this;
 }
 
+define.classMethod('setCursorOption', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * Add a cursor flag to the cursor
  * @method
- * @param {string} flag The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'].
+ * @param {string} flag The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'partial'].
  * @param {boolean} value The flag boolean value.
  * @throws {MongoError}
  * @return {Cursor}
@@ -367,6 +425,8 @@ Cursor.prototype.addCursorFlag = function(flag, value) {
   this.s.cmd[flag] = value;
   return this;
 }
+
+define.classMethod('addCursorFlag', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Add a query modifier to the cursor query
@@ -388,6 +448,8 @@ Cursor.prototype.addQueryModifier = function(name, value) {
   return this;
 }
 
+define.classMethod('addQueryModifier', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * Add a comment to the cursor query allowing for tracking the comment in the log.
  * @method
@@ -400,6 +462,24 @@ Cursor.prototype.comment = function(value) {
   this.s.cmd.comment = value;
   return this;
 }
+
+define.classMethod('comment', {callback: false, promise:false, returns: [Cursor]});
+
+/**
+ * Set a maxAwaitTimeMS on a tailing cursor query to allow to customize the timeout value for the option awaitData (Only supported on MongoDB 3.2 or higher, ignored otherwise)
+ * @method
+ * @param {number} value Number of milliseconds to wait before aborting the tailed query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.maxAwaitTimeMS = function(value) {
+  if(typeof value != 'number') throw MongoError.create({message: "maxAwaitTimeMS must be a number", driver:true});
+  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
+  this.s.cmd.maxAwaitTimeMS = value;
+  return this;
+}
+
+define.classMethod('maxAwaitTimeMS', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Set a maxTimeMS on the cursor query, allowing for hard timeout limits on queries (Only supported on MongoDB 2.6 or higher)
@@ -415,7 +495,11 @@ Cursor.prototype.maxTimeMS = function(value) {
   return this;
 }
 
+define.classMethod('maxTimeMS', {callback: false, promise:false, returns: [Cursor]});
+
 Cursor.prototype.maxTimeMs = Cursor.prototype.maxTimeMS;
+
+define.classMethod('maxTimeMs', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Sets a field projection for the query.
@@ -430,6 +514,8 @@ Cursor.prototype.project = function(value) {
   return this;
 }
 
+define.classMethod('project', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * Sets the sort order of the cursor query.
  * @method
@@ -443,6 +529,25 @@ Cursor.prototype.sort = function(keyOrList, direction) {
   if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) throw MongoError.create({message: "Cursor is closed", driver:true});
   var order = keyOrList;
 
+  // We have an array of arrays, we need to preserve the order of the sort
+  // so we will us a Map
+  if(Array.isArray(order) && Array.isArray(order[0])) {
+    order = new Map(order.map(function(x) {
+      var value = [x[0], null];
+      if(x[1] == 'asc') {
+        value[1] = 1;
+      } else if(x[1] == 'desc') {
+        value[1] = -1;
+      } else if(x[1] == 1 || x[1] == -1) {
+        value[1] = x[1];
+      } else {
+        throw new MongoError("Illegal sort clause, must be of the form [['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]");
+      }
+
+      return value;
+    }));
+  }
+
   if(direction != null) {
     order = [[keyOrList, direction]];
   }
@@ -451,6 +556,8 @@ Cursor.prototype.sort = function(keyOrList, direction) {
   this.sortValue = order;
   return this;
 }
+
+define.classMethod('sort', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Set the batch size for the cursor.
@@ -467,6 +574,22 @@ Cursor.prototype.batchSize = function(value) {
   this.setCursorBatchSize(value);
   return this;
 }
+
+define.classMethod('batchSize', {callback: false, promise:false, returns: [Cursor]});
+
+/**
+ * Set the collation options for the cursor.
+ * @method
+ * @param {object} value The cursor collation options (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.collation = function(value) {
+  this.s.cmd.collation = value;
+  return this;
+}
+
+define.classMethod('collation', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Set the limit for the cursor.
@@ -485,6 +608,8 @@ Cursor.prototype.limit = function(value) {
   return this;
 }
 
+define.classMethod('limit', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * Set the skip for the cursor.
  * @method
@@ -501,53 +626,13 @@ Cursor.prototype.skip = function(value) {
   return this;
 }
 
+define.classMethod('skip', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * The callback format for results
  * @callback Cursor~resultCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {(object|null|boolean)} result The result object if the command was executed successfully.
- */
-
-/**
- * Set the new batchSize of the cursor
- * @function Cursor.prototype.setBatchSize
- * @param {number} value The new batchSize for the cursor
- * @return {null}
- */
-
-/**
- * Get the batchSize of the cursor
- * @function Cursor.prototype.batchSize
- * @param {number} value The current batchSize for the cursor
- * @return {null}
- */
-
-/**
- * Set the new skip value of the cursor
- * @function Cursor.prototype.setCursorSkip
- * @param {number} value The new skip for the cursor
- * @return {null}
- */
-
-/**
- * Get the skip value of the cursor
- * @function Cursor.prototype.cursorSkip
- * @param {number} value The current skip value for the cursor
- * @return {null}
- */
-
-/**
- * Set the new limit value of the cursor
- * @function Cursor.prototype.setCursorLimit
- * @param {number} value The new limit for the cursor
- * @return {null}
- */
-
-/**
- * Get the limit value of the cursor
- * @function Cursor.prototype.cursorLimit
- * @param {number} value The current limit value for the cursor
- * @return {null}
  */
 
 /**
@@ -573,7 +658,7 @@ Cursor.prototype.skip = function(value) {
 Cursor.prototype.nextObject = Cursor.prototype.next;
 
 var nextObject = function(self, callback) {
-  if(self.s.state == Cursor.CLOSED || self.isDead()) return handleCallback(callback, MongoError.create({message: "Cursor is closed", driver:true}));
+  if(self.s.state == Cursor.CLOSED || self.isDead && self.isDead()) return handleCallback(callback, MongoError.create({message: "Cursor is closed", driver:true}));
   if(self.s.state == Cursor.INIT && self.s.cmd.sort) {
     try {
       self.s.cmd.sort = formattedOrderClause(self.s.cmd.sort);
@@ -581,22 +666,16 @@ var nextObject = function(self, callback) {
       return handleCallback(callback, err);
     }
   }
+
   // Get the next object
   self._next(function(err, doc) {
-    if(err && err.tailable && self.s.currentNumberOfRetries == 0) return callback(err);
-    if(err && err.tailable && self.s.currentNumberOfRetries > 0) {
-      self.s.currentNumberOfRetries = self.s.currentNumberOfRetries - 1;
-
-      return setTimeout(function() {
-        self.nextObject(callback);
-      }, self.s.tailableRetryInterval);
-    }
-
     self.s.state = Cursor.OPEN;
     if(err) return handleCallback(callback, err);
     handleCallback(callback, null, doc);
   });
 }
+
+define.classMethod('nextObject', {callback: true, promise:true});
 
 // Trampoline emptying the number of retrieved items
 // without incurring a nextTick operation
@@ -609,15 +688,9 @@ var loop = function(self, callback) {
   return loop;
 }
 
-/**
- * Get the next available document from the cursor, returns null if no more documents are available.
- * @method
- * @param {Cursor~resultCallback} [callback] The result callback.
- * @throws {MongoError}
- * @deprecated
- * @return {Promise} returns Promise if no callback passed
- */
 Cursor.prototype.next = Cursor.prototype.nextObject;
+
+define.classMethod('next', {callback: true, promise:true});
 
 /**
  * Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
@@ -641,6 +714,8 @@ Cursor.prototype.each = function(callback) {
   _each(this, callback);
 };
 
+define.classMethod('each', {callback: true, promise:false});
+
 // Run the each loop
 var _each = function(self, callback) {
   if(!callback) throw MongoError.create({message: 'callback is mandatory', driver:true});
@@ -658,7 +733,7 @@ var _each = function(self, callback) {
     while(fn = loop(self, callback)) fn(self, callback);
     _each(self, callback);
   } else {
-    self._next(function(err, item) {
+    self.next(function(err, item) {
       if(err) return handleCallback(callback, err);
       if(item == null) {
         self.s.state = Cursor.CLOSED;
@@ -704,6 +779,8 @@ Cursor.prototype.forEach = function(iterator, callback) {
   });
 }
 
+define.classMethod('forEach', {callback: true, promise:false});
+
 /**
  * Set the ReadPreference for the cursor.
  * @method
@@ -714,13 +791,17 @@ Cursor.prototype.forEach = function(iterator, callback) {
 Cursor.prototype.setReadPreference = function(r) {
   if(this.s.state != Cursor.INIT) throw MongoError.create({message: 'cannot change cursor readPreference after cursor has been accessed', driver:true});
   if(r instanceof ReadPreference) {
-    this.s.options.readPreference = new CoreReadPreference(r.mode, r.tags);
-  } else {
+    this.s.options.readPreference = new CoreReadPreference(r.mode, r.tags, {maxStalenessSeconds: r.maxStalenessSeconds});
+  } else if(typeof r == 'string'){
     this.s.options.readPreference = new CoreReadPreference(r);
+  } else if(r instanceof CoreReadPreference) {
+    this.s.options.readPreference = r;
   }
 
   return this;
 }
+
+define.classMethod('setReadPreference', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * The callback format for results
@@ -762,7 +843,6 @@ var toArray = function(self, callback) {
   self.rewind();
   self.s.state = Cursor.INIT;
 
-
   // Fetch all the documents
   var fetchDocs = function() {
     self._next(function(err, doc) {
@@ -784,7 +864,7 @@ var toArray = function(self, callback) {
           docs = docs.map(self.s.transforms.doc);
         }
 
-        items = items.concat(docs);
+        push.apply(items, docs);
       }
 
       // Attempt a fetch
@@ -794,6 +874,8 @@ var toArray = function(self, callback) {
 
   fetchDocs();
 }
+
+define.classMethod('toArray', {callback: true, promise:true});
 
 /**
  * The callback format for results
@@ -805,7 +887,7 @@ var toArray = function(self, callback) {
 /**
  * Get the count of documents for this cursor
  * @method
- * @param {boolean} applySkipLimit Should the count command apply limit and skip settings on the cursor or in the passed in options.
+ * @param {boolean} [applySkipLimit=true] Should the count command apply limit and skip settings on the cursor or in the passed in options.
  * @param {object} [options=null] Optional settings.
  * @param {number} [options.skip=null] The number of documents to skip.
  * @param {number} [options.limit=null] The maximum amounts to count before aborting.
@@ -853,41 +935,23 @@ var count = function(self, applySkipLimit, opts, callback) {
 
   if(typeof opts.maxTimeMS == 'number') {
     command.maxTimeMS = opts.maxTimeMS;
-  } else if(typeof self.s.maxTimeMS == 'number') {
-    command.maxTimeMS = self.s.maxTimeMS;
+  } else if(self.s.cmd && typeof self.s.cmd.maxTimeMS == 'number') {
+    command.maxTimeMS = self.s.cmd.maxTimeMS;
   }
-
-  // Get a server
-  var server = self.s.topology.getServer(opts);
-  // Get a connection
-  var connection = self.s.topology.getConnection(opts);
-  // Get the callbacks
-  var callbacks = server.getCallbacks();
 
   // Merge in any options
   if(opts.skip) command.skip = opts.skip;
   if(opts.limit) command.limit = opts.limit;
   if(self.s.options.hint) command.hint = self.s.options.hint;
 
-  // Build Query object
-  var query = new Query(self.s.bson, f("%s.$cmd", self.s.ns.substr(0, delimiter)), command, {
-      numberToSkip: 0, numberToReturn: -1
-    , checkKeys: false
-  });
-
-  // Set up callback
-  callbacks.register(query.requestId, function(err, result) {
-    if(err) return handleCallback(callback, err);
-    if(result.documents.length == 1
-      && (result.documents[0].errmsg
-      || result.documents[0].err
-      || result.documents[0]['$err'])) return callback(MongoError.create(result.documents[0]));
-    handleCallback(callback, null, result.documents[0].n);
-  });
-
-  // Write the initial command out
-  connection.write(query.toBin());
+  // Execute the command
+  self.topology.command(f("%s.$cmd", self.s.ns.substr(0, delimiter))
+    , command, function(err, result) {
+      callback(err, result ? result.result.n : null)
+    });
 }
+
+define.classMethod('count', {callback: true, promise:true});
 
 /**
  * Close the cursor, sending a KillCursor command and emitting close.
@@ -904,21 +968,25 @@ Cursor.prototype.close = function(callback) {
   // Callback if provided
   if(typeof callback == 'function') return handleCallback(callback, null, this);
   // Return a Promise
-  return new this.s.promiseLibrary(function(resolve, reject) {
+  return new this.s.promiseLibrary(function(resolve) {
     resolve();
   });
 }
+
+define.classMethod('close', {callback: true, promise:true});
 
 /**
  * Map all documents using the provided function
  * @method
  * @param {function} [transform] The mapping transformation method.
- * @return {null}
+ * @return {Cursor}
  */
 Cursor.prototype.map = function(transform) {
   this.cursorState.transforms = { doc: transform };
   return this;
 }
+
+define.classMethod('map', {callback: false, promise:false, returns: [Cursor]});
 
 /**
  * Is the cursor closed
@@ -929,11 +997,15 @@ Cursor.prototype.isClosed = function() {
   return this.isDead();
 }
 
+define.classMethod('isClosed', {callback: false, promise:false, returns: [Boolean]});
+
 Cursor.prototype.destroy = function(err) {
+  if(err) this.emit('error', err);
   this.pause();
   this.close();
-  if(err) this.emit('error', err);
 }
+
+define.classMethod('destroy', {callback: false, promise:false});
 
 /**
  * Return a modified Readable stream including a possible transform method.
@@ -947,6 +1019,8 @@ Cursor.prototype.stream = function(options) {
   return this;
 }
 
+define.classMethod('stream', {callback: false, promise:false, returns: [Cursor]});
+
 /**
  * Execute the explain for the cursor
  * @method
@@ -956,6 +1030,11 @@ Cursor.prototype.stream = function(options) {
 Cursor.prototype.explain = function(callback) {
   var self = this;
   this.s.cmd.explain = true;
+
+  // Do we have a readConcern
+  if(this.s.cmd.readConcern) {
+    delete this.s.cmd['readConcern'];
+  }
 
   // Execute using callback
   if(typeof callback == 'function') return this._next(callback);
@@ -969,7 +1048,9 @@ Cursor.prototype.explain = function(callback) {
   });
 }
 
-Cursor.prototype._read = function(n) {
+define.classMethod('explain', {callback: true, promise:true});
+
+Cursor.prototype._read = function() {
   var self = this;
   if(self.s.state == Cursor.CLOSED || self.isDead()) {
     return self.push(null);
@@ -978,10 +1059,10 @@ Cursor.prototype._read = function(n) {
   // Get the next item
   self.nextObject(function(err, result) {
     if(err) {
-      if(!self.isDead()) self.close();
       if(self.listeners('error') && self.listeners('error').length > 0) {
         self.emit('error', err);
       }
+      if(!self.isDead()) self.close();
 
       // Emit end event
       self.emit('end');
@@ -1002,6 +1083,17 @@ Cursor.prototype._read = function(n) {
     self.push(result);
   });
 }
+
+Object.defineProperty(Cursor.prototype, 'readPreference', {
+  enumerable:true,
+  get: function() {
+    if (!this || !this.s) {
+      return null;
+    }
+
+    return this.s.options.readPreference;
+  }
+});
 
 Object.defineProperty(Cursor.prototype, 'namespace', {
   enumerable: true,

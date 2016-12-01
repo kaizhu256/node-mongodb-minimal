@@ -8,6 +8,7 @@ var EventEmitter = require('events').EventEmitter
   , debugOptions = require('./utils').debugOptions
   , CommandCursor = require('./command_cursor')
   , handleCallback = require('./utils').handleCallback
+  , filterOptions = require('./utils').filterOptions
   , toError = require('./utils').toError
   , ReadPreference = require('./read_preference')
   , f = require('util').format
@@ -16,13 +17,19 @@ var EventEmitter = require('events').EventEmitter
   , CoreReadPreference = require('mongodb-core').ReadPreference
   , MongoError = require('mongodb-core').MongoError
   , ObjectID = require('mongodb-core').ObjectID
+  , Define = require('./metadata')
   , Logger = require('mongodb-core').Logger
   , Collection = require('./collection')
-  , crypto = require('crypto');
+  , crypto = require('crypto')
+  , assign = require('./utils').assign;
 
 var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceServerObjectId'
-  , 'serializeFunctions', 'raw', 'promoteLongs', 'bufferMaxEntries', 'numberOfRetries', 'retryMiliSeconds'
-  , 'readPreference', 'pkFactory'];
+  , 'serializeFunctions', 'raw', 'promoteLongs', 'promoteValues', 'promoteBuffers', 'bufferMaxEntries', 'numberOfRetries', 'retryMiliSeconds'
+  , 'readPreference', 'pkFactory', 'parentDb', 'promiseLibrary', 'noListener'];
+
+// Filter out any write concern options
+var illegalCommandFields = ['w', 'wtimeout', 'j', 'fsync', 'autoIndexId'
+  , 'strict', 'serializeFunctions', 'pkFactory', 'raw', 'readPreference'];
 
 /**
  * @fileOverview The **Db** class is a class that represents a MongoDB Database.
@@ -40,6 +47,12 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
  * });
  */
 
+// Allowed parameters
+var legalOptionNames = ['w', 'wtimeout', 'fsync', 'j', 'readPreference', 'readPreferenceTags', 'native_parser'
+  , 'forceServerObjectId', 'pkFactory', 'serializeFunctions', 'raw', 'bufferMaxEntries', 'authSource'
+  , 'ignoreUndefined', 'promoteLongs', 'promiseLibrary', 'readConcern', 'retryMiliSeconds', 'numberOfRetries'
+  , 'parentDb', 'noListener', 'loggerLevel', 'logger', 'promoteBuffers', 'promoteLongs', 'promoteValues'];
+
 /**
  * Creates a new Db instance
  * @class
@@ -50,17 +63,19 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
  * @param {(number|string)} [options.w=null] The write concern.
  * @param {number} [options.wtimeout=null] The write concern timeout.
  * @param {boolean} [options.j=false] Specify a journal write concern.
- * @param {boolean} [options.native_parser=true] Select C++ bson parser instead of JavaScript parser.
  * @param {boolean} [options.forceServerObjectId=false] Force server to assign _id values instead of driver.
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
+ * @param {Boolean} [options.ignoreUndefined=false] Specify if the BSON serializer should ignore undefined fields.
  * @param {boolean} [options.raw=false] Return document results as raw BSON buffers.
  * @param {boolean} [options.promoteLongs=true] Promotes Long values to number if they fit inside the 53 bits resolution.
+ * @param {boolean} [options.promoteBuffers=false] Promotes Binary BSON values to native Node Buffers.
+ * @param {boolean} [options.promoteValues=true] Promotes BSON values to native types where possible, set to false to only receive wrapper types.
  * @param {number} [options.bufferMaxEntries=-1] Sets a cap on how many operations the driver will buffer up before giving up on getting a working connection, default is -1 which is unlimited.
- * @param {number} [options.numberOfRetries=5] Number of times a tailable cursor will re-poll when it gets nothing back.
- * @param {number} [options.retryMiliSeconds=500] Number of milliseconds between retries.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {object} [options.pkFactory=null] A primary key factory object for generation of custom _id keys.
  * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
+ * @param {object} [options.readConcern=null] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
+ * @param {object} [options.readConcern.level='local'] Specify a read concern level for the collection operations, one of [local|majority]. (only MongoDB 3.2 or higher supported)
  * @property {(Server|ReplSet|Mongos)} serverConfig Get the current db topology.
  * @property {number} bufferMaxEntries Current bufferMaxEntries value for the database
  * @property {string} databaseName The name of the database this instance represents.
@@ -68,6 +83,7 @@ var debugFields = ['authSource', 'w', 'wtimeout', 'j', 'native_parser', 'forceSe
  * @property {boolean} native_parser The current value of the parameter native_parser.
  * @property {boolean} slaveOk The current slaveOk value for the db instance.
  * @property {object} writeConcern The current write concern values.
+ * @property {object} topology Access the topology object (single server, replicaset or mongos).
  * @fires Db#close
  * @fires Db#authenticated
  * @fires Db#reconnect
@@ -91,6 +107,9 @@ var Db = function(databaseName, topology, options) {
     promiseLibrary = typeof global.Promise == 'function' ?
       global.Promise : require('es6-promise').Promise;
   }
+
+  // Filter the options
+  options = filterOptions(options, legalOptionNames);
 
   // Ensure we put the promiseLib in the options
   options.promiseLibrary = promiseLibrary;
@@ -127,70 +146,27 @@ var Db = function(databaseName, topology, options) {
     , promiseLibrary: promiseLibrary
     // No listener
     , noListener: typeof options.noListener == 'boolean' ? options.noListener : false
+    // ReadConcern
+    , readConcern: options.readConcern
   }
 
   // Ensure we have a valid db name
   validateDatabaseName(self.s.databaseName);
-
-  // If we have specified the type of parser
-  if(typeof self.s.nativeParser == 'boolean') {
-    if(self.s.nativeParser) {
-      topology.setBSONParserType("c++");
-    } else {
-      topology.setBSONParserType("js");
-    }
-  }
 
   // Add a read Only property
   getSingleProperty(this, 'serverConfig', self.s.topology);
   getSingleProperty(this, 'bufferMaxEntries', self.s.bufferMaxEntries);
   getSingleProperty(this, 'databaseName', self.s.databaseName);
 
-  // Last ismaster
-  Object.defineProperty(this, 'options', {
-    enumerable:true,
-    get: function() { return self.s.options; }
-  });
-
-  // Last ismaster
-  Object.defineProperty(this, 'native_parser', {
-    enumerable:true,
-    get: function() { return self.s.topology.parserType() == 'c++'; }
-  });
-
-  // Last ismaster
-  Object.defineProperty(this, 'slaveOk', {
-    enumerable:true,
-    get: function() {
-      if(self.s.options.readPreference != null
-        && (self.s.options.readPreference != 'primary' || self.s.options.readPreference.mode != 'primary')) {
-        return true;
-      }
-      return false;
-    }
-  });
-
-  Object.defineProperty(this, 'writeConcern', {
-    enumerable:true,
-    get: function() {
-      var ops = {};
-      if(self.s.options.w != null) ops.w = self.s.options.w;
-      if(self.s.options.j != null) ops.j = self.s.options.j;
-      if(self.s.options.fsync != null) ops.fsync = self.s.options.fsync;
-      if(self.s.options.wtimeout != null) ops.wtimeout = self.s.options.wtimeout;
-      return ops;
-    }
-  });
-
   // This is a child db, do not register any listeners
   if(options.parentDb) return;
   if(this.s.noListener) return;
 
   // Add listeners
-  topology.once('error', createListener(self, 'error', self));
-  topology.once('timeout', createListener(self, 'timeout', self));
+  topology.on('error', createListener(self, 'error', self));
+  topology.on('timeout', createListener(self, 'timeout', self));
   topology.on('close', createListener(self, 'close', self));
-  topology.once('parseError', createListener(self, 'parseError', self));
+  topology.on('parseError', createListener(self, 'parseError', self));
   topology.once('open', createListener(self, 'open', self));
   topology.once('fullsetup', createListener(self, 'fullsetup', self));
   topology.once('all', createListener(self, 'all', self));
@@ -198,6 +174,45 @@ var Db = function(databaseName, topology, options) {
 }
 
 inherits(Db, EventEmitter);
+
+var define = Db.define = new Define('Db', Db, false);
+
+// Topology
+Object.defineProperty(Db.prototype, 'topology', {
+  enumerable:true,
+  get: function() { return this.s.topology; }
+});
+
+// Options
+Object.defineProperty(Db.prototype, 'options', {
+  enumerable:true,
+  get: function() { return this.s.options; }
+});
+
+// slaveOk specified
+Object.defineProperty(Db.prototype, 'slaveOk', {
+  enumerable:true,
+  get: function() {
+    if(this.s.options.readPreference != null
+      && (this.s.options.readPreference != 'primary' || this.s.options.readPreference.mode != 'primary')) {
+      return true;
+    }
+    return false;
+  }
+});
+
+// get the write Concern
+Object.defineProperty(Db.prototype, 'writeConcern', {
+  enumerable:true,
+  get: function() {
+    var ops = {};
+    if(this.s.options.w != null) ops.w = this.s.options.w;
+    if(this.s.options.j != null) ops.j = this.s.options.j;
+    if(this.s.options.fsync != null) ops.fsync = this.s.options.fsync;
+    if(this.s.options.wtimeout != null) ops.wtimeout = this.s.options.wtimeout;
+    return ops;
+  }
+});
 
 /**
  * The callback format for the Db.open method
@@ -208,7 +223,7 @@ inherits(Db, EventEmitter);
 
 // Internal method
 var open = function(self, callback) {
-  self.s.topology.connect(self, self.s.options, function(err, topology) {
+  self.s.topology.connect(self, self.s.options, function(err) {
     if(callback == null) return;
     var internalCallback = callback;
     callback == null;
@@ -241,6 +256,27 @@ Db.prototype.open = function(callback) {
   });
 }
 
+define.classMethod('open', {callback: true, promise:true});
+
+/**
+ * Converts provided read preference to CoreReadPreference
+ * @param {(ReadPreference|string|object)} readPreference the user provided read preference
+ * @return {CoreReadPreference}
+ */
+var convertReadPreference = function(readPreference) {
+  if(readPreference && typeof readPreference == 'string') {
+    return new CoreReadPreference(readPreference);
+  } else if(readPreference instanceof ReadPreference) {
+    return new CoreReadPreference(readPreference.mode, readPreference.tags, {maxStalenessSeconds: readPreference.maxStalenessSeconds});
+  } else if(readPreference && typeof readPreference == 'object') {
+    var mode = readPreference.mode || readPreference.preference;
+    if (mode && typeof mode == 'string') {
+      readPreference = new CoreReadPreference(mode, readPreference.tags, {maxStalenessSeconds: readPreference.maxStalenessSeconds});
+    }
+  }
+  return readPreference;
+}
+
 /**
  * The callback format for results
  * @callback Db~resultCallback
@@ -249,18 +285,21 @@ Db.prototype.open = function(callback) {
  */
 
 var executeCommand = function(self, command, options, callback) {
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
+  // Get the db name we are executing against
   var dbName = options.dbName || options.authdb || self.s.databaseName;
+
   // If we have a readPreference set
   if(options.readPreference == null && self.s.readPreference) {
     options.readPreference = self.s.readPreference;
   }
 
-  // Convert the readPreference
-  if(options.readPreference && typeof options.readPreference == 'string') {
-    options.readPreference = new CoreReadPreference(options.readPreference);
-  } else if(options.readPreference instanceof ReadPreference) {
-    options.readPreference = new CoreReadPreference(options.readPreference.mode
-      , options.readPreference.tags);
+  // Convert the readPreference if its not a write
+  if(options.readPreference) {
+    options.readPreference = convertReadPreference(options.readPreference);
+  } else {
+    options.readPreference = CoreReadPreference.primary;
   }
 
   // Debug information
@@ -270,6 +309,7 @@ var executeCommand = function(self, command, options, callback) {
   // Execute command
   self.s.topology.command(f('%s.$cmd', dbName), command, options, function(err, result) {
     if(err) return handleCallback(callback, err);
+    if(options.full) return handleCallback(callback, null, result);
     handleCallback(callback, null, result.result);
   });
 }
@@ -280,7 +320,6 @@ var executeCommand = function(self, command, options, callback) {
  * @param {object} command The command hash
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {number} [options.maxTimeMS=null] Number of milliseconds to wait before aborting the query.
  * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
@@ -302,6 +341,8 @@ Db.prototype.command = function(command, options, callback) {
   });
 }
 
+define.classMethod('command', {callback: true, promise:true});
+
 /**
  * The callback format for results
  * @callback Db~noResultCallback
@@ -310,7 +351,7 @@ Db.prototype.command = function(command, options, callback) {
  */
 
 /**
- * Close the db and it's underlying connections
+ * Close the db and its underlying connections
  * @method
  * @param {boolean} force Force close, emitting no events
  * @param {Db~noResultCallback} [callback] The result callback
@@ -345,10 +386,12 @@ Db.prototype.close = function(force, callback) {
   })
 
   // Return dummy promise
-  return new this.s.promiseLibrary(function(resolve, reject) {
+  return new this.s.promiseLibrary(function(resolve) {
     resolve();
   });
 }
+
+define.classMethod('close', {callback: true, promise:true});
 
 /**
  * Return the Admin db instance
@@ -359,6 +402,8 @@ Db.prototype.admin = function() {
   return new Admin(this, this.s.topology, this.s.promiseLibrary);
 };
 
+define.classMethod('admin', {callback: false, promise:false, returns: [Admin]});
+
 /**
  * The callback format for the collection method, must be used if strict is specified
  * @callback Db~collectionResultCallback
@@ -368,7 +413,7 @@ Db.prototype.admin = function() {
 
 /**
  * Fetch a specific collection (containing the actual collection information). If the application does not use strict mode you can
- * can use it without a callback in the following way. var collection = db.collection('mycollection');
+ * can use it without a callback in the following way: `var collection = db.collection('mycollection');`
  *
  * @method
  * @param {string} name the collection name we wish to access.
@@ -381,6 +426,8 @@ Db.prototype.admin = function() {
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @param {boolean} [options.serializeFunctions=false] Serialize functions on any object.
  * @param {boolean} [options.strict=false] Returns an error if the collection does not exist
+ * @param {object} [options.readConcern=null] Specify a read concern for the collection. (only MongoDB 3.2 or higher supported)
+ * @param {object} [options.readConcern.level='local'] Specify a read concern level for the collection operations, one of [local|majority]. (only MongoDB 3.2 or higher supported)
  * @param {Db~collectionResultCallback} callback The collection result callback
  * @return {Collection} return the new Collection instance if not in strict mode
  */
@@ -391,6 +438,14 @@ Db.prototype.collection = function(name, options, callback) {
   options = shallowClone(options);
   // Set the promise library
   options.promiseLibrary = this.s.promiseLibrary;
+
+  // If we have not set a collection level readConcern set the db level one
+  options.readConcern = options.readConcern || this.s.readConcern;
+
+  // Do we have ignoreUndefined set
+  if(this.s.options.ignoreUndefined) {
+    options.ignoreUndefined = this.s.options.ignoreUndefined;
+  }
 
   // Execute
   if(options == null || !options.strict) {
@@ -409,6 +464,11 @@ Db.prototype.collection = function(name, options, callback) {
     throw toError(f("A callback is required in strict mode. While getting collection %s.", name));
   }
 
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) {
+    return callback(new MongoError('topology was destroyed'));
+  }
+
   // Strict mode
   this.listCollections({name:name}).toArray(function(err, collections) {
     if(err != null) return handleCallback(callback, err, null);
@@ -422,39 +482,63 @@ Db.prototype.collection = function(name, options, callback) {
   });
 }
 
+define.classMethod('collection', {callback: true, promise:false, returns: [Collection]});
+
+function decorateWithWriteConcern(command, self, options) {
+  // Do we support write concerns 3.4 and higher
+  if(self.s.topology.capabilities().commandsTakeWriteConcern) {
+    // Get the write concern settings
+    var finalOptions = writeConcern(shallowClone(options), self, options);
+    // Add the write concern to the command
+    if(finalOptions.writeConcern) {
+      command.writeConcern = finalOptions.writeConcern;
+    }
+  }
+}
+
 var createCollection = function(self, name, options, callback) {
   // Get the write concern options
   var finalOptions = writeConcern(shallowClone(options), self, options);
-
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
   // Check if we have the name
-  self.listCollections({name: name}).toArray(function(err, collections) {
-    if(err != null) return handleCallback(callback, err, null);
-    if(collections.length > 0 && finalOptions.strict) {
-      return handleCallback(callback, MongoError.create({message: f("Collection %s already exists. Currently in strict mode.", name), driver:true}), null);
-    } else if (collections.length > 0) {
-      try { return handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options)); }
-      catch(err) { return handleCallback(callback, err); }
-    }
+  self.listCollections({name: name})
+    .setReadPreference(ReadPreference.PRIMARY)
+    .toArray(function(err, collections) {
+      if(err != null) return handleCallback(callback, err, null);
+      if(collections.length > 0 && finalOptions.strict) {
+        return handleCallback(callback, MongoError.create({message: f("Collection %s already exists. Currently in strict mode.", name), driver:true}), null);
+      } else if (collections.length > 0) {
+        try { return handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options)); }
+        catch(err) { return handleCallback(callback, err); }
+      }
 
-    // Create collection command
-    var cmd = {'create':name};
+      // Create collection command
+      var cmd = {'create':name};
 
-    // Add all optional parameters
-    for(var n in options) {
-      if(options[n] != null && typeof options[n] != 'function')
-        cmd[n] = options[n];
-    }
+      // Decorate command with writeConcern if supported
+      decorateWithWriteConcern(cmd, self, options);
+      // Add all optional parameters
+      for(var n in options) {
+        if(options[n] != null
+          && typeof options[n] != 'function' && illegalCommandFields.indexOf(n) == -1) {
+            cmd[n] = options[n];
+        }
+      }
 
-    // Execute command
-    self.command(cmd, finalOptions, function(err, result) {
-      if(err) return handleCallback(callback, err);
-      handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options));
-    });
+      // Force a primary read Preference
+      finalOptions.readPreference = ReadPreference.PRIMARY;
+
+      // Execute command
+      self.command(cmd, finalOptions, function(err) {
+        if(err) return handleCallback(callback, err);
+        handleCallback(callback, null, new Collection(self, self.s.topology, self.s.databaseName, name, self.s.pkFactory, options));
+      });
   });
 }
 
 /**
- * Creates a collection on a server pre-allocating space, need to create f.ex capped collections.
+ * Create a new collection on a server with the specified options. Use this to create capped collections.
  *
  * @method
  * @param {string} name the collection name we wish to access.
@@ -471,6 +555,7 @@ var createCollection = function(self, name, options, callback) {
  * @param {number} [options.size=null] The size of the capped collection in bytes.
  * @param {number} [options.max=null] The maximum number of documents in the capped collection.
  * @param {boolean} [options.autoIndexId=true] Create an index on the _id field of the document, True by default on MongoDB 2.2 or higher off for version < 2.2.
+ * @param {object} [options.collation=null] Specify collation (MongoDB 3.4 or higher) settings for update operation (see 3.4 documentation for available fields).
  * @param {Db~collectionResultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
@@ -498,6 +583,8 @@ Db.prototype.createCollection = function(name, options, callback) {
   });
 }
 
+define.classMethod('createCollection', {callback: true, promise:true});
+
 /**
  * Get all the db statistics.
  *
@@ -514,9 +601,17 @@ Db.prototype.stats = function(options, callback) {
   var commandObject = { dbStats:true };
   // Check if we have the scale value
   if(options['scale'] != null) commandObject['scale'] = options['scale'];
+
+  // If we have a readPreference set
+  if(options.readPreference == null && this.s.readPreference) {
+    options.readPreference = this.s.readPreference;
+  }
+
   // Execute the command
   return this.command(commandObject, options, callback);
 }
+
+define.classMethod('stats', {callback: true, promise:true});
 
 // Transformation methods for cursor results
 var listCollectionsTranforms = function(databaseName) {
@@ -542,6 +637,7 @@ var listCollectionsTranforms = function(databaseName) {
  * @param {object} filter Query to filter collections by
  * @param {object} [options=null] Optional settings.
  * @param {number} [options.batchSize=null] The batchSize for the returned command cursor or if pre 2.8 the systems batch collection
+ * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
  * @return {CommandCursor}
  */
 Db.prototype.listCollections = function(filter, options) {
@@ -553,6 +649,11 @@ Db.prototype.listCollections = function(filter, options) {
   // Set the promise library
   options.promiseLibrary = this.s.promiseLibrary;
 
+  // Ensure valid readPreference
+  if(options.readPreference) {
+    options.readPreference = convertReadPreference(options.readPreference);
+  }
+
   // We have a list collections command
   if(this.serverConfig.capabilities().hasListCollectionsCommand) {
     // Cursor options
@@ -561,10 +662,14 @@ Db.prototype.listCollections = function(filter, options) {
     var command = { listCollections : true, filter: filter, cursor: cursor };
     // Set the AggregationCursor constructor
     options.cursorFactory = CommandCursor;
-    // Filter out the correct field values
-    options.transforms = listCollectionsTranforms(this.s.databaseName);
-    // Execute the cursor
-    return this.s.topology.cursor(f('%s.$cmd', this.s.databaseName), command, options);
+    // Create the cursor
+    cursor = this.s.topology.cursor(f('%s.$cmd', this.s.databaseName), command, options);
+    // Do we have a readPreference, apply it
+    if(options.readPreference) {
+      cursor.setReadPreference(options.readPreference);
+    }
+    // Return the cursor
+    return cursor;
   }
 
   // We cannot use the listCollectionsCommand
@@ -589,18 +694,25 @@ Db.prototype.listCollections = function(filter, options) {
   }
 
   // Return options
-  var options = {transforms: listCollectionsTranforms(this.s.databaseName)}
+  var _options = {transforms: listCollectionsTranforms(this.s.databaseName)}
   // Get the cursor
-  var cursor = this.collection(Db.SYSTEM_NAMESPACE_COLLECTION).find(filter, options);
+  cursor = this.collection(Db.SYSTEM_NAMESPACE_COLLECTION).find(filter, _options);
+  // Do we have a readPreference, apply it
+  if(options.readPreference) cursor.setReadPreference(options.readPreference);
   // Set the passed in batch size if one was provided
   if(options.batchSize) cursor = cursor.batchSize(options.batchSize);
   // We have a fallback mode using legacy systems collections
   return cursor;
 };
 
+define.classMethod('listCollections', {callback: false, promise:false, returns: [CommandCursor]});
+
 var evaluate = function(self, code, parameters, options, callback) {
   var finalCode = code;
   var finalParameters = [];
+
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
 
   // If not a code object translate to one
   if(!(finalCode instanceof Code)) finalCode = new Code(finalCode);
@@ -639,6 +751,7 @@ var evaluate = function(self, code, parameters, options, callback) {
  * @param {object} [options=null] Optional settings.
  * @param {boolean} [options.nolock=false] Tell MongoDB not to block on the evaulation of the javascript.
  * @param {Db~resultCallback} [callback] The results callback
+ * @deprecated Eval is deprecated on MongoDB 3.2 and forward
  * @return {Promise} returns Promise if no callback passed
  */
 Db.prototype.eval = function(code, parameters, options, callback) {
@@ -659,6 +772,8 @@ Db.prototype.eval = function(code, parameters, options, callback) {
     });
   });
 };
+
+define.classMethod('eval', {callback: true, promise:true});
 
 /**
  * Rename a collection.
@@ -692,6 +807,8 @@ Db.prototype.renameCollection = function(fromCollection, toCollection, options, 
   });
 };
 
+define.classMethod('renameCollection', {callback: true, promise:true});
+
 /**
  * Drop a collection from the database, removing it permanently. New accesses will create a new collection.
  *
@@ -700,23 +817,40 @@ Db.prototype.renameCollection = function(fromCollection, toCollection, options, 
  * @param {Db~resultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
-Db.prototype.dropCollection = function(name, callback) {
+Db.prototype.dropCollection = function(name, options, callback) {
   var self = this;
+  if(typeof options == 'function') callback = options, options = {};
+  options = options || {};
 
   // Command to execute
   var cmd = {'drop':name}
 
+  // Decorate with write concern
+  decorateWithWriteConcern(cmd, self, options);
+
+  // options
+  options = assign({}, this.s.options, {readPreference: ReadPreference.PRIMARY});
+
   // Check if the callback is in fact a string
-  if(typeof callback == 'function') return this.command(cmd, this.s.options, function(err, result) {
+  if(typeof callback == 'function') return this.command(cmd, options, function(err, result) {
+    // Did the user destroy the topology
+    if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
     if(err) return handleCallback(callback, err);
     if(result.ok) return handleCallback(callback, null, true);
     handleCallback(callback, null, false);
   });
 
+  // Clone the options
+  options = shallowClone(self.s.options);
+  // Set readPreference PRIMARY
+  options.readPreference = ReadPreference.PRIMARY;
+
   // Execute the command
   return new this.s.promiseLibrary(function(resolve, reject) {
     // Execute command
-    self.command(cmd, self.s.options, function(err, result) {
+    self.command(cmd, options, function(err, result) {
+      // Did the user destroy the topology
+      if(self.serverConfig && self.serverConfig.isDestroyed()) return reject(new MongoError('topology was destroyed'));
       if(err) return reject(err);
       if(result.ok) return resolve(true);
       resolve(false);
@@ -724,20 +858,32 @@ Db.prototype.dropCollection = function(name, callback) {
   });
 };
 
+define.classMethod('dropCollection', {callback: true, promise:true});
+
 /**
- * Drop a database.
+ * Drop a database, removing it permanently from the server.
  *
  * @method
  * @param {Db~resultCallback} [callback] The results callback
  * @return {Promise} returns Promise if no callback passed
  */
-Db.prototype.dropDatabase = function(callback) {
+Db.prototype.dropDatabase = function(options, callback) {
   var self = this;
+  if(typeof options == 'function') callback = options, options = {};
+  options = options || {};
   // Drop database command
   var cmd = {'dropDatabase':1};
 
+  // Decorate with write concern
+  decorateWithWriteConcern(cmd, self, options);
+
+  // Ensure primary only
+  options = assign({}, this.s.options, {readPreference: ReadPreference.PRIMARY});
+
   // Check if the callback is in fact a string
-  if(typeof callback == 'function') return this.command(cmd, this.s.options, function(err, result) {
+  if(typeof callback == 'function') return this.command(cmd, options, function(err, result) {
+    // Did the user destroy the topology
+    if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
     if(callback == null) return;
     if(err) return handleCallback(callback, err, null);
     handleCallback(callback, null, result.ok ? true : false);
@@ -746,7 +892,9 @@ Db.prototype.dropDatabase = function(callback) {
   // Execute the command
   return new this.s.promiseLibrary(function(resolve, reject) {
     // Execute command
-    self.command(cmd, self.s.options, function(err, result) {
+    self.command(cmd, options, function(err, result) {
+      // Did the user destroy the topology
+      if(self.serverConfig && self.serverConfig.isDestroyed()) return reject(new MongoError('topology was destroyed'));
       if(err) return reject(err);
       if(result.ok) return resolve(true);
       resolve(false);
@@ -754,13 +902,14 @@ Db.prototype.dropDatabase = function(callback) {
   });
 }
 
+define.classMethod('dropDatabase', {callback: true, promise:true});
+
 /**
  * The callback format for the collections method.
  * @callback Db~collectionsResultCallback
  * @param {MongoError} error An error instance representing the error during the execution.
  * @param {Collection[]} collections An array of all the collections objects for the db instance.
  */
-
 var collections = function(self, callback) {
   // Let's get the collection names
   self.listCollections().toArray(function(err, documents) {
@@ -798,13 +947,14 @@ Db.prototype.collections = function(callback) {
   });
 };
 
+define.classMethod('collections', {callback: true, promise:true});
+
 /**
  * Runs a command on the database as admin.
  * @method
  * @param {object} command The command hash
  * @param {object} [options=null] Optional settings.
  * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
- * @param {number} [options.maxTimeMS=null] Number of milliseconds to wait before aborting the query.
  * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
@@ -813,50 +963,33 @@ Db.prototype.executeDbAdminCommand = function(selector, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
   options = options || {};
 
-  if(options.readPreference) {
-    options.readPreference = options.readPreference;
-  }
-
   // Return the callback
-  if(typeof callback == 'function') return self.s.topology.command('admin.$cmd', selector, options, function(err, result) {
-    if(err) return handleCallback(callback, err);
-    handleCallback(callback, null, result.result);
-  });
+  if(typeof callback == 'function') {
+    // Convert read preference
+    if(options.readPreference) {
+      options.readPreference = convertReadPreference(options.readPreference)
+    }
+
+    return self.s.topology.command('admin.$cmd', selector, options, function(err, result) {
+      // Did the user destroy the topology
+      if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
+      if(err) return handleCallback(callback, err);
+      handleCallback(callback, null, result.result);
+    });
+  }
 
   // Return promise
   return new self.s.promiseLibrary(function(resolve, reject) {
     self.s.topology.command('admin.$cmd', selector, options, function(err, result) {
+      // Did the user destroy the topology
+      if(self.serverConfig && self.serverConfig.isDestroyed()) return reject(new MongoError('topology was destroyed'));
       if(err) return reject(err);
       resolve(result.result);
     });
   });
 };
 
-var createIndex = function(self, name, fieldOrSpec, options, callback) {
-  // Get the write concern options
-  var finalOptions = writeConcern({}, self, options);
-  // Ensure we have a callback
-  if(finalOptions.writeConcern && typeof callback != 'function') {
-    throw MongoError.create({message: "Cannot use a writeConcern without a provided callback", driver:true});
-  }
-
-  // Attempt to run using createIndexes command
-  createIndexUsingCreateIndexes(self, name, fieldOrSpec, options, function(err, result) {
-    if(err == null) return handleCallback(callback, err, result);
-    // Create command
-    var doc = createCreateIndexCommand(self, name, fieldOrSpec, options);
-    // Set no key checking
-    finalOptions.checkKeys = false;
-    // Insert document
-    self.s.topology.insert(f("%s.%s", self.s.databaseName, Db.SYSTEM_INDEX_COLLECTION), doc, finalOptions, function(err, result) {
-      if(callback == null) return;
-      if(err) return handleCallback(callback, err);
-      if(result == null) return handleCallback(callback, null, null);
-      if(result.result.writeErrors) return handleCallback(callback, MongoError.create(result.result.writeErrors[0]), null);
-      handleCallback(callback, null, doc.name);
-    });
-  });
-}
+define.classMethod('executeDbAdminCommand', {callback: true, promise:true});
 
 /**
  * Creates an index on the db and collection collection.
@@ -876,6 +1009,7 @@ var createIndex = function(self, name, fieldOrSpec, options, callback) {
  * @param {number} [options.v=null] Specify the format version of the indexes.
  * @param {number} [options.expireAfterSeconds=null] Allows you to expire data on indexes applied to a data (MongoDB 2.2 or higher)
  * @param {number} [options.name=null] Override the autogenerated index name (useful if the resulting name is larger than 128 bytes)
+ * @param {object} [options.partialFilterExpression=null] Creates a partial index based on the given filter object (MongoDB 3.2 or higher)
  * @param {Db~resultCallback} [callback] The command result callback
  * @return {Promise} returns Promise if no callback passed
  */
@@ -903,26 +1037,46 @@ Db.prototype.createIndex = function(name, fieldOrSpec, options, callback) {
   });
 };
 
-var ensureIndex = function(self, name, fieldOrSpec, options, callback) {
+var createIndex = function(self, name, fieldOrSpec, options, callback) {
   // Get the write concern options
   var finalOptions = writeConcern({}, self, options);
-  // Create command
-  var selector = createCreateIndexCommand(self, name, fieldOrSpec, options);
-  var index_name = selector.name;
+  // Ensure we have a callback
+  if(finalOptions.writeConcern && typeof callback != 'function') {
+    throw MongoError.create({message: "Cannot use a writeConcern without a provided callback", driver:true});
+  }
 
-  // Default command options
-  var commandOptions = {};
-  // Check if the index allready exists
-  self.indexInformation(name, finalOptions, function(err, indexInformation) {
-    if(err != null && err.code != 26) return handleCallback(callback, err, null);
-    // If the index does not exist, create it
-    if(indexInformation == null || !indexInformation[index_name])  {
-      self.createIndex(name, fieldOrSpec, options, callback);
-    } else {
-      if(typeof callback === 'function') return handleCallback(callback, null, index_name);
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
+
+  // Attempt to run using createIndexes command
+  createIndexUsingCreateIndexes(self, name, fieldOrSpec, options, function(err, result) {
+    if(err == null) return handleCallback(callback, err, result);
+
+    // 67 = 'CannotCreateIndex' (malformed index options)
+    // 85 = 'IndexOptionsConflict' (index already exists with different options)
+    // 11000 = 'DuplicateKey' (couldn't build unique index because of dupes)
+    // These errors mean that the server recognized `createIndex` as a command
+    // and so we don't need to fallback to an insert.
+    if(err.code === 67 || err.code == 11000 || err.code === 85) {
+      return handleCallback(callback, err, result);
     }
+
+    // Create command
+    var doc = createCreateIndexCommand(self, name, fieldOrSpec, options);
+    // Set no key checking
+    finalOptions.checkKeys = false;
+    // Insert document
+    self.s.topology.insert(f("%s.%s", self.s.databaseName, Db.SYSTEM_INDEX_COLLECTION), doc, finalOptions, function(err, result) {
+      if(callback == null) return;
+      if(err) return handleCallback(callback, err);
+      if(result == null) return handleCallback(callback, null, null);
+      if(result.result.writeErrors) return handleCallback(callback, MongoError.create(result.result.writeErrors[0]), null);
+      handleCallback(callback, null, doc.name);
+    });
   });
 }
+
+define.classMethod('createIndex', {callback: true, promise:true});
 
 /**
  * Ensures that an index exists, if it does not it creates it
@@ -963,6 +1117,30 @@ Db.prototype.ensureIndex = function(name, fieldOrSpec, options, callback) {
   });
 };
 
+var ensureIndex = function(self, name, fieldOrSpec, options, callback) {
+  // Get the write concern options
+  var finalOptions = writeConcern({}, self, options);
+  // Create command
+  var selector = createCreateIndexCommand(self, name, fieldOrSpec, options);
+  var index_name = selector.name;
+
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
+
+  // Check if the index allready exists
+  self.indexInformation(name, finalOptions, function(err, indexInformation) {
+    if(err != null && err.code != 26) return handleCallback(callback, err, null);
+    // If the index does not exist, create it
+    if(indexInformation == null || !indexInformation[index_name])  {
+      self.createIndex(name, fieldOrSpec, options, callback);
+    } else {
+      if(typeof callback === 'function') return handleCallback(callback, null, index_name);
+    }
+  });
+}
+
+define.classMethod('ensureIndex', {callback: true, promise:true});
+
 Db.prototype.addChild = function(db) {
   if(this.s.parentDb) return this.s.parentDb.addChild(db);
   this.s.children.push(db);
@@ -983,29 +1161,28 @@ Db.prototype.addChild = function(db) {
  */
 Db.prototype.db = function(dbName, options) {
   options = options || {};
+
   // Copy the options and add out internal override of the not shared flag
-  for(var key in this.options) {
-    options[key] = this.options[key];
-  }
+  var finalOptions = assign({}, this.options, options);
 
   // Do we have the db in the cache already
-  if(this.s.dbCache[dbName] && options.returnNonCachedInstance !== true) {
+  if(this.s.dbCache[dbName] && finalOptions.returnNonCachedInstance !== true) {
     return this.s.dbCache[dbName];
   }
 
   // Add current db as parentDb
-  if(options.noListener == null || options.noListener == false) {
-    options.parentDb = this;
+  if(finalOptions.noListener == null || finalOptions.noListener == false) {
+    finalOptions.parentDb = this;
   }
 
   // Add promiseLibrary
-  options.promiseLibrary = this.s.promiseLibrary;
+  finalOptions.promiseLibrary = this.s.promiseLibrary;
 
   // Return the db object
-  var db = new Db(dbName, this.s.topology, options)
+  var db = new Db(dbName, this.s.topology, finalOptions)
 
   // Add as child
-  if(options.noListener == null || options.noListener == false) {
+  if(finalOptions.noListener == null || finalOptions.noListener == false) {
     this.addChild(db);
   }
 
@@ -1014,6 +1191,8 @@ Db.prototype.db = function(dbName, options) {
   // Return the database
   return db;
 };
+
+define.classMethod('db', {callback: false, promise:false, returns: [Db]});
 
 var _executeAuthCreateUserCommand = function(self, username, password, options, callback) {
   // Special case where there is no password ($external users)
@@ -1081,7 +1260,7 @@ var _executeAuthCreateUserCommand = function(self, username, password, options, 
   }
 
   // Force write using primary
-  commandOptions.readPreference = CoreReadPreference.primary;
+  commandOptions.readPreference = ReadPreference.primary;
 
   // Execute the command
   self.command(command, commandOptions, function(err, result) {
@@ -1093,6 +1272,8 @@ var _executeAuthCreateUserCommand = function(self, username, password, options, 
 }
 
 var addUser = function(self, username, password, options, callback) {
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
   // Attempt to execute auth command
   _executeAuthCreateUserCommand(self, username, password, options, function(err, r) {
     // We need to perform the backward compatible insert operation
@@ -1115,14 +1296,14 @@ var addUser = function(self, username, password, options, callback) {
         // We got an error (f.ex not authorized)
         if(err != null) return handleCallback(callback, err, null);
         // Check if the user exists and update i
-        collection.find({user: username}, {dbName: options['dbName']}).toArray(function(err, documents) {
+        collection.find({user: username}, {dbName: options['dbName']}).toArray(function(err) {
           // We got an error (f.ex not authorized)
           if(err != null) return handleCallback(callback, err, null);
           // Add command keys
           finalOptions.upsert = true;
 
           // We have a user, let's update the password or upsert if not
-          collection.update({user: username},{$set: {user: username, pwd: userPassword}}, finalOptions, function(err, results, full) {
+          collection.update({user: username},{$set: {user: username, pwd: userPassword}}, finalOptions, function(err) {
             if(count == 0 && err) return handleCallback(callback, null, [{user:username, pwd:userPassword}]);
             if(err) return handleCallback(callback, err, null)
             handleCallback(callback, null, [{user:username, pwd:userPassword}]);
@@ -1172,8 +1353,12 @@ Db.prototype.addUser = function(username, password, options, callback) {
   });
 };
 
+define.classMethod('addUser', {callback: true, promise:true});
+
 var _executeAuthRemoveUserCommand = function(self, username, options, callback) {
   if(typeof options == 'function') callback = options, options = {};
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
   // Get the error options
   var commandOptions = {writeCommand:true};
   if(options['dbName']) commandOptions.dbName = options['dbName'];
@@ -1193,7 +1378,7 @@ var _executeAuthRemoveUserCommand = function(self, username, options, callback) 
   command = writeConcern(command, self, options);
 
   // Force write using primary
-  commandOptions.readPreference = CoreReadPreference.primary;
+  commandOptions.readPreference = ReadPreference.primary;
 
   // Execute the command
   self.command(command, commandOptions, function(err, result) {
@@ -1217,7 +1402,7 @@ var removeUser = function(self, username, options, callback) {
       // Locate the user
       collection.findOne({user: username}, {}, function(err, user) {
         if(user == null) return handleCallback(callback, err, false);
-        collection.remove({user: username}, finalOptions, function(err, result) {
+        collection.remove({user: username}, finalOptions, function(err) {
           handleCallback(callback, err, true);
         });
       });
@@ -1229,6 +1414,8 @@ var removeUser = function(self, username, options, callback) {
     handleCallback(callback, err, result);
   });
 }
+
+define.classMethod('removeUser', {callback: true, promise:true});
 
 /**
  * Remove a user from a database
@@ -1262,11 +1449,15 @@ Db.prototype.removeUser = function(username, options, callback) {
 };
 
 var authenticate = function(self, username, password, options, callback) {
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
+
   // the default db to authenticate against is 'self'
   // if authententicate is called from a retry context, it may be another one, like admin
-  var authdb = options.authdb ? options.authdb : options.dbName;
+  var authdb = options.dbName ? options.dbName : self.databaseName;
+  authdb = self.authSource ? self.authSource : authdb;
+  authdb = options.authdb ? options.authdb : authdb;
   authdb = options.authSource ? options.authSource : authdb;
-  authdb = authdb ? authdb : self.databaseName;
 
   // Callback
   var _callback = function(err, result) {
@@ -1284,39 +1475,39 @@ var authenticate = function(self, username, password, options, callback) {
 
   // If classic auth delegate to auth command
   if(authMechanism == 'MONGODB-CR') {
-    self.s.topology.auth('mongocr', authdb, username, password, function(err, result) {
+    self.s.topology.auth('mongocr', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
   } else if(authMechanism == 'PLAIN') {
-    self.s.topology.auth('plain', authdb, username, password, function(err, result) {
+    self.s.topology.auth('plain', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
   } else if(authMechanism == 'MONGODB-X509') {
-    self.s.topology.auth('x509', authdb, username, password, function(err, result) {
+    self.s.topology.auth('x509', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
   } else if(authMechanism == 'SCRAM-SHA-1') {
-    self.s.topology.auth('scram-sha-1', authdb, username, password, function(err, result) {
+    self.s.topology.auth('scram-sha-1', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
   } else if(authMechanism == 'GSSAPI') {
     if(process.platform == 'win32') {
-      self.s.topology.auth('sspi', authdb, username, password, options, function(err, result) {
+      self.s.topology.auth('sspi', authdb, username, password, options, function(err) {
         if(err) return handleCallback(callback, err, false);
         _callback(null, true);
       });
     } else {
-      self.s.topology.auth('gssapi', authdb, username, password, options, function(err, result) {
+      self.s.topology.auth('gssapi', authdb, username, password, options, function(err) {
         if(err) return handleCallback(callback, err, false);
         _callback(null, true);
       });
     }
   } else if(authMechanism == 'DEFAULT') {
-    self.s.topology.auth('default', authdb, username, password, function(err, result) {
+    self.s.topology.auth('default', authdb, username, password, function(err) {
       if(err) return handleCallback(callback, err, false);
       _callback(null, true);
     });
@@ -1345,24 +1536,36 @@ Db.prototype.authenticate = function(username, password, options, callback) {
   if(!options.authMechanism) {
     options.authMechanism = 'DEFAULT';
   } else if(options.authMechanism != 'GSSAPI'
+    && options.authMechanism != 'DEFAULT'
     && options.authMechanism != 'MONGODB-CR'
     && options.authMechanism != 'MONGODB-X509'
     && options.authMechanism != 'SCRAM-SHA-1'
     && options.authMechanism != 'PLAIN') {
-      return handleCallback(callback, MongoError.create({message: "only GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", driver:true}));
+      return handleCallback(callback, MongoError.create({message: "only DEFAULT, GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism", driver:true}));
   }
 
   // If we have a callback fallback
-  if(typeof callback == 'function') return authenticate(self, username, password, options, callback);
+  if(typeof callback == 'function') return authenticate(self, username, password, options, function(err, r) {
+    // Support failed auth method
+    if(err && err.message && err.message.indexOf('saslStart') != -1) err.code = 59;
+    // Reject error
+    if(err) return callback(err, r);
+    callback(null, r);
+  });
 
   // Return a promise
   return new this.s.promiseLibrary(function(resolve, reject) {
     authenticate(self, username, password, options, function(err, r) {
+      // Support failed auth method
+      if(err && err.message && err.message.indexOf('saslStart') != -1) err.code = 59;
+      // Reject error
       if(err) return reject(err);
       resolve(r);
     });
   });
 };
+
+define.classMethod('authenticate', {callback: true, promise:true});
 
 /**
  * Logout user from server, fire off on all connections and remove all auth info
@@ -1374,41 +1577,31 @@ Db.prototype.authenticate = function(username, password, options, callback) {
  */
 Db.prototype.logout = function(options, callback) {
   var self = this;
-  var args = Array.prototype.slice.call(arguments, 0);
-  callback = args.pop();
-  if(typeof callback != 'function') args.push(callback);
-  options = args.length ? args.shift() || {} : {};
+  if(typeof options == 'function') callback = options, options = {};
+  options = options || {};
 
-  // logout command
-  var cmd = {'logout':1};
+  // Establish the correct database name
+  var dbName = this.s.authSource ? this.s.authSource : this.s.databaseName;
+  dbName = options.dbName ? options.dbName : dbName;
 
-  // Add onAll to login to ensure all connection are logged out
-  options.onAll = true;
+  // If we have a callback
+  if(typeof callback == 'function') {
+    return self.s.topology.logout(dbName, function(err) {
+      if(err) return callback(err);
+      callback(null, true);
+    });
+  }
 
-  // We authenticated against a different db use that
-  if(this.s.authSource) options.dbName = this.s.authSource;
-
-  // Execute the command
-  if(typeof callback == 'function') return this.command(cmd, options, function(err, result) {
-    if(err) return handleCallback(callback, err, false);
-    handleCallback(callback, null, true)
-  });
-
-  // Return promise
+  // Return a promise
   return new this.s.promiseLibrary(function(resolve, reject) {
-    self.command(cmd, options, function(err, result) {
+    self.s.topology.logout(dbName, function(err) {
       if(err) return reject(err);
       resolve(true);
     });
   });
 }
 
-// Figure out the read preference
-var getReadPreference = function(options, db) {
-  if(options.readPreference) return options;
-  if(db.readPreference) options.readPreference = db.readPreference;
-  return options;
-}
+define.classMethod('logout', {callback: true, promise:true});
 
 /**
  * Retrieves this collections index info.
@@ -1441,6 +1634,9 @@ var indexInformation = function(self, name, options, callback) {
     // If we specified full information
   var full = options['full'] == null ? false : options['full'];
 
+  // Did the user destroy the topology
+  if(self.serverConfig && self.serverConfig.isDestroyed()) return callback(new MongoError('topology was destroyed'));
+
   // Process all the results from the index command and collection
   var processResults = function(indexes) {
     // Contains all the information
@@ -1467,10 +1663,11 @@ var indexInformation = function(self, name, options, callback) {
   });
 }
 
+define.classMethod('indexInformation', {callback: true, promise:true});
+
 var createCreateIndexCommand = function(db, name, fieldOrSpec, options) {
   var indexParameters = parseIndexOptions(fieldOrSpec);
   var fieldHash = indexParameters.fieldHash;
-  var keys = indexParameters.keys;
 
   // Generate the index name
   var indexName = typeof options.name == 'string' ? options.name : indexParameters.name;
@@ -1524,11 +1721,26 @@ var createIndexUsingCreateIndexes = function(self, name, fieldOrSpec, options, c
     }
   }
 
-  // Create command
-  var cmd = {createIndexes: name, indexes: indexes};
+  // Get capabilities
+  var capabilities = self.s.topology.capabilities();
 
-  // Apply write concern to command
-  cmd = writeConcern(cmd, self, options);
+  // Did the user pass in a collation, check if our write server supports it
+  if(indexes[0].collation && capabilities && !capabilities.commandsTakeCollation) {
+    // Create a new error
+    var error = new MongoError(f('server/primary/mongos does not support collation'));
+    error.code = 67;
+    // Return the error
+    return callback(error);
+  }
+
+  // Create command, apply write concern to command
+  var cmd = writeConcern({createIndexes: name, indexes: indexes}, self, options);
+
+  // Decorate command with writeConcern if supported
+  decorateWithWriteConcern(cmd, self, options);
+
+  // ReadPreference primary
+  options.readPreference = ReadPreference.PRIMARY;
 
   // Build the command
   self.command(cmd, options, function(err, result) {
@@ -1570,7 +1782,7 @@ var writeConcern = function(target, db, options) {
 // Add listeners to topology
 var createListener = function(self, e, object) {
   var listener = function(err) {
-    if(e != 'error') {
+    if(object.listeners(e).length > 0) {
       object.emit(e, err, self);
 
       // Emit on all associated db's if available
@@ -1582,15 +1794,28 @@ var createListener = function(self, e, object) {
   return listener;
 }
 
+
+/**
+ * Unref all sockets
+ * @method
+ */
+Db.prototype.unref = function() {
+  this.s.topology.unref();
+}
+
 /**
  * Db close event
  *
+ * Emitted after a socket closed against a single server or mongos proxy.
+ *
  * @event Db#close
- * @type {object}
+ * @type {MongoError}
  */
 
 /**
  * Db authenticated event
+ *
+ * Emitted after all server members in the topology (single server, replicaset or mongos) have successfully authenticated.
  *
  * @event Db#authenticated
  * @type {object}
@@ -1599,12 +1824,18 @@ var createListener = function(self, e, object) {
 /**
  * Db reconnect event
  *
+ *  * Server: Emitted when the driver has reconnected and re-authenticated.
+ *  * ReplicaSet: N/A
+ *  * Mongos: Emitted when the driver reconnects and re-authenticates successfully against a Mongos.
+ *
  * @event Db#reconnect
  * @type {object}
  */
 
 /**
  * Db error event
+ *
+ * Emitted after an error occurred against a single server or mongos proxy.
  *
  * @event Db#error
  * @type {MongoError}
@@ -1613,19 +1844,27 @@ var createListener = function(self, e, object) {
 /**
  * Db timeout event
  *
+ * Emitted after a socket timeout occurred against a single server or mongos proxy.
+ *
  * @event Db#timeout
- * @type {object}
+ * @type {MongoError}
  */
 
 /**
  * Db parseError event
  *
+ * The parseError event is emitted if the driver detects illegal or corrupt BSON being received from the server.
+ *
  * @event Db#parseError
- * @type {object}
+ * @type {MongoError}
  */
 
 /**
- * Db fullsetup event, emitted when all servers in the topology have been connected to.
+ * Db fullsetup event, emitted when all servers in the topology have been connected to at start up time.
+ *
+ * * Server: Emitted when the driver has connected to the single server and has authenticated.
+ * * ReplSet: Emitted after the driver has attempted to connect to all replicaset members.
+ * * Mongos: Emitted after the driver has attempted to connect to all mongos proxies.
  *
  * @event Db#fullsetup
  * @type {Db}

@@ -1,30 +1,35 @@
 {
+    "package.json": true,
     "author": "kai zhu <kaizhu256@gmail.com>",
-    "description": "pure javascript version of mongodb-client @ https://www.npmjs.com/package/mongodb with zero npm-dependenciess",
+    "description": "this is a zero-dependency version of the mongodb v2.2.12 npm-package",
     "devDependencies": {
-        "phantomjs-lite": "^2015.8.2",
-        "utility2": "~2015.8.5"
+        "electron-lite": "kaizhu256/node-electron-lite#alpha",
+        "utility2": "kaizhu256/node-utility2#alpha"
     },
-    "engines": { "node": ">=0.10 <=0.12" },
     "keywords": [
-        "client",
-        "driver",
         "mongo", "mongodb"
     ],
     "license": "MIT",
-    "main": "node_modules/mongodb.js",
+    "main": "lib.mongodb",
     "name": "mongodb-minimal",
     "os": ["darwin", "linux"],
-    "repository" : {
-        "type" : "git",
-        "url" : "https://github.com/kaizhu256/node-mongodb-minimal.git"
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/kaizhu256/node-mongodb-minimal.git"
     },
     "scripts": {
-        "build-ci": "node_modules/.bin/utility2 shRun shReadmeBuild",
-        "build-doc": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && node_modules/.bin/utility2 shRun shDocApiCreate \"{exampleFileList:['example.js','node_modules/mongodb.js','mongodb/test/functional','mongodb/lib','mongodb/lib/gridfs','mongodb-core/lib/connection','mongodb-core/lib/topologies'],moduleDict:{'mongodb':{aliasList:[''],exports:require('./node_modules/mongodb')},'mongodb.Collection':{aliasList:['col','collection'],exports:require('./node_modules/mongodb').Collection.prototype},'mongodb.MongoClient':{exports:require('./node_modules/mongodb').MongoClient},'mongodb.bson':{aliasList:['','.'],exports:require('./node_modules/mongodb').bson},'mongodb.core':{aliasList:[''],exports:require('./node_modules/mongodb').core},}}\"",
-        "postinstall": "mkdir -p node_modules && printf \"module.exports = require('../bson/browser_build/bson.js')(); module.exports.native = module.exports.pure = function () {     return module.exports; }; module.exports.ObjectId = module.exports.ObjectID; \" > node_modules/bson.js && printf \"module.exports = require('../es6-promise');\" > node_modules/es6-promise.js && printf \" module.exports = require('../mongodb'); module.exports.bson = require('bson'); module.exports.core = require('mongodb-core'); \" > node_modules/mongodb.js && printf \"module.exports = require('../mongodb-core');\" > node_modules/mongodb-core.js",
-        "start": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && npm run-script postinstall && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 start example.js",
-        "test": "node_modules/.bin/utility2 shRun shReadmeExportPackageJson && npm run-script postinstall && node_modules/.bin/utility2 shRun shReadmeExportFile example.js example.js && node_modules/.bin/utility2 test example.js"
+        "build-ci": "utility2 shRun shReadmeBuild",
+        "postinstall": "for DIR in .bin electron-lite utility2; do     (if [ -d node_modules/$DIR ] && [ ! -d $DIR ]; then mv node_modules/$DIR .; fi); done; rm -fr node_modules && ln -s . node_modules",
+
+
+
+
+
+        "start": "export PORT=${PORT:-8080} && export npm_config_mode_auto_restart=1 && utility2 shRun shIstanbulCover test.js",
+
+
+
+        "test": "export PORT=$(utility2 shServerPortRandom) && utility2 test test.js"
     },
-    "version": "2015.8.2"
+    "version": "2016.11.1"
 }
