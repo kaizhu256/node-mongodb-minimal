@@ -1,110 +1,150 @@
 <style>
+/*csslint
+    adjoining-classes: false
+*/
 .testReportPlatformDiv {
-border: 1px solid;
-border-radius: 5px;
-font-family: Helvetical Neue, Helvetica, Arial, sans-serif;
-margin-top: 20px;
-padding: 0 10px 10px 10px;
-text-align: left;
+    border: 1px solid black;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-top: 20px;
+    padding: 0 10px 10px 10px;
+    text-align: left;
 }
-.testReportPlatformPre {
-background-color: #fdd;
-border: 1px;
-border-radius: 0 0 5px 5px;
-border-top-style: solid;
-margin-bottom: 0;
-padding: 10px;
+.testReportPlatformDiv .displayNone {
+    display: none;
 }
-.testReportPlatformPreHidden {
-display: none;
+.testReportPlatformDiv img {
+    border: 1px solid black;
+    margin: 5px 0 5px 0;
+    max-height: 256px;
+    max-width: 512px;
 }
-.testReportPlatformScreenCaptureImg {
-border: 1px solid;
-border-color: #000;
-margin: 5px 0 5px 0;
-max-height:256px;
-max-width:512px;
+.testReportPlatformDiv pre {
+    background: #fdd;
+    border-top: 1px solid black;
+    margin-bottom: 0;
+    padding: 10px;
+    white-space: pre-wrap;
 }
-.testReportPlatformSpan {
-display: inline-block;
-width: 8em;
+.testReportPlatformDiv span {
+    display: inline-block;
+    width: 8rem;
 }
-.testReportPlatformTable {
-border: 1px;
-border-top-style: solid;
-text-align: left;
-width: 100%;
+.testReportPlatformDiv.summary {
+    background: #bfb;
 }
-.testReportPlatformTr:nth-child(odd) {
-background-color: #bfb;
+.testReportPlatformDiv table {
+    border-top: 1px solid black;
+    text-align: left;
+    width: 100%;
 }
-.testReportTestFailed {
-background-color: #f99;
+.testReportPlatformDiv table > tbody > tr:nth-child(odd) {
+    background: #bfb;
 }
-.testReportTestPending {
-background-color: #99f;
+.testReportPlatformDiv .testFailed {
+    background: #f99;
 }
-.testReportSummaryDiv {
-background-color: #bfb;
-}
-.testReportSummarySpan {
-display: inline-block;
-width: 6.5em;
+.testReportPlatformDiv .testPending {
+    background: #99f;
 }
 </style>
-<div class="testReportPlatformDiv testReportSummaryDiv">
-<h2>mongodb-minimal test-report summary</h2>
+<div class="testReportPlatformDiv summary">
+<h1>
+    <a
+        
+        href="https://github.com/kaizhu256/node-mongodb-minimal#readme"
+        
+    >mongodb-minimal v2016.11.1</a>
+</h1>
+<h2>test-report summary</h2>
 <h4>
-<span class="testReportSummarySpan">version</span>-
-2015.8.2<br>
-<span class="testReportSummarySpan">test date</span>- 2015-09-16T13:04:09.664Z<br>
-<span class="testReportSummarySpan">commit info</span>-
-a7b8056753119aef24aee137074959518721264c - - npm publish 2015.8.2 - update README.md<br>
+    <span>version</span>-
+        2016.11.1<br>
+    <span>test date</span>- 2016-12-01T15:29:18.477Z<br>
+    <span>commit info</span>-
+        
+        7fe70b2f50341609b896870514fb44fbfb602eba - fix build<br>
+        
 </h4>
-<table class="testReportPlatformTable">
-<thead><tr>
-<th>total time-elapsed</th>
-<th>total tests failed</th>
-<th>total tests passed</th>
-<th>total tests pending</th>
-</tr></thead>
+<table>
+<thead>
+    <tr>
+        <th>total time-elapsed</th>
+        <th>total tests failed</th>
+        <th>total tests passed</th>
+        <th>total tests pending</th>
+    </tr>
+</thead>
 <tbody><tr>
-<td>6 ms</td>
-<td class="testReportTestPassed">0</td>
-<td>1</td>
-<td>0</td>
+    <td>17769 ms</td>
+    <td class="testPassed">0</td>
+    <td>2</td>
+    <td>0</td>
 </tr></tbody>
 </table>
 </div>
 
 <div class="testReportPlatformDiv">
 <h4>
-1. npmTest - node - linux v0.12.7 - 2015-09-16T13:04:09.641Z<br>
-<a href="screen-capture.npmTest.svg"><img class="testReportPlatformScreenCaptureImg" src="screen-capture.npmTest.svg"></a><br>
-<span class="testReportPlatformSpan">time-elapsed</span>- 4 ms<br>
-<span class="testReportPlatformSpan">tests failed</span>- 0<br>
-<span class="testReportPlatformSpan">tests passed</span>- 1<br>
-<span class="testReportPlatformSpan">tests pending</span>- 0<br>
+    1. docApiCreate - node - linux v7.2.0 - 2016-12-01T15:29:18.371Z<br>
+    
+    <span>time-elapsed</span>- 8063 ms<br>
+    <span>tests failed</span>- 0<br>
+    <span>tests passed</span>- 1<br>
+    <span>tests pending</span>- 0<br>
 </h4>
-<table class="testReportPlatformTable">
+<table>
 <thead><tr>
-<th>#</th>
-<th>time-elapsed</th>
-<th>status</th>
-<th>test-case</th>
+    <th>#</th>
+    <th>time-elapsed</th>
+    <th>status</th>
+    <th>test-case</th>
 </tr></thead>
 <tbody>
 
-<tr class="testReportPlatformTr">
-<td>1</td>
-<td>0 ms</td>
-<td class="testReportTestPassed">passed</td>
-<td>testCase_example_default</td>
+<tr>
+    <td>1</td>
+    <td>6802 ms</td>
+    <td class="testPassed">passed</td>
+    <td>testCase_build_doc</td>
 </tr>
 
 </tbody>
 </table>
-<pre class="testReportPlatformPreHidden">
+<pre class="displayNone">
+
+</pre>
+</div>
+
+<div class="testReportPlatformDiv">
+<h4>
+    2. npmTest - node - linux v7.2.0 - 2016-12-01T15:29:09.022Z<br>
+    
+    <a href="screen-capture.npmTest.svg"><img src="screen-capture.npmTest.svg"></a><br>
+    
+    <span>time-elapsed</span>- 17769 ms<br>
+    <span>tests failed</span>- 0<br>
+    <span>tests passed</span>- 1<br>
+    <span>tests pending</span>- 0<br>
+</h4>
+<table>
+<thead><tr>
+    <th>#</th>
+    <th>time-elapsed</th>
+    <th>status</th>
+    <th>test-case</th>
+</tr></thead>
+<tbody>
+
+<tr>
+    <td>2</td>
+    <td>7135 ms</td>
+    <td class="testPassed">passed</td>
+    <td>testCase_build_doc</td>
+</tr>
+
+</tbody>
+</table>
+<pre class="displayNone">
 
 </pre>
 </div>

@@ -1,196 +1,75 @@
-<svg height="3086" width="720" xmlns="http://www.w3.org/2000/svg">
-<rect height="3086" fill="#555" width="720"></rect>
+<svg height="1150" width="720" xmlns="http://www.w3.org/2000/svg">
+<rect height="1150" fill="#555" width="720"></rect>
 <text fill="#7f7" font-family="Courier New" font-size="12" xml:space="preserve">
 <tspan x="10" y="26"></tspan>
-<tspan x="10" y="42">&gt; mongodb-minimal@2015.8.2 test /home/travis/build/kaizhu256/node-mongodb-minimal</tspan>
-<tspan x="10" y="58">&gt; utility2 shRun shReadmeExportPackageJson &amp;&amp; npm run-script postinstall &amp;&amp; node_modules/.bin/ut\</tspan>
-<tspan x="10" y="74">ility2 shRun shReadmeExportFile example.js example.js &amp;&amp; node_modules/.bin/utility2 test example\</tspan>
-<tspan x="10" y="90">.js</tspan>
-<tspan x="10" y="106"></tspan>
-<tspan x="10" y="122"></tspan>
-<tspan x="10" y="138">&gt; mongodb-minimal@2015.8.2 postinstall /home/travis/build/kaizhu256/node-mongodb-minimal</tspan>
-<tspan x="10" y="154">&gt; mkdir -p node_modules &amp;&amp; printf "module.exports = require('../bson/browser_build/bson.js')(); \</tspan>
-<tspan x="10" y="170">module.exports.native = module.exports.pure = function () {     return module.exports; }; module\</tspan>
-<tspan x="10" y="186">.exports.ObjectId = module.exports.ObjectID; " &gt; node_modules/bson.js &amp;&amp; printf "module.exports \</tspan>
-<tspan x="10" y="202">= require('../es6-promise');" &gt; node_modules/es6-promise.js &amp;&amp; printf " module.exports = require\</tspan>
-<tspan x="10" y="218">('../mongodb'); module.exports.bson = require('bson'); module.exports.core = require('mongodb-co\</tspan>
-<tspan x="10" y="234">re'); " &gt; node_modules/mongodb.js &amp;&amp; printf "module.exports = require('../mongodb-core');" &gt; nod\</tspan>
-<tspan x="10" y="250">e_modules/mongodb-core.js</tspan>
-<tspan x="10" y="266"></tspan>
+<tspan x="10" y="42">&gt; mongodb-minimal@2016.11.1 test /home/travis/build/kaizhu256/node-mongodb-minimal</tspan>
+<tspan x="10" y="58">&gt; export PORT=$(utility2 shServerPortRandom) &amp;&amp; utility2 test test.js</tspan>
+<tspan x="10" y="74"></tspan>
+<tspan x="10" y="90"></tspan>
+<tspan x="10" y="106">[MODE_BUILD=npmTest] - 2016-12-01T15:29:08Z - npm-testing /home/travis/build/kaizhu256/node-mong\</tspan>
+<tspan x="10" y="122">odb-minimal</tspan>
+<tspan x="10" y="138"></tspan>
+<tspan x="10" y="154"></tspan>
+<tspan x="10" y="170">covering $ /home/travis/.nvm/versions/node/v7.2.0/bin/node /home/travis/build/kaizhu256/node-mon\</tspan>
+<tspan x="10" y="186">godb-minimal/test.js</tspan>
+<tspan x="10" y="202">merging file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/test-report.json to t\</tspan>
+<tspan x="10" y="218">est-report</tspan>
+<tspan x="10" y="234">&gt; server listening on http-port 48846</tspan>
+<tspan x="10" y="250">created documentation file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/doc.api\</tspan>
+<tspan x="10" y="266">.html</tspan>
 <tspan x="10" y="282"></tspan>
-<tspan x="10" y="298">[MODE_BUILD=npmTest] - 2015-09-15T12:13:02Z - npm-testing /home/travis/build/kaizhu256/node-mong\</tspan>
-<tspan x="10" y="314">odb-minimal</tspan>
-<tspan x="10" y="330"></tspan>
+<tspan x="10" y="298"></tspan>
+<tspan x="10" y="314">browserTest - created electron entry-page /home/travis/build/kaizhu256/node-mongodb-minimal/tmp/\</tspan>
+<tspan x="10" y="330">electron.158bb00e-e0d0-44b9-a7f6-ae3ee0407ff0.html</tspan>
 <tspan x="10" y="346"></tspan>
-<tspan x="10" y="362">covering $ node /home/travis/build/kaizhu256/node-mongodb-minimal/example.js</tspan>
-<tspan x="10" y="378">step 1</tspan>
-<tspan x="10" y="394">connecting to mongodb server</tspan>
-<tspan x="10" y="410">step 2</tspan>
-<tspan x="10" y="426">connected to mongodb server</tspan>
-<tspan x="10" y="442">step 3</tspan>
-<tspan x="10" y="458">inserting document into collection - {"_id":"0.611a4b33","value":"hello"}</tspan>
-<tspan x="10" y="474">step 4</tspan>
-<tspan x="10" y="490">updating document in collection</tspan>
-<tspan x="10" y="506">step 5</tspan>
-<tspan x="10" y="522">finding document in collection</tspan>
-<tspan x="10" y="538">step 6</tspan>
-<tspan x="10" y="554">found document in collection - {"_id":"0.611a4b33","value":"bye"}</tspan>
-<tspan x="10" y="570">step 7</tspan>
-<tspan x="10" y="586">removing document from collection</tspan>
-<tspan x="10" y="602">step 8</tspan>
-<tspan x="10" y="618">removed 1 document from collection</tspan>
-<tspan x="10" y="634">step 9</tspan>
-<tspan x="10" y="650">disconnecting from mongodb server</tspan>
-<tspan x="10" y="666">[node test-case 1 of 1 passed] - testCase_example_default</tspan>
+<tspan x="10" y="362">[3976:1201/152910:ERROR:browser_main_loop.cc(231)] Running without the SUID sandbox! See https:/\</tspan>
+<tspan x="10" y="378">/chromium.googlesource.com/chromium/src/+/master/docs/linux_suid_sandbox_development.md for more\</tspan>
+<tspan x="10" y="394"> information on developing with the sandbox on.</tspan>
+<tspan x="10" y="410">Xlib:  extension "RANDR" missing on display ":99.0".</tspan>
+<tspan x="10" y="426">merging file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/test-report.json to t\</tspan>
+<tspan x="10" y="442">est-report</tspan>
+<tspan x="10" y="458">Xlib:  extension "RANDR" missing on display ":99.0".</tspan>
+<tspan x="10" y="474">[3976:1201/152910:WARNING:audio_manager.cc(314)] Multiple instances of AudioManager detected</tspan>
+<tspan x="10" y="490">[3976:1201/152910:WARNING:audio_manager.cc(275)] Multiple instances of AudioManager detected</tspan>
+<tspan x="10" y="506">[3997:1201/152910:ERROR:sandbox_linux.cc(343)] InitializeSandbox() called with multiple threads \</tspan>
+<tspan x="10" y="522">in process gpu-process. </tspan>
+<tspan x="10" y="538"></tspan>
+<tspan x="10" y="554">browserTest - opened url file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/doc.\</tspan>
+<tspan x="10" y="570">api.html</tspan>
+<tspan x="10" y="586"></tspan>
+<tspan x="10" y="602"></tspan>
+<tspan x="10" y="618">browserTest - created screen-capture file:///home/travis/build/kaizhu256/node-mongodb-minimal/tm\</tspan>
+<tspan x="10" y="634">p/build/screen-capture.npmTest.browser._2Fhome_2Ftravis_2Fbuild_2Fkaizhu256_2Fnode-mongodb-minim\</tspan>
+<tspan x="10" y="650">al_2Ftmp_2Fbuild_2Fdoc.api.html.png</tspan>
+<tspan x="10" y="666"></tspan>
 <tspan x="10" y="682"></tspan>
-<tspan x="10" y="698">-------------------------------------------------------</tspan>
-<tspan x="10" y="714">| test-report - npmTest - node - linux v0.12.7 - 2015-09-15T12:13:04.327Z</tspan>
-<tspan x="10" y="730">|       2 ms            0 failed        1 passed      |</tspan>
-<tspan x="10" y="746">-------------------------------------------------------</tspan>
-<tspan x="10" y="762"></tspan>
-<tspan x="10" y="778">created test-report file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/test-repo\</tspan>
-<tspan x="10" y="794">rt.html</tspan>
-<tspan x="10" y="810"></tspan>
-<tspan x="10" y="826">npmTest - 0 failed tests</tspan>
-<tspan x="10" y="842"></tspan>
-<tspan x="10" y="858">--------------------------------------------------------------|----------|----------|----------|\</tspan>
-<tspan x="10" y="874">----------|----------------|</tspan>
-<tspan x="10" y="890">File                                                          |  % Stmts | % Branch |  % Funcs |\</tspan>
-<tspan x="10" y="906">  % Lines |Uncovered Lines |</tspan>
-<tspan x="10" y="922">--------------------------------------------------------------|----------|----------|----------|\</tspan>
-<tspan x="10" y="938">----------|----------------|</tspan>
-<tspan x="10" y="954"> node-mongodb-minimal/                                        |    97.96 |       80 |      100 |\</tspan>
-<tspan x="10" y="970">    97.96 |                |</tspan>
-<tspan x="10" y="986">  example.js                                                  |    97.96 |       80 |      100 |\</tspan>
-<tspan x="10" y="1002">    97.96 |            150 |</tspan>
-<tspan x="10" y="1018"> node-mongodb-minimal/bson/browser_build/                     |    31.15 |    19.97 |    25.71 |\</tspan>
-<tspan x="10" y="1034">    31.69 |                |</tspan>
-<tspan x="10" y="1050">  bson.js                                                     |    31.15 |    19.97 |    25.71 |\</tspan>
-<tspan x="10" y="1066">    31.69 |... 1,4837,4842 |</tspan>
-<tspan x="10" y="1082"> node-mongodb-minimal/mongodb-core/                           |      100 |      100 |      100 |\</tspan>
-<tspan x="10" y="1098">      100 |                |</tspan>
-<tspan x="10" y="1114">  index.js                                                    |      100 |      100 |      100 |\</tspan>
-<tspan x="10" y="1130">      100 |                |</tspan>
-<tspan x="10" y="1146"> node-mongodb-minimal/mongodb-core/lib/                       |    38.64 |     29.8 |    43.24 |\</tspan>
-<tspan x="10" y="1162">    40.48 |                |</tspan>
-<tspan x="10" y="1178">  cursor.js                                                   |    36.77 |    29.96 |       40 |\</tspan>
-<tspan x="10" y="1194">    38.63 |... 722,724,735 |</tspan>
-<tspan x="10" y="1210">  error.js                                                    |    70.59 |       25 |      100 |\</tspan>
-<tspan x="10" y="1226">    70.59 | 26,27,31,33,34 |</tspan>
-<tspan x="10" y="1242"> node-mongodb-minimal/mongodb-core/lib/auth/                  |    16.54 |     2.54 |    13.95 |\</tspan>
-<tspan x="10" y="1258">    17.04 |                |</tspan>
-<tspan x="10" y="1274">  gssapi.js                                                   |    19.42 |     2.13 |     9.52 |\</tspan>
-<tspan x="10" y="1290">    21.11 |... 227,229,230 |</tspan>
-<tspan x="10" y="1306">  mongocr.js                                                  |    17.91 |     3.45 |       20 |\</tspan>
-<tspan x="10" y="1322">    17.46 |... 143,145,146 |</tspan>
-<tspan x="10" y="1338">  plain.js                                                    |    20.69 |      3.7 |    22.22 |\</tspan>
-<tspan x="10" y="1354">    20.37 |... 133,135,136 |</tspan>
-<tspan x="10" y="1370">  scram.js                                                    |    10.46 |     1.89 |    10.53 |\</tspan>
-<tspan x="10" y="1386">    10.71 |... 307,309,310 |</tspan>
-<tspan x="10" y="1402">  sspi.js                                                     |       17 |     1.89 |    11.11 |\</tspan>
-<tspan x="10" y="1418">    18.39 |... 217,219,220 |</tspan>
-<tspan x="10" y="1434">  x509.js                                                     |    21.05 |      3.7 |    22.22 |\</tspan>
-<tspan x="10" y="1450">    20.75 |... 128,130,131 |</tspan>
-<tspan x="10" y="1466"> node-mongodb-minimal/mongodb-core/lib/connection/            |    54.53 |     41.9 |    51.35 |\</tspan>
-<tspan x="10" y="1482">    57.68 |                |</tspan>
-<tspan x="10" y="1498">  commands.js                                                 |     54.9 |    55.22 |    41.67 |\</tspan>
-<tspan x="10" y="1514">    57.09 |... 485,486,499 |</tspan>
-<tspan x="10" y="1530">  connection.js                                               |    52.15 |    50.88 |    70.59 |\</tspan>
-<tspan x="10" y="1546">    55.29 |... 359,405,414 |</tspan>
-<tspan x="10" y="1562">  logger.js                                                   |    44.62 |    26.79 |    23.08 |\</tspan>
-<tspan x="10" y="1578">    46.55 |... 177,189,190 |</tspan>
-<tspan x="10" y="1594">  pool.js                                                     |    68.87 |    23.08 |    71.43 |\</tspan>
-<tspan x="10" y="1610">       73 |... 155,214,236 |</tspan>
-<tspan x="10" y="1626">  utils.js                                                    |    41.46 |    14.29 |    27.27 |\</tspan>
-<tspan x="10" y="1642">    48.57 |... 60,67,68,69 |</tspan>
-<tspan x="10" y="1658"> node-mongodb-minimal/mongodb-core/lib/topologies/            |    22.07 |     9.01 |    17.05 |\</tspan>
-<tspan x="10" y="1674">    24.87 |                |</tspan>
-<tspan x="10" y="1690">  command_result.js                                           |    77.78 |      100 |    33.33 |\</tspan>
-<tspan x="10" y="1706">    77.78 |          25,34 |</tspan>
-<tspan x="10" y="1722">  mongos.js                                                   |    13.01 |        0 |        0 |\</tspan>
-<tspan x="10" y="1738">    14.78 |... 956,960,962 |</tspan>
-<tspan x="10" y="1754">  read_preference.js                                          |       75 |        0 |       50 |\</tspan>
-<tspan x="10" y="1770">    78.95 |    61,70,71,72 |</tspan>
-<tspan x="10" y="1786">  replset.js                                                  |     8.47 |        0 |        0 |\</tspan>
-<tspan x="10" y="1802">     9.82 |... 7,1311,1314 |</tspan>
-<tspan x="10" y="1818">  replset_state.js                                            |    12.79 |        0 |        0 |\</tspan>
-<tspan x="10" y="1834">    14.36 |... 465,468,472 |</tspan>
-<tspan x="10" y="1850">  server.js                                                   |    45.25 |    34.15 |    58.57 |\</tspan>
-<tspan x="10" y="1866">    50.71 |... 5,1106,1107 |</tspan>
-<tspan x="10" y="1882">  session.js                                                  |    52.94 |      100 |        0 |\</tspan>
-<tspan x="10" y="1898">    52.94 |... 46,59,72,90 |</tspan>
-<tspan x="10" y="1914"> node-mongodb-minimal/mongodb-core/lib/topologies/strategies/ |    14.43 |        0 |        0 |\</tspan>
-<tspan x="10" y="1930">    16.09 |                |</tspan>
-<tspan x="10" y="1946">  ping.js                                                     |    14.43 |        0 |        0 |\</tspan>
-<tspan x="10" y="1962">    16.09 |... 260,262,264 |</tspan>
-<tspan x="10" y="1978"> node-mongodb-minimal/mongodb-core/lib/wireprotocol/          |    41.54 |    22.82 |    37.25 |\</tspan>
-<tspan x="10" y="1994">    47.46 |                |</tspan>
-<tspan x="10" y="2010">  2_4_support.js                                              |    48.87 |     41.3 |       65 |\</tspan>
-<tspan x="10" y="2026">    56.39 |... 512,518,520 |</tspan>
-<tspan x="10" y="2042">  2_6_support.js                                              |     9.03 |        0 |        0 |\</tspan>
-<tspan x="10" y="2058">    11.02 |... 257,258,260 |</tspan>
-<tspan x="10" y="2074">  3_2_support.js                                              |     6.44 |        0 |        0 |\</tspan>
-<tspan x="10" y="2090">     7.74 |... 465,466,468 |</tspan>
-<tspan x="10" y="2106">  commands.js                                                 |    96.11 |       52 |      100 |\</tspan>
-<tspan x="10" y="2122">     98.3 |       17,65,76 |</tspan>
-<tspan x="10" y="2138"> node-mongodb-minimal/mongodb/                                |      100 |      100 |      100 |\</tspan>
-<tspan x="10" y="2154">      100 |                |</tspan>
-<tspan x="10" y="2170">  index.js                                                    |      100 |      100 |      100 |\</tspan>
-<tspan x="10" y="2186">      100 |                |</tspan>
-<tspan x="10" y="2202"> node-mongodb-minimal/mongodb/lib/                            |    24.06 |    14.24 |    12.82 |\</tspan>
-<tspan x="10" y="2218">    27.76 |                |</tspan>
-<tspan x="10" y="2234">  admin.js                                                    |     9.77 |        0 |        0 |\</tspan>
-<tspan x="10" y="2250">    11.79 |... 539,540,541 |</tspan>
-<tspan x="10" y="2266">  aggregation_cursor.js                                       |    34.92 |     6.25 |        0 |\</tspan>
-<tspan x="10" y="2282">    36.67 |... 271,281,282 |</tspan>
-<tspan x="10" y="2298">  apm.js                                                      |     3.21 |        0 |        0 |\</tspan>
-<tspan x="10" y="2314">     3.79 |... 353,362,364 |</tspan>
-<tspan x="10" y="2330">  collection.js                                               |    22.65 |    15.19 |     12.5 |\</tspan>
-<tspan x="10" y="2346">    26.82 |... 7,2762,2763 |</tspan>
-<tspan x="10" y="2362">  command_cursor.js                                           |    38.24 |     6.25 |        0 |\</tspan>
-<tspan x="10" y="2378">    41.94 |... 174,175,177 |</tspan>
-<tspan x="10" y="2394">  cursor.js                                                   |    23.86 |     11.3 |    11.86 |\</tspan>
-<tspan x="10" y="2410">     29.1 |... 6,1017,1022 |</tspan>
-<tspan x="10" y="2426">  db.js                                                       |    17.77 |     7.86 |    10.83 |\</tspan>
-<tspan x="10" y="2442">    21.38 |... 4,1567,1578 |</tspan>
-<tspan x="10" y="2458">  mongo_client.js                                             |     45.5 |     49.7 |    42.11 |\</tspan>
-<tspan x="10" y="2474">    50.28 |... 431,441,442 |</tspan>
-<tspan x="10" y="2490">  mongos.js                                                   |    11.69 |        0 |        0 |\</tspan>
-<tspan x="10" y="2506">    12.77 |... 373,374,383 |</tspan>
-<tspan x="10" y="2522">  read_preference.js                                          |    63.64 |     7.14 |       25 |\</tspan>
-<tspan x="10" y="2538">    63.64 |... 83,85,86,89 |</tspan>
-<tspan x="10" y="2554">  replset.js                                                  |    10.33 |        0 |        0 |\</tspan>
-<tspan x="10" y="2570">    11.11 |... 437,438,447 |</tspan>
-<tspan x="10" y="2586">  server.js                                                   |    69.13 |    51.79 |    46.88 |\</tspan>
-<tspan x="10" y="2602">    75.74 |... 354,355,364 |</tspan>
-<tspan x="10" y="2618">  topology_base.js                                            |     51.9 |    26.47 |       30 |\</tspan>
-<tspan x="10" y="2634">     51.9 |... 122,126,127 |</tspan>
-<tspan x="10" y="2650">  url_parser.js                                               |    33.93 |    21.93 |       80 |\</tspan>
-<tspan x="10" y="2666">    34.81 |... 267,269,282 |</tspan>
-<tspan x="10" y="2682">  utils.js                                                    |     31.2 |     13.7 |    26.32 |\</tspan>
-<tspan x="10" y="2698">     32.2 |... 216,217,220 |</tspan>
-<tspan x="10" y="2714"> node-mongodb-minimal/mongodb/lib/bulk/                       |    38.81 |    24.54 |       25 |\</tspan>
-<tspan x="10" y="2730">    40.76 |                |</tspan>
-<tspan x="10" y="2746">  common.js                                                   |    52.56 |    45.31 |    35.71 |\</tspan>
-<tspan x="10" y="2762">    53.59 |... 372,373,376 |</tspan>
-<tspan x="10" y="2778">  ordered.js                                                  |    56.29 |    41.13 |    36.84 |\</tspan>
-<tspan x="10" y="2794">    58.97 |... 494,495,496 |</tspan>
-<tspan x="10" y="2810">  unordered.js                                                |    10.99 |        0 |        0 |\</tspan>
-<tspan x="10" y="2826">    11.98 |... 508,509,519 |</tspan>
-<tspan x="10" y="2842"> node-mongodb-minimal/mongodb/lib/gridfs/                     |     8.33 |     0.15 |        0 |\</tspan>
-<tspan x="10" y="2858">     9.52 |                |</tspan>
-<tspan x="10" y="2874">  chunk.js                                                    |    15.22 |        0 |        0 |\</tspan>
-<tspan x="10" y="2890">    16.47 |... 213,224,227 |</tspan>
-<tspan x="10" y="2906">  grid_store.js                                               |     7.57 |     0.16 |        0 |\</tspan>
-<tspan x="10" y="2922">      8.7 |... 5,1726,1727 |</tspan>
-<tspan x="10" y="2938">--------------------------------------------------------------|----------|----------|----------|\</tspan>
-<tspan x="10" y="2954">----------|----------------|</tspan>
-<tspan x="10" y="2970">All files                                                     |    27.81 |    15.54 |    17.69 |\</tspan>
-<tspan x="10" y="2986">    30.68 |                |</tspan>
-<tspan x="10" y="3002">--------------------------------------------------------------|----------|----------|----------|\</tspan>
-<tspan x="10" y="3018">----------|----------------|</tspan>
-<tspan x="10" y="3034"></tspan>
-<tspan x="10" y="3050">created coverage file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/coverage.htm\</tspan>
-<tspan x="10" y="3066">l/index.html</tspan>
+<tspan x="10" y="698">browserTest - exit-code 0 - file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/d\</tspan>
+<tspan x="10" y="714">oc.api.html</tspan>
+<tspan x="10" y="730"></tspan>
+<tspan x="10" y="746">[node test-case 1 of 1 passed] - testCase_build_doc</tspan>
+<tspan x="10" y="762">-------------------------|-----------|-----------|-----------|-----------|</tspan>
+<tspan x="10" y="778">File                     |   % Stmts |% Branches |   % Funcs |   % Lines |</tspan>
+<tspan x="10" y="794">-------------------------|-----------|-----------|-----------|-----------|</tspan>
+<tspan x="10" y="810">   node-mongodb-minimal/ |       100 |       100 |       100 |       100 |</tspan>
+<tspan x="10" y="826">      test.js            |       100 |       100 |       100 |       100 |</tspan>
+<tspan x="10" y="842">-------------------------|-----------|-----------|-----------|-----------|</tspan>
+<tspan x="10" y="858">All files                |       100 |       100 |       100 |       100 |</tspan>
+<tspan x="10" y="874">-------------------------|-----------|-----------|-----------|-----------|</tspan>
+<tspan x="10" y="890"></tspan>
+<tspan x="10" y="906">created coverage file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/coverage.htm\</tspan>
+<tspan x="10" y="922">l/index.html</tspan>
+<tspan x="10" y="938">merging file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/test-report.json to t\</tspan>
+<tspan x="10" y="954">est-report</tspan>
+<tspan x="10" y="970"></tspan>
+<tspan x="10" y="986">-------------------------------------------------------</tspan>
+<tspan x="10" y="1002">| test-report - npmTest - node - linux v7.2.0 - 2016-12-01T15:29:09.022Z</tspan>
+<tspan x="10" y="1018">|    7139 ms            0 failed        1 passed      |</tspan>
+<tspan x="10" y="1034">-------------------------------------------------------</tspan>
+<tspan x="10" y="1050"></tspan>
+<tspan x="10" y="1066">created test-report file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/test-repo\</tspan>
+<tspan x="10" y="1082">rt.html</tspan>
+<tspan x="10" y="1098"></tspan>
+<tspan x="10" y="1114"></tspan>
+<tspan x="10" y="1130">npmTest - 0 failed tests</tspan>
 </text>
 </svg>
