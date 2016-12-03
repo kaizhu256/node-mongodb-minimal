@@ -41,7 +41,7 @@
         
         href="https://github.com/kaizhu256/node-mongodb-minimal#readme"
         
-    >(mongodb-minimal v2016.11.1)</a>
+    >(mongodb-minimal v2016.11.2)</a>
 </h1>
 <div class="docApiSectionDiv"><a href="#"><h1>table of contents</h1></a><ul>
 
@@ -369,17 +369,6 @@
             function <span class="docApiSignatureSpan">mongodb-minimal.</span>instrument
             <span class="docApiSignatureSpan">(options,
  callback)</span>
-            </a>
-            
-        </li>
-        
-        <li>
-            
-            <a class="docApiElementLiA" href="#element.mongodb-minimal.middleware">
-            function <span class="docApiSignatureSpan">mongodb-minimal.</span>middleware
-            <span class="docApiSignatureSpan">(request,
- response,
- nextMiddleware)</span>
             </a>
             
         </li>
@@ -5497,42 +5486,6 @@ MongoClient.<span class="docApiCodeKeywordSpan">connect</span>(url, function(err
  callback) {
   if(typeof options == &#x27;function&#x27;) callback = options, options = {};
   return new Instrumentation(core, options, callback);
-}</pre></li>
-        <li>example usage<pre class="docApiCodePre">n/a</pre></li>
-        </ul>
-        
-        
-        
-        <h2>
-            <a href="#element.mongodb-minimal.middleware" id="element.mongodb-minimal.middleware">
-            function <span class="docApiSignatureSpan">mongodb-minimal.</span>middleware
-            <span class="docApiSignatureSpan">(request,
- response,
- nextMiddleware)</span>
-            </a>
-        </h2>
-        <ul>
-        <li>description and source code<pre class="docApiCodePre">middleware = function (request,
- response,
- nextMiddleware) {
-    var options;
-    options = {};
-    local.onNext(options, function (error) {
-        // recurse with next middleware in middlewareList
-        if (options.modeNext &lt; self.middlewareList.length) {
-            // run the sub-middleware
-            self.middlewareList[options.modeNext](
-                request,
-                response,
-                options.onNext
-            );
-            return;
-        }
-        // default to nextMiddleware
-        nextMiddleware(error);
-    });
-    options.modeNext = -1;
-    options.onNext();
 }</pre></li>
         <li>example usage<pre class="docApiCodePre">n/a</pre></li>
         </ul>
