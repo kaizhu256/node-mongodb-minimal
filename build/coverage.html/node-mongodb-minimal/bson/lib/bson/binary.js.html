@@ -1,0 +1,1071 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/bson/lib/bson/binary.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/bson/lib/bson/binary.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">18.11% <small>(23 / 127)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">0.87% <small>(1 / 115)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">0% <small>(0 / 10)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">18.55% <small>(23 / 124)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/bson/lib/bson/</a> &#187; binary.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span></td><td class="text"><pre class="prettyprint lang-js">/**
+ * Module dependencies.
+ * @ignore
+ */
+<span class="missing-if-branch" title="else path not taken" >E</span>if(typeof window === 'undefined') { 
+  var Buffer = require('buffer').Buffer; // TODO just use global Buffer
+}
+&nbsp;
+/**
+ * A class representation of the BSON Binary type.
+ * 
+ * Sub types
+ *  - **BSON.BSON_BINARY_SUBTYPE_DEFAULT**, default BSON type.
+ *  - **BSON.BSON_BINARY_SUBTYPE_FUNCTION**, BSON function type.
+ *  - **BSON.BSON_BINARY_SUBTYPE_BYTE_ARRAY**, BSON byte array type.
+ *  - **BSON.BSON_BINARY_SUBTYPE_UUID**, BSON uuid type.
+ *  - **BSON.BSON_BINARY_SUBTYPE_MD5**, BSON md5 type.
+ *  - **BSON.BSON_BINARY_SUBTYPE_USER_DEFINED**, BSON user defined type.
+ *
+ * @class
+ * @param {Buffer} buffer a buffer object containing the binary data.
+ * @param {Number} [subType] the option binary type.
+ * @return {Binary}
+ */
+<span class="fstat-no" title="function not covered" >function Binary(buffer, subType) {</span>
+<span class="cstat-no" title="statement not covered" >  if(!(this instanceof Binary)) <span class="cstat-no" title="statement not covered" >return new Binary(buffer, subType);</span></span>
+  
+<span class="cstat-no" title="statement not covered" >  this._bsontype = 'Binary';</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(buffer instanceof Number) {</span>
+<span class="cstat-no" title="statement not covered" >    this.sub_type = buffer;</span>
+<span class="cstat-no" title="statement not covered" >    this.position = 0;</span>
+  } else {    
+<span class="cstat-no" title="statement not covered" >    this.sub_type = subType == null ? BSON_BINARY_SUBTYPE_DEFAULT : subType;</span>
+<span class="cstat-no" title="statement not covered" >    this.position = 0;</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(buffer != null &amp;&amp; !(buffer instanceof Number)) {</span>
+    // Only accept Buffer, Uint8Array or Arrays
+<span class="cstat-no" title="statement not covered" >    if(typeof buffer == 'string') {</span>
+      // Different ways of writing the length of the string for the different types
+<span class="cstat-no" title="statement not covered" >      if(typeof Buffer != 'undefined') {</span>
+<span class="cstat-no" title="statement not covered" >        this.buffer = new Buffer(buffer);</span>
+      } else <span class="cstat-no" title="statement not covered" >if(typeof Uint8Array != 'undefined' || (Object.prototype.toString.call(buffer) == '[object Array]')) {</span>
+<span class="cstat-no" title="statement not covered" >        this.buffer = writeStringToArray(buffer);</span>
+      } else {
+<span class="cstat-no" title="statement not covered" >        throw new Error("only String, Buffer, Uint8Array or Array accepted");</span>
+      }
+    } else {
+<span class="cstat-no" title="statement not covered" >      this.buffer = buffer;      </span>
+    }
+<span class="cstat-no" title="statement not covered" >    this.position = buffer.length;</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    if(typeof Buffer != 'undefined') {</span>
+<span class="cstat-no" title="statement not covered" >      this.buffer =  new Buffer(Binary.BUFFER_SIZE);      </span>
+    } else <span class="cstat-no" title="statement not covered" >if(typeof Uint8Array != 'undefined'){</span>
+<span class="cstat-no" title="statement not covered" >      this.buffer = new Uint8Array(new ArrayBuffer(Binary.BUFFER_SIZE));</span>
+    } else {
+<span class="cstat-no" title="statement not covered" >      this.buffer = new Array(Binary.BUFFER_SIZE);</span>
+    }
+    // Set position to start of buffer
+<span class="cstat-no" title="statement not covered" >    this.position = 0;</span>
+  }
+};
+&nbsp;
+/**
+ * Updates this binary with byte_value.
+ *
+ * @method
+ * @param {string} byte_value a single byte we wish to write.
+ */
+Binary.prototype.put = <span class="fstat-no" title="function not covered" >function put(byte_value) {</span>
+  // If it's a string and a has more than one character throw an error
+<span class="cstat-no" title="statement not covered" >  if(byte_value['length'] != null &amp;&amp; typeof byte_value != 'number' &amp;&amp; byte_value.length != 1) <span class="cstat-no" title="statement not covered" >throw new Error("only accepts single character String, Uint8Array or Array");</span></span>
+<span class="cstat-no" title="statement not covered" >  if(typeof byte_value != 'number' &amp;&amp; byte_value &lt; 0 || byte_value &gt; 255) <span class="cstat-no" title="statement not covered" >throw new Error("only accepts number in a valid unsigned byte range 0-255");</span></span>
+  
+  // Decode the byte value once
+<span class="cstat-no" title="statement not covered" >  var decoded_byte = null;</span>
+<span class="cstat-no" title="statement not covered" >  if(typeof byte_value == 'string') {</span>
+<span class="cstat-no" title="statement not covered" >    decoded_byte = byte_value.charCodeAt(0);      </span>
+  } else <span class="cstat-no" title="statement not covered" >if(byte_value['length'] != null) {</span>
+<span class="cstat-no" title="statement not covered" >    decoded_byte = byte_value[0];</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    decoded_byte = byte_value;</span>
+  }
+  
+<span class="cstat-no" title="statement not covered" >  if(this.buffer.length &gt; this.position) {</span>
+<span class="cstat-no" title="statement not covered" >    this.buffer[this.position++] = decoded_byte;</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    if(typeof Buffer != 'undefined' &amp;&amp; Buffer.isBuffer(this.buffer)) {    </span>
+      // Create additional overflow buffer
+<span class="cstat-no" title="statement not covered" >      var buffer = new Buffer(Binary.BUFFER_SIZE + this.buffer.length);</span>
+      // Combine the two buffers together
+<span class="cstat-no" title="statement not covered" >      this.buffer.copy(buffer, 0, 0, this.buffer.length);</span>
+<span class="cstat-no" title="statement not covered" >      this.buffer = buffer;</span>
+<span class="cstat-no" title="statement not covered" >      this.buffer[this.position++] = decoded_byte;</span>
+    } else {
+<span class="cstat-no" title="statement not covered" >      var buffer = null;</span>
+      // Create a new buffer (typed or normal array)
+<span class="cstat-no" title="statement not covered" >      if(Object.prototype.toString.call(this.buffer) == '[object Uint8Array]') {</span>
+<span class="cstat-no" title="statement not covered" >        buffer = new Uint8Array(new ArrayBuffer(Binary.BUFFER_SIZE + this.buffer.length));</span>
+      } else {
+<span class="cstat-no" title="statement not covered" >        buffer = new Array(Binary.BUFFER_SIZE + this.buffer.length);</span>
+      }      
+      
+      // We need to copy all the content to the new array
+<span class="cstat-no" title="statement not covered" >      for(var i = 0; i &lt; this.buffer.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >        buffer[i] = this.buffer[i];</span>
+      }
+      
+      // Reassign the buffer
+<span class="cstat-no" title="statement not covered" >      this.buffer = buffer;</span>
+      // Write the byte
+<span class="cstat-no" title="statement not covered" >      this.buffer[this.position++] = decoded_byte;</span>
+    }
+  }
+};
+&nbsp;
+/**
+ * Writes a buffer or string to the binary.
+ *
+ * @method
+ * @param {(Buffer|string)} string a string or buffer to be written to the Binary BSON object.
+ * @param {number} offset specify the binary of where to write the content.
+ * @return {null}
+ */
+Binary.prototype.write = <span class="fstat-no" title="function not covered" >function write(string, offset) {</span>
+<span class="cstat-no" title="statement not covered" >  offset = typeof offset == 'number' ? offset : this.position;</span>
+&nbsp;
+  // If the buffer is to small let's extend the buffer
+<span class="cstat-no" title="statement not covered" >  if(this.buffer.length &lt; offset + string.length) {</span>
+<span class="cstat-no" title="statement not covered" >    var buffer = null;</span>
+    // If we are in node.js
+<span class="cstat-no" title="statement not covered" >    if(typeof Buffer != 'undefined' &amp;&amp; Buffer.isBuffer(this.buffer)) {      </span>
+<span class="cstat-no" title="statement not covered" >      buffer = new Buffer(this.buffer.length + string.length);</span>
+<span class="cstat-no" title="statement not covered" >      this.buffer.copy(buffer, 0, 0, this.buffer.length);      </span>
+    } else <span class="cstat-no" title="statement not covered" >if(Object.prototype.toString.call(this.buffer) == '[object Uint8Array]') {</span>
+      // Create a new buffer
+<span class="cstat-no" title="statement not covered" >      buffer = new Uint8Array(new ArrayBuffer(this.buffer.length + string.length))</span>
+      // Copy the content
+<span class="cstat-no" title="statement not covered" >      for(var i = 0; i &lt; this.position; i++) {</span>
+<span class="cstat-no" title="statement not covered" >        buffer[i] = this.buffer[i];</span>
+      }
+    }
+    
+    // Assign the new buffer
+<span class="cstat-no" title="statement not covered" >    this.buffer = buffer;</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(typeof Buffer != 'undefined' &amp;&amp; Buffer.isBuffer(string) &amp;&amp; Buffer.isBuffer(this.buffer)) {</span>
+<span class="cstat-no" title="statement not covered" >    string.copy(this.buffer, offset, 0, string.length);</span>
+<span class="cstat-no" title="statement not covered" >    this.position = (offset + string.length) &gt; this.position ? (offset + string.length) : this.position;</span>
+    // offset = string.length
+  } else <span class="cstat-no" title="statement not covered" >if(typeof Buffer != 'undefined' &amp;&amp; typeof string == 'string' &amp;&amp; Buffer.isBuffer(this.buffer)) {</span>
+<span class="cstat-no" title="statement not covered" >    this.buffer.write(string, 'binary', offset);</span>
+<span class="cstat-no" title="statement not covered" >    this.position = (offset + string.length) &gt; this.position ? (offset + string.length) : this.position;</span>
+    // offset = string.length;
+  } else <span class="cstat-no" title="statement not covered" >if(Object.prototype.toString.call(string) == '[object Uint8Array]' </span>
+    || Object.prototype.toString.call(string) == '[object Array]' &amp;&amp; typeof string != 'string') {      
+<span class="cstat-no" title="statement not covered" >    for(var i = 0; i &lt; string.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >      this.buffer[offset++] = string[i];</span>
+    }    
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.position = offset &gt; this.position ? offset : this.position;</span>
+  } else <span class="cstat-no" title="statement not covered" >if(typeof string == 'string') {</span>
+<span class="cstat-no" title="statement not covered" >    for(var i = 0; i &lt; string.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >      this.buffer[offset++] = string.charCodeAt(i);</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    this.position = offset &gt; this.position ? offset : this.position;</span>
+  }
+};
+&nbsp;
+/**
+ * Reads **length** bytes starting at **position**.
+ *
+ * @method
+ * @param {number} position read from the given position in the Binary.
+ * @param {number} length the number of bytes to read.
+ * @return {Buffer}
+ */
+Binary.prototype.read = <span class="fstat-no" title="function not covered" >function read(position, length) {</span>
+<span class="cstat-no" title="statement not covered" >  length = length &amp;&amp; length &gt; 0</span>
+    ? length
+    : this.position;
+  
+  // Let's return the data based on the type we have
+<span class="cstat-no" title="statement not covered" >  if(this.buffer['slice']) {</span>
+<span class="cstat-no" title="statement not covered" >    return this.buffer.slice(position, position + length);</span>
+  } else {
+    // Create a buffer to keep the result
+<span class="cstat-no" title="statement not covered" >    var buffer = typeof Uint8Array != 'undefined' ? new Uint8Array(new ArrayBuffer(length)) : new Array(length);</span>
+<span class="cstat-no" title="statement not covered" >    for(var i = 0; i &lt; length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >      buffer[i] = this.buffer[position++];</span>
+    }
+  }
+  // Return the buffer
+<span class="cstat-no" title="statement not covered" >  return buffer;</span>
+};
+&nbsp;
+/**
+ * Returns the value of this binary as a string.
+ *
+ * @method
+ * @return {string}
+ */
+Binary.prototype.value = <span class="fstat-no" title="function not covered" >function value(asRaw) {</span>
+<span class="cstat-no" title="statement not covered" >  asRaw = asRaw == null ? false : asRaw;  </span>
+&nbsp;
+  // Optimize to serialize for the situation where the data == size of buffer
+<span class="cstat-no" title="statement not covered" >  if(asRaw &amp;&amp; typeof Buffer != 'undefined' &amp;&amp; Buffer.isBuffer(this.buffer) &amp;&amp; this.buffer.length == this.position)</span>
+<span class="cstat-no" title="statement not covered" >    return this.buffer;</span>
+  
+  // If it's a node.js buffer object
+<span class="cstat-no" title="statement not covered" >  if(typeof Buffer != 'undefined' &amp;&amp; Buffer.isBuffer(this.buffer)) {</span>
+<span class="cstat-no" title="statement not covered" >    return asRaw ? this.buffer.slice(0, this.position) : this.buffer.toString('binary', 0, this.position);</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    if(asRaw) {</span>
+      // we support the slice command use it
+<span class="cstat-no" title="statement not covered" >      if(this.buffer['slice'] != null) {</span>
+<span class="cstat-no" title="statement not covered" >        return this.buffer.slice(0, this.position);</span>
+      } else {
+        // Create a new buffer to copy content to
+<span class="cstat-no" title="statement not covered" >        var newBuffer = Object.prototype.toString.call(this.buffer) == '[object Uint8Array]' ? new Uint8Array(new ArrayBuffer(this.position)) : new Array(this.position);</span>
+        // Copy content
+<span class="cstat-no" title="statement not covered" >        for(var i = 0; i &lt; this.position; i++) {</span>
+<span class="cstat-no" title="statement not covered" >          newBuffer[i] = this.buffer[i];</span>
+        }
+        // Return the buffer
+<span class="cstat-no" title="statement not covered" >        return newBuffer;</span>
+      }
+    } else {
+<span class="cstat-no" title="statement not covered" >      return convertArraytoUtf8BinaryString(this.buffer, 0, this.position);</span>
+    }
+  }
+};
+&nbsp;
+/**
+ * Length.
+ *
+ * @method
+ * @return {number} the length of the binary.
+ */
+Binary.prototype.length = <span class="fstat-no" title="function not covered" >function length() {</span>
+<span class="cstat-no" title="statement not covered" >  return this.position;</span>
+};
+&nbsp;
+/**
+ * @ignore
+ */
+Binary.prototype.toJSON = <span class="fstat-no" title="function not covered" >function() {</span>
+<span class="cstat-no" title="statement not covered" >  return this.buffer != null ? this.buffer.toString('base64') : '';</span>
+}
+&nbsp;
+/**
+ * @ignore
+ */
+Binary.prototype.toString = <span class="fstat-no" title="function not covered" >function(format) {</span>
+<span class="cstat-no" title="statement not covered" >  return this.buffer != null ? this.buffer.slice(0, this.position).toString(format) : '';</span>
+}
+&nbsp;
+/**
+ * Binary default subtype
+ * @ignore 
+ */
+var BSON_BINARY_SUBTYPE_DEFAULT = 0;
+&nbsp;
+/**
+ * @ignore
+ */
+var writeStringToArray = <span class="fstat-no" title="function not covered" >function(data) {</span>
+  // Create a buffer
+<span class="cstat-no" title="statement not covered" >  var buffer = typeof Uint8Array != 'undefined' ? new Uint8Array(new ArrayBuffer(data.length)) : new Array(data.length);</span>
+  // Write the content to the buffer
+<span class="cstat-no" title="statement not covered" >  for(var i = 0; i &lt; data.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >    buffer[i] = data.charCodeAt(i);</span>
+  }  
+  // Write the string to the buffer
+<span class="cstat-no" title="statement not covered" >  return buffer;</span>
+}
+&nbsp;
+/**
+ * Convert Array ot Uint8Array to Binary String
+ *
+ * @ignore
+ */
+var convertArraytoUtf8BinaryString = <span class="fstat-no" title="function not covered" >function(byteArray, startIndex, endIndex) {</span>
+<span class="cstat-no" title="statement not covered" >  var result = "";</span>
+<span class="cstat-no" title="statement not covered" >  for(var i = startIndex; i &lt; endIndex; i++) {</span>
+<span class="cstat-no" title="statement not covered" >   result = result + String.fromCharCode(byteArray[i]);</span>
+  }
+<span class="cstat-no" title="statement not covered" >  return result;  </span>
+};
+&nbsp;
+Binary.BUFFER_SIZE = 256;
+&nbsp;
+/**
+ * Default BSON type
+ *  
+ * @classconstant SUBTYPE_DEFAULT
+ **/
+Binary.SUBTYPE_DEFAULT = 0;
+/**
+ * Function BSON type
+ *  
+ * @classconstant SUBTYPE_DEFAULT
+ **/
+Binary.SUBTYPE_FUNCTION = 1;
+/**
+ * Byte Array BSON type
+ *  
+ * @classconstant SUBTYPE_DEFAULT
+ **/
+Binary.SUBTYPE_BYTE_ARRAY = 2;
+/**
+ * OLD UUID BSON type
+ *  
+ * @classconstant SUBTYPE_DEFAULT
+ **/
+Binary.SUBTYPE_UUID_OLD = 3;
+/**
+ * UUID BSON type
+ *  
+ * @classconstant SUBTYPE_DEFAULT
+ **/
+Binary.SUBTYPE_UUID = 4;
+/**
+ * MD5 BSON type
+ *  
+ * @classconstant SUBTYPE_DEFAULT
+ **/
+Binary.SUBTYPE_MD5 = 5;
+/**
+ * User BSON type
+ *  
+ * @classconstant SUBTYPE_DEFAULT
+ **/
+Binary.SUBTYPE_USER_DEFINED = 128;
+&nbsp;
+/**
+ * Expose.
+ */
+module.exports = Binary;
+module.exports.Binary = Binary;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Jul 06 2015 19:16:36 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>

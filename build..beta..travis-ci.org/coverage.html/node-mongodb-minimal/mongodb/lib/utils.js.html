@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/mongodb/lib/utils.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb/lib/utils.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">31.2% <small>(39 / 125)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">13.7% <small>(10 / 73)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">26.32% <small>(5 / 19)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">32.2% <small>(38 / 118)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/mongodb/lib/</a> &#187; utils.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">7</span>
+<span class="cline-any cline-yes">11</span>
+<span class="cline-any cline-yes">7</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">6</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">4</span>
+<span class="cline-any cline-yes">4</span>
+<span class="cline-any cline-yes">4</span>
+<span class="cline-any cline-yes">4</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
+&nbsp;
+var MongoError = require('mongodb-core').MongoError
+&nbsp;
+var shallowClone = function(obj) {
+  var copy = {};
+  for(var name in obj) copy[name] = obj[name];
+  return copy;
+}
+&nbsp;
+// Set simple property
+var getSingleProperty = function(obj, name, value) {
+  Object.defineProperty(obj, name, {
+    enumerable:true,
+    get: function() {
+      return value
+    }
+  });
+}
+&nbsp;
+var formatSortValue = exports.formatSortValue = <span class="fstat-no" title="function not covered" >function(sortDirection) {</span>
+<span class="cstat-no" title="statement not covered" >  var value = ("" + sortDirection).toLowerCase();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  switch (value) {</span>
+    case 'ascending':
+    case 'asc':
+    case '1':
+<span class="cstat-no" title="statement not covered" >      return 1;</span>
+    case 'descending':
+    case 'desc':
+    case '-1':
+<span class="cstat-no" title="statement not covered" >      return -1;</span>
+    default:
+<span class="cstat-no" title="statement not covered" >      throw new Error("Illegal sort clause, must be of the form "</span>
+                    + "[['field1', '(ascending|descending)'], "
+                    + "['field2', '(ascending|descending)']]");
+  }
+};
+&nbsp;
+var formattedOrderClause = exports.formattedOrderClause = <span class="fstat-no" title="function not covered" >function(sortValue) {</span>
+<span class="cstat-no" title="statement not covered" >  var orderBy = {};</span>
+<span class="cstat-no" title="statement not covered" >  if(sortValue == null) <span class="cstat-no" title="statement not covered" >return null;</span></span>
+<span class="cstat-no" title="statement not covered" >  if (Array.isArray(sortValue)) {</span>
+<span class="cstat-no" title="statement not covered" >    if(sortValue.length === 0) {</span>
+<span class="cstat-no" title="statement not covered" >      return null;</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    for(var i = 0; i &lt; sortValue.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >      if(sortValue[i].constructor == String) {</span>
+<span class="cstat-no" title="statement not covered" >        orderBy[sortValue[i]] = 1;</span>
+      } else {
+<span class="cstat-no" title="statement not covered" >        orderBy[sortValue[i][0]] = formatSortValue(sortValue[i][1]);</span>
+      }
+    }
+  } else <span class="cstat-no" title="statement not covered" >if(sortValue != null &amp;&amp; typeof sortValue == 'object') {</span>
+<span class="cstat-no" title="statement not covered" >    orderBy = sortValue;</span>
+  } else <span class="cstat-no" title="statement not covered" >if (typeof sortValue == 'string') {</span>
+<span class="cstat-no" title="statement not covered" >    orderBy[sortValue] = 1;</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    throw new Error("Illegal sort clause, must be of the form " +</span>
+      "[['field1', '(ascending|descending)'], ['field2', '(ascending|descending)']]");
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return orderBy;</span>
+};
+&nbsp;
+var checkCollectionName = function checkCollectionName (collectionName) {
+  <span class="missing-if-branch" title="if path not taken" >I</span>if('string' !== typeof collectionName) {
+<span class="cstat-no" title="statement not covered" >    throw Error("collection name must be a String");</span>
+  }
+&nbsp;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(!collectionName || collectionName.indexOf('..') != -1) {
+<span class="cstat-no" title="statement not covered" >    throw Error("collection names cannot be empty");</span>
+  }
+&nbsp;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(collectionName.indexOf('$') != -1 &amp;&amp;
+<span class="branch-1 cbranch-no" title="branch not covered" >      collectionName.match(/((^\$cmd)|(oplog\.\$main))/) == null)</span> {
+<span class="cstat-no" title="statement not covered" >    throw Error("collection names must not contain '$'");</span>
+  }
+&nbsp;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(collectionName.match(/^\.|\.$/) != null) {
+<span class="cstat-no" title="statement not covered" >    throw Error("collection names must not start or end with '.'");</span>
+  }
+&nbsp;
+  // Validate that we are not passing 0x00 in the colletion name
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(!!~collectionName.indexOf("\x00")) {
+<span class="cstat-no" title="statement not covered" >    throw new Error("collection names cannot contain a null character");</span>
+  }
+};
+&nbsp;
+var handleCallback = function(callback, err, value1, value2) {
+  try {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(callback == null) <span class="cstat-no" title="statement not covered" >return;</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(value2) <span class="cstat-no" title="statement not covered" >return callback(err, value1, value2);</span>
+    return callback(err, value1);
+  } catch(err) {
+<span class="cstat-no" title="statement not covered" >    process.nextTick(<span class="fstat-no" title="function not covered" >function() {</span> <span class="cstat-no" title="statement not covered" >throw err; </span>});</span>
+<span class="cstat-no" title="statement not covered" >    return false;</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return true;</span>
+}
+&nbsp;
+/**
+ * Wrap a Mongo error document in an Error instance
+ * @ignore
+ * @api private
+ */
+var toError = <span class="fstat-no" title="function not covered" >function(error) {</span>
+<span class="cstat-no" title="statement not covered" >  if (error instanceof Error) <span class="cstat-no" title="statement not covered" >return error;</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  var msg = error.err || error.errmsg || error.errMessage || error;</span>
+<span class="cstat-no" title="statement not covered" >  var e = MongoError.create({message: msg, driver:true});</span>
+&nbsp;
+  // Get all object keys
+<span class="cstat-no" title="statement not covered" >  var keys = typeof error == 'object'</span>
+    ? Object.keys(error)
+    : [];
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  for(var i = 0; i &lt; keys.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >    e[keys[i]] = error[keys[i]];</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return e;</span>
+}
+&nbsp;
+/**
+ * @ignore
+ */
+var normalizeHintField = <span class="fstat-no" title="function not covered" >function normalizeHintField(hint) {</span>
+<span class="cstat-no" title="statement not covered" >  var finalHint = null;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(typeof hint == 'string') {</span>
+<span class="cstat-no" title="statement not covered" >    finalHint = hint;</span>
+  } else <span class="cstat-no" title="statement not covered" >if(Array.isArray(hint)) {</span>
+<span class="cstat-no" title="statement not covered" >    finalHint = {};</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    hint.forEach(<span class="fstat-no" title="function not covered" >function(param) {</span></span>
+<span class="cstat-no" title="statement not covered" >      finalHint[param] = 1;</span>
+    });
+  } else <span class="cstat-no" title="statement not covered" >if(hint != null &amp;&amp; typeof hint == 'object') {</span>
+<span class="cstat-no" title="statement not covered" >    finalHint = {};</span>
+<span class="cstat-no" title="statement not covered" >    for (var name in hint) {</span>
+<span class="cstat-no" title="statement not covered" >      finalHint[name] = hint[name];</span>
+    }
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return finalHint;</span>
+};
+&nbsp;
+/**
+ * Create index name based on field spec
+ *
+ * @ignore
+ * @api private
+ */
+var parseIndexOptions = <span class="fstat-no" title="function not covered" >function(fieldOrSpec) {</span>
+<span class="cstat-no" title="statement not covered" >  var fieldHash = {};</span>
+<span class="cstat-no" title="statement not covered" >  var indexes = [];</span>
+<span class="cstat-no" title="statement not covered" >  var keys;</span>
+&nbsp;
+  // Get all the fields accordingly
+<span class="cstat-no" title="statement not covered" >  if('string' == typeof fieldOrSpec) {</span>
+    // 'type'
+<span class="cstat-no" title="statement not covered" >    indexes.push(fieldOrSpec + '_' + 1);</span>
+<span class="cstat-no" title="statement not covered" >    fieldHash[fieldOrSpec] = 1;</span>
+  } else <span class="cstat-no" title="statement not covered" >if(Array.isArray(fieldOrSpec)) {</span>
+<span class="cstat-no" title="statement not covered" >    fieldOrSpec.forEach(<span class="fstat-no" title="function not covered" >function(f) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if('string' == typeof f) {</span>
+        // [{location:'2d'}, 'type']
+<span class="cstat-no" title="statement not covered" >        indexes.push(f + '_' + 1);</span>
+<span class="cstat-no" title="statement not covered" >        fieldHash[f] = 1;</span>
+      } else <span class="cstat-no" title="statement not covered" >if(Array.isArray(f)) {</span>
+        // [['location', '2d'],['type', 1]]
+<span class="cstat-no" title="statement not covered" >        indexes.push(f[0] + '_' + (f[1] || 1));</span>
+<span class="cstat-no" title="statement not covered" >        fieldHash[f[0]] = f[1] || 1;</span>
+      } else <span class="cstat-no" title="statement not covered" >if(isObject(f)) {</span>
+        // [{location:'2d'}, {type:1}]
+<span class="cstat-no" title="statement not covered" >        keys = Object.keys(f);</span>
+<span class="cstat-no" title="statement not covered" >        keys.forEach(<span class="fstat-no" title="function not covered" >function(k) {</span></span>
+<span class="cstat-no" title="statement not covered" >          indexes.push(k + '_' + f[k]);</span>
+<span class="cstat-no" title="statement not covered" >          fieldHash[k] = f[k];</span>
+        });
+      } else {
+        // undefined (ignore)
+      }
+    });
+  } else <span class="cstat-no" title="statement not covered" >if(isObject(fieldOrSpec)) {</span>
+    // {location:'2d', type:1}
+<span class="cstat-no" title="statement not covered" >    keys = Object.keys(fieldOrSpec);</span>
+<span class="cstat-no" title="statement not covered" >    keys.forEach(<span class="fstat-no" title="function not covered" >function(key) {</span></span>
+<span class="cstat-no" title="statement not covered" >      indexes.push(key + '_' + fieldOrSpec[key]);</span>
+<span class="cstat-no" title="statement not covered" >      fieldHash[key] = fieldOrSpec[key];</span>
+    });
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return {</span>
+    name: indexes.join("_"), keys: keys, fieldHash: fieldHash
+  }
+}
+&nbsp;
+var isObject = exports.isObject = <span class="fstat-no" title="function not covered" >function (arg) {</span>
+<span class="cstat-no" title="statement not covered" >  return '[object Object]' == toString.call(arg)</span>
+}
+&nbsp;
+var debugOptions = <span class="fstat-no" title="function not covered" >function(debugFields, options) {</span>
+<span class="cstat-no" title="statement not covered" >  var finaloptions = {};</span>
+<span class="cstat-no" title="statement not covered" >  debugFields.forEach(<span class="fstat-no" title="function not covered" >function(n) {</span></span>
+<span class="cstat-no" title="statement not covered" >    finaloptions[n] = options[n];</span>
+  });
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return finaloptions;</span>
+}
+&nbsp;
+var decorateCommand = <span class="fstat-no" title="function not covered" >function(command, options, exclude) {</span>
+<span class="cstat-no" title="statement not covered" >  for(var name in options) {</span>
+<span class="cstat-no" title="statement not covered" >    if(exclude[name] == null) <span class="cstat-no" title="statement not covered" >command[name] = options[name];</span></span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return command;</span>
+}
+&nbsp;
+exports.shallowClone = shallowClone;
+exports.getSingleProperty = getSingleProperty;
+exports.checkCollectionName = checkCollectionName;
+exports.toError = toError;
+exports.formattedOrderClause = formattedOrderClause;
+exports.parseIndexOptions = parseIndexOptions;
+exports.normalizeHintField = normalizeHintField;
+exports.handleCallback = handleCallback;
+exports.decorateCommand = decorateCommand;
+exports.isObject = isObject;
+exports.debugOptions = debugOptions;
+&nbsp;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Aug 19 2015 22:48:05 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>

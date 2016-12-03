@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/mongodb/lib/url_parser.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb/lib/url_parser.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">33.93% <small>(57 / 168)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">21.93% <small>(25 / 114)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">80% <small>(4 / 5)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">34.81% <small>(55 / 158)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/mongodb/lib/</a> &#187; url_parser.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
+&nbsp;
+var ReadPreference = require('./read_preference');
+&nbsp;
+module.exports = function(url, options) {
+  // Ensure we have a default options object if none set
+  options = options || <span class="branch-1 cbranch-no" title="branch not covered" >{};</span>
+  // Variables
+  var connection_part = '';
+  var auth_part = '';
+  var query_string_part = '';
+  var dbName = 'admin';
+&nbsp;
+  // Must start with mongodb
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(url.indexOf("mongodb://") != 0)
+<span class="cstat-no" title="statement not covered" >    throw Error("URL must be in the format mongodb://user:pass@host:port/dbname");</span>
+  // If we have a ? mark cut the query elements off
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(url.indexOf("?") != -1) {
+<span class="cstat-no" title="statement not covered" >    query_string_part = url.substr(url.indexOf("?") + 1);</span>
+<span class="cstat-no" title="statement not covered" >    connection_part = url.substring("mongodb://".length, url.indexOf("?"))</span>
+  } else {
+    connection_part = url.substring("mongodb://".length);
+  }
+&nbsp;
+  // Check if we have auth params
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(connection_part.indexOf("@") != -1) {
+<span class="cstat-no" title="statement not covered" >    auth_part = connection_part.split("@")[0];</span>
+<span class="cstat-no" title="statement not covered" >    connection_part = connection_part.split("@")[1];</span>
+  }
+&nbsp;
+  // Check if the connection string has a db
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(connection_part.indexOf(".sock") != -1) {
+<span class="cstat-no" title="statement not covered" >    if(connection_part.indexOf(".sock/") != -1) {</span>
+<span class="cstat-no" title="statement not covered" >      dbName = connection_part.split(".sock/")[1];</span>
+<span class="cstat-no" title="statement not covered" >      connection_part = connection_part.split("/", connection_part.indexOf(".sock") + ".sock".length);</span>
+    }
+  } else <span class="missing-if-branch" title="else path not taken" >E</span>if(connection_part.indexOf("/") != -1) {
+    dbName = connection_part.split("/")[1];
+    connection_part = connection_part.split("/")[0];
+  }
+&nbsp;
+  // Result object
+  var object = {};
+&nbsp;
+  // Pick apart the authentication part of the string
+  var authPart = auth_part || '';
+  var auth = authPart.split(':', 2);
+&nbsp;
+  // Decode the URI components
+  auth[0] = decodeURIComponent(auth[0]);
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(auth[1]){
+<span class="cstat-no" title="statement not covered" >    auth[1] = decodeURIComponent(auth[1]);</span>
+  }
+&nbsp;
+  // Add auth to final object if we have 2 elements
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(auth.length == 2) <span class="cstat-no" title="statement not covered" >object.auth = {user: auth[0], password: auth[1]};</span>
+&nbsp;
+  // Variables used for temporary storage
+  var hostPart;
+  var urlOptions;
+  var servers;
+  var serverOptions = {socketOptions: {}};
+  var dbOptions = {read_preference_tags: []};
+  var replSetServersOptions = {socketOptions: {}};
+  // Add server options to final object
+  object.server_options = serverOptions;
+  object.db_options = dbOptions;
+  object.rs_options = replSetServersOptions;
+  object.mongos_options = {};
+&nbsp;
+  // Let's check if we are using a domain socket
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(url.match(/\.sock/)) {
+    // Split out the socket part
+<span class="cstat-no" title="statement not covered" >    var domainSocket = url.substring(</span>
+        url.indexOf("mongodb://") + "mongodb://".length
+      , url.lastIndexOf(".sock") + ".sock".length);
+    // Clean out any auth stuff if any
+<span class="cstat-no" title="statement not covered" >    if(domainSocket.indexOf("@") != -1) <span class="cstat-no" title="statement not covered" >domainSocket = domainSocket.split("@")[1];</span></span>
+<span class="cstat-no" title="statement not covered" >    servers = [{domain_socket: domainSocket}];</span>
+  } else {
+    // Split up the db
+    hostPart = connection_part;
+    // Deduplicate servers
+    var deduplicatedServers = {};
+&nbsp;
+    // Parse all server results
+    servers = hostPart.split(',').map(function(h) {
+      var _host, _port, ipv6match;
+      //check if it matches [IPv6]:port, where the port number is optional
+      <span class="missing-if-branch" title="if path not taken" >I</span>if ((ipv6match = /\[([^\]]+)\](?:\:(.+))?/.exec(h))) {
+<span class="cstat-no" title="statement not covered" >        _host = ipv6match[1];</span>
+<span class="cstat-no" title="statement not covered" >        _port = parseInt(ipv6match[2], 10) || 27017;</span>
+      } else {
+        //otherwise assume it's IPv4, or plain hostname
+        var hostPort = h.split(':', 2);
+        _host = hostPort[0] || <span class="branch-1 cbranch-no" title="branch not covered" >'localhost';</span>
+        _port = hostPort[1] != null ? parseInt(hostPort[1], 10) : <span class="branch-1 cbranch-no" title="branch not covered" >27017;</span>
+        // Check for localhost?safe=true style case
+        <span class="missing-if-branch" title="if path not taken" >I</span>if(_host.indexOf("?") != -1) <span class="cstat-no" title="statement not covered" >_host = _host.split(/\?/)[0];</span>
+      }
+&nbsp;
+      // No entry returned for duplicate servr
+      <span class="missing-if-branch" title="if path not taken" >I</span>if(deduplicatedServers[_host + "_" + _port]) <span class="cstat-no" title="statement not covered" >return null;</span>
+      deduplicatedServers[_host + "_" + _port] = 1;
+&nbsp;
+      // Return the mapped object
+      return {host: _host, port: _port};
+    }).filter(function(x) {
+      return x != null;
+    });
+  }
+&nbsp;
+  // Get the db name
+  object.dbName = dbName || <span class="branch-1 cbranch-no" title="branch not covered" >'admin';</span>
+  // Split up all the options
+  urlOptions = (query_string_part || '').split(/[&amp;;]/);
+  // Ugh, we have to figure out which options go to which constructor manually.
+  urlOptions.forEach(function(opt) {
+    <span class="missing-if-branch" title="else path not taken" >E</span>if(!opt) return;
+<span class="cstat-no" title="statement not covered" >    var splitOpt = opt.split('='), name = splitOpt[0], value = splitOpt[1];</span>
+    // Options implementations
+<span class="cstat-no" title="statement not covered" >    switch(name) {</span>
+      case 'slaveOk':
+      case 'slave_ok':
+<span class="cstat-no" title="statement not covered" >        serverOptions.slave_ok = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        dbOptions.slaveOk = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'maxPoolSize':
+      case 'poolSize':
+<span class="cstat-no" title="statement not covered" >        serverOptions.poolSize = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        replSetServersOptions.poolSize = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'autoReconnect':
+      case 'auto_reconnect':
+<span class="cstat-no" title="statement not covered" >        serverOptions.auto_reconnect = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'minPoolSize':
+<span class="cstat-no" title="statement not covered" >        throw new Error("minPoolSize not supported");</span>
+      case 'maxIdleTimeMS':
+<span class="cstat-no" title="statement not covered" >        throw new Error("maxIdleTimeMS not supported");</span>
+      case 'waitQueueMultiple':
+<span class="cstat-no" title="statement not covered" >        throw new Error("waitQueueMultiple not supported");</span>
+      case 'waitQueueTimeoutMS':
+<span class="cstat-no" title="statement not covered" >        throw new Error("waitQueueTimeoutMS not supported");</span>
+      case 'uuidRepresentation':
+<span class="cstat-no" title="statement not covered" >        throw new Error("uuidRepresentation not supported");</span>
+      case 'ssl':
+<span class="cstat-no" title="statement not covered" >        if(value == 'prefer') {</span>
+<span class="cstat-no" title="statement not covered" >          serverOptions.ssl = value;</span>
+<span class="cstat-no" title="statement not covered" >          replSetServersOptions.ssl = value;</span>
+<span class="cstat-no" title="statement not covered" >          break;</span>
+        }
+<span class="cstat-no" title="statement not covered" >        serverOptions.ssl = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        replSetServersOptions.ssl = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'replicaSet':
+      case 'rs_name':
+<span class="cstat-no" title="statement not covered" >        replSetServersOptions.rs_name = value;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'reconnectWait':
+<span class="cstat-no" title="statement not covered" >        replSetServersOptions.reconnectWait = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'retries':
+<span class="cstat-no" title="statement not covered" >        replSetServersOptions.retries = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'readSecondary':
+      case 'read_secondary':
+<span class="cstat-no" title="statement not covered" >        replSetServersOptions.read_secondary = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'fsync':
+<span class="cstat-no" title="statement not covered" >        dbOptions.fsync = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'journal':
+<span class="cstat-no" title="statement not covered" >        dbOptions.j = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'safe':
+<span class="cstat-no" title="statement not covered" >        dbOptions.safe = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'nativeParser':
+      case 'native_parser':
+<span class="cstat-no" title="statement not covered" >        dbOptions.native_parser = (value == 'true');</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'connectTimeoutMS':
+<span class="cstat-no" title="statement not covered" >        serverOptions.socketOptions.connectTimeoutMS = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        replSetServersOptions.socketOptions.connectTimeoutMS = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'socketTimeoutMS':
+<span class="cstat-no" title="statement not covered" >        serverOptions.socketOptions.socketTimeoutMS = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        replSetServersOptions.socketOptions.socketTimeoutMS = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'w':
+<span class="cstat-no" title="statement not covered" >        dbOptions.w = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        if(isNaN(dbOptions.w)) <span class="cstat-no" title="statement not covered" >dbOptions.w = value;</span></span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'authSource':
+<span class="cstat-no" title="statement not covered" >        dbOptions.authSource = value;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'gssapiServiceName':
+<span class="cstat-no" title="statement not covered" >        dbOptions.gssapiServiceName = value;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'authMechanism':
+<span class="cstat-no" title="statement not covered" >        if(value == 'GSSAPI') {</span>
+          // If no password provided decode only the principal
+<span class="cstat-no" title="statement not covered" >          if(object.auth == null) {</span>
+<span class="cstat-no" title="statement not covered" >            var urlDecodeAuthPart = decodeURIComponent(authPart);</span>
+<span class="cstat-no" title="statement not covered" >            if(urlDecodeAuthPart.indexOf("@") == -1) <span class="cstat-no" title="statement not covered" >throw new Error("GSSAPI requires a provided principal");</span></span>
+<span class="cstat-no" title="statement not covered" >            object.auth = {user: urlDecodeAuthPart, password: null};</span>
+          } else {
+<span class="cstat-no" title="statement not covered" >            object.auth.user = decodeURIComponent(object.auth.user);</span>
+          }
+        } else <span class="cstat-no" title="statement not covered" >if(value == 'MONGODB-X509') {</span>
+<span class="cstat-no" title="statement not covered" >          object.auth = {user: decodeURIComponent(authPart)};</span>
+        }
+&nbsp;
+        // Only support GSSAPI or MONGODB-CR for now
+<span class="cstat-no" title="statement not covered" >        if(value != 'GSSAPI'</span>
+          &amp;&amp; value != 'MONGODB-X509'
+          &amp;&amp; value != 'MONGODB-CR'
+          &amp;&amp; value != 'SCRAM-SHA-1'
+          &amp;&amp; value != 'PLAIN')
+<span class="cstat-no" title="statement not covered" >            throw new Error("only GSSAPI, PLAIN, MONGODB-X509, SCRAM-SHA-1 or MONGODB-CR is supported by authMechanism");</span>
+&nbsp;
+        // Authentication mechanism
+<span class="cstat-no" title="statement not covered" >        dbOptions.authMechanism = value;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'authMechanismProperties':
+        // Split up into key, value pairs
+<span class="cstat-no" title="statement not covered" >        var values = value.split(',');</span>
+<span class="cstat-no" title="statement not covered" >        var o = {};</span>
+        // For each value split into key, value
+<span class="cstat-no" title="statement not covered" >        values.forEach(<span class="fstat-no" title="function not covered" >function(x) {</span></span>
+<span class="cstat-no" title="statement not covered" >          var v = x.split(':');</span>
+<span class="cstat-no" title="statement not covered" >          o[v[0]] = v[1];</span>
+        });
+&nbsp;
+        // Set all authMechanismProperties
+<span class="cstat-no" title="statement not covered" >        dbOptions.authMechanismProperties = o;</span>
+        // Set the service name value
+<span class="cstat-no" title="statement not covered" >        if(typeof o.SERVICE_NAME == 'string') <span class="cstat-no" title="statement not covered" >dbOptions.gssapiServiceName = o.SERVICE_NAME;</span></span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'wtimeoutMS':
+<span class="cstat-no" title="statement not covered" >        dbOptions.wtimeout = parseInt(value, 10);</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'readPreference':
+<span class="cstat-no" title="statement not covered" >        if(!ReadPreference.isValid(value)) <span class="cstat-no" title="statement not covered" >throw new Error("readPreference must be either primary/primaryPreferred/secondary/secondaryPreferred/nearest");</span></span>
+<span class="cstat-no" title="statement not covered" >        dbOptions.read_preference = value;</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      case 'readPreferenceTags':
+        // Decode the value
+<span class="cstat-no" title="statement not covered" >        value = decodeURIComponent(value);</span>
+        // Contains the tag object
+<span class="cstat-no" title="statement not covered" >        var tagObject = {};</span>
+<span class="cstat-no" title="statement not covered" >        if(value == null || value == '') {</span>
+<span class="cstat-no" title="statement not covered" >          dbOptions.read_preference_tags.push(tagObject);</span>
+<span class="cstat-no" title="statement not covered" >          break;</span>
+        }
+&nbsp;
+        // Split up the tags
+<span class="cstat-no" title="statement not covered" >        var tags = value.split(/\,/);</span>
+<span class="cstat-no" title="statement not covered" >        for(var i = 0; i &lt; tags.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >          var parts = tags[i].trim().split(/\:/);</span>
+<span class="cstat-no" title="statement not covered" >          tagObject[parts[0]] = parts[1];</span>
+        }
+&nbsp;
+        // Set the preferences tags
+<span class="cstat-no" title="statement not covered" >        dbOptions.read_preference_tags.push(tagObject);</span>
+<span class="cstat-no" title="statement not covered" >        break;</span>
+      default:
+<span class="cstat-no" title="statement not covered" >        break;</span>
+    }
+  });
+&nbsp;
+  // No tags: should be null (not [])
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(dbOptions.read_preference_tags.length === 0) {
+    dbOptions.read_preference_tags = null;
+  }
+&nbsp;
+  // Validate if there are an invalid write concern combinations
+  <span class="missing-if-branch" title="if path not taken" >I</span>if((dbOptions.w == -1 || dbOptions.w == 0) &amp;&amp; (
+<span class="branch-2 cbranch-no" title="branch not covered" >      dbOptions.journal == true</span>
+      || <span class="branch-3 cbranch-no" title="branch not covered" >dbOptions.fsync == true</span>
+      || <span class="branch-4 cbranch-no" title="branch not covered" >dbOptions.safe == true)</span>) <span class="cstat-no" title="statement not covered" >throw new Error("w set to -1 or 0 cannot be combined with safe/w/journal/fsync")</span>
+&nbsp;
+  // If no read preference set it to primary
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(!dbOptions.read_preference) dbOptions.read_preference = 'primary';
+&nbsp;
+  // Add servers to result
+  object.servers = servers;
+  // Returned parsed object
+  return object;
+}
+&nbsp;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 31 2015 10:54:58 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1380 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/mongodb/lib/mongo_client.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb/lib/mongo_client.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">45.5% <small>(91 / 200)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">49.7% <small>(84 / 169)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">42.11% <small>(8 / 19)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">50.28% <small>(91 / 181)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/mongodb/lib/</a> &#187; mongo_client.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
+&nbsp;
+var parse = require('./url_parser')
+  , Server = require('./server')
+  , Mongos = require('./mongos')
+  , ReplSet = require('./replset')
+  , ReadPreference = require('./read_preference')
+  , Db = require('./db');
+&nbsp;
+/**
+ * @fileOverview The **MongoClient** class is a class that allows for making Connections to MongoDB.
+ *
+ * @example
+ * var MongoClient = require('mongodb').MongoClient,
+ *   test = require('assert');
+ * // Connection url
+ * var url = 'mongodb://localhost:27017/test';
+ * // Connect using MongoClient
+ * MongoClient.connect(url, function(err, db) {
+ *   // Get an additional db
+ *   db.close();
+ * });
+ */
+&nbsp;
+/**
+ * Creates a new MongoClient instance
+ * @class
+ * @return {MongoClient} a MongoClient instance.
+ */
+<span class="fstat-no" title="function not covered" >function MongoClient() {</span>
+  /**
+   * The callback format for results
+   * @callback MongoClient~connectCallback
+   * @param {MongoError} error An error instance representing the error during the execution.
+   * @param {Db} db The connected database.
+   */
+&nbsp;
+  /**
+   * Connect to MongoDB using a url as documented at
+   *
+   *  docs.mongodb.org/manual/reference/connection-string/
+   *
+   * Note that for replicasets the replicaSet query parameter is required in the 2.0 driver
+   *
+   * @method
+   * @param {string} url The connection URI string
+   * @param {object} [options=null] Optional settings.
+   * @param {boolean} [options.uri_decode_auth=false] Uri decode the user name and password for authentication
+   * @param {object} [options.db=null] A hash of options to set on the db object, see **Db constructor**
+   * @param {object} [options.server=null] A hash of options to set on the server objects, see **Server** constructor**
+   * @param {object} [options.replSet=null] A hash of options to set on the replSet object, see **ReplSet** constructor**
+   * @param {object} [options.mongos=null] A hash of options to set on the mongos object, see **Mongos** constructor**
+   * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
+   * @param {MongoClient~connectCallback} callback The command result callback
+   * @return {Promise} returns Promise if no callback passed
+   */
+<span class="cstat-no" title="statement not covered" >  this.connect = MongoClient.connect;</span>
+}
+&nbsp;
+/**
+ * Connect to MongoDB using a url as documented at
+ *
+ *  docs.mongodb.org/manual/reference/connection-string/
+ *
+ * Note that for replicasets the replicaSet query parameter is required in the 2.0 driver
+ *
+ * @method
+ * @static
+ * @param {string} url The connection URI string
+ * @param {object} [options=null] Optional settings.
+ * @param {boolean} [options.uri_decode_auth=false] Uri decode the user name and password for authentication
+ * @param {object} [options.db=null] A hash of options to set on the db object, see **Db constructor**
+ * @param {object} [options.server=null] A hash of options to set on the server objects, see **Server** constructor**
+ * @param {object} [options.replSet=null] A hash of options to set on the replSet object, see **ReplSet** constructor**
+ * @param {object} [options.mongos=null] A hash of options to set on the mongos object, see **Mongos** constructor**
+ * @param {object} [options.promiseLibrary=null] A Promise library class the application wishes to use such as Bluebird, must be ES6 compatible
+ * @param {MongoClient~connectCallback} callback The command result callback
+ * @return {Promise} returns Promise if no callback passed
+ */
+MongoClient.connect = function(url, options, callback) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  callback = typeof args[args.length - 1] == 'function' ? args.pop() : <span class="branch-1 cbranch-no" title="branch not covered" >null;</span>
+  options = args.length ? <span class="branch-0 cbranch-no" title="branch not covered" >args.shift() </span>: null;
+  options = options || {};
+&nbsp;
+  // Get the promiseLibrary
+  var promiseLibrary = options.promiseLibrary;
+&nbsp;
+  // No promise library selected fall back
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(!promiseLibrary) {
+    promiseLibrary = typeof global.Promise == 'function' ?
+      global.Promise : <span class="branch-1 cbranch-no" title="branch not covered" >require('es6-promise').Promise;</span>
+  }
+&nbsp;
+  // Return a promise
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof callback != 'function') {
+<span class="cstat-no" title="statement not covered" >    return new promiseLibrary(<span class="fstat-no" title="function not covered" >function(resolve, reject) {</span></span>
+<span class="cstat-no" title="statement not covered" >      connect(url, options, <span class="fstat-no" title="function not covered" >function(err, db) {</span></span>
+<span class="cstat-no" title="statement not covered" >        if(err) <span class="cstat-no" title="statement not covered" >return reject(err);</span></span>
+<span class="cstat-no" title="statement not covered" >        resolve(db);</span>
+      });
+    });
+  }
+&nbsp;
+  // Fallback to callback based connect
+  connect(url, options, callback);
+}
+&nbsp;
+var connect = function(url, options, callback) {
+  var serverOptions = options.server || {};
+  var mongosOptions = options.mongos || {};
+  var replSetServersOptions = options.replSet || options.replSetServers || {};
+  var dbOptions = options.db || {};
+&nbsp;
+  // If callback is null throw an exception
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(callback == null)
+<span class="cstat-no" title="statement not covered" >    throw new Error("no callback function provided");</span>
+&nbsp;
+  // Parse the string
+  var object = parse(url, options);
+&nbsp;
+  // Merge in any options for db in options object
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(dbOptions) {
+    for(var name in dbOptions) <span class="cstat-no" title="statement not covered" >object.db_options[name] = dbOptions[name];</span>
+  }
+&nbsp;
+  // Added the url to the options
+  object.db_options.url = url;
+&nbsp;
+  // Merge in any options for server in options object
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(serverOptions) {
+    for(var name in serverOptions) <span class="cstat-no" title="statement not covered" >object.server_options[name] = serverOptions[name];</span>
+  }
+&nbsp;
+  // Merge in any replicaset server options
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(replSetServersOptions) {
+    for(var name in replSetServersOptions) <span class="cstat-no" title="statement not covered" >object.rs_options[name] = replSetServersOptions[name];</span>
+  }
+&nbsp;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(replSetServersOptions.ssl
+    || replSetServersOptions.sslValidate
+    || replSetServersOptions.sslCA
+    || replSetServersOptions.sslCert
+    || replSetServersOptions.sslKey
+    || replSetServersOptions.sslPass) {
+<span class="cstat-no" title="statement not covered" >    object.server_options.ssl = replSetServersOptions.ssl;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslValidate = replSetServersOptions.sslValidate;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslCA = replSetServersOptions.sslCA;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslCert = replSetServersOptions.sslCert;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslKey = replSetServersOptions.sslKey;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslPass = replSetServersOptions.sslPass;</span>
+  }
+&nbsp;
+  // Merge in any replicaset server options
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(mongosOptions) {
+    for(var name in mongosOptions) <span class="cstat-no" title="statement not covered" >object.mongos_options[name] = mongosOptions[name];</span>
+  }
+&nbsp;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof object.server_options.poolSize == 'number') {
+<span class="cstat-no" title="statement not covered" >    if(!object.mongos_options.poolSize) <span class="cstat-no" title="statement not covered" >object.mongos_options.poolSize = object.server_options.poolSize;</span></span>
+<span class="cstat-no" title="statement not covered" >    if(!object.rs_options.poolSize) <span class="cstat-no" title="statement not covered" >object.rs_options.poolSize = object.server_options.poolSize;</span></span>
+  }
+&nbsp;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(mongosOptions.ssl
+    || mongosOptions.sslValidate
+    || mongosOptions.sslCA
+    || mongosOptions.sslCert
+    || mongosOptions.sslKey
+    || mongosOptions.sslPass) {
+<span class="cstat-no" title="statement not covered" >    object.server_options.ssl = mongosOptions.ssl;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslValidate = mongosOptions.sslValidate;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslCA = mongosOptions.sslCA;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslCert = mongosOptions.sslCert;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslKey = mongosOptions.sslKey;</span>
+<span class="cstat-no" title="statement not covered" >    object.server_options.sslPass = mongosOptions.sslPass;</span>
+  }
+&nbsp;
+  // Set the promise library
+  object.db_options.promiseLibrary = options.promiseLibrary;
+&nbsp;
+  // We need to ensure that the list of servers are only either direct members or mongos
+  // they cannot be a mix of monogs and mongod's
+  var totalNumberOfServers = object.servers.length;
+  var totalNumberOfMongosServers = 0;
+  var totalNumberOfMongodServers = 0;
+  var serverConfig = null;
+  var errorServers = {};
+&nbsp;
+  // Failure modes
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(object.servers.length == 0) <span class="cstat-no" title="statement not covered" >throw new Error("connection string must contain at least one seed host");</span>
+&nbsp;
+  // If we have no db setting for the native parser try to set the c++ one first
+  object.db_options.native_parser = _setNativeParser(object.db_options);
+  // If no auto_reconnect is set, set it to true as default for single servers
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(typeof object.server_options.auto_reconnect != 'boolean') {
+    object.server_options.auto_reconnect = true;
+  }
+&nbsp;
+  // If we have more than a server, it could be replicaset or mongos list
+  // need to verify that it's one or the other and fail if it's a mix
+  // Connect to all servers and run ismaster
+  for(var i = 0; i &lt; object.servers.length; i++) {
+    // Set up socket options
+    var providedSocketOptions = object.server_options.socketOptions || <span class="branch-1 cbranch-no" title="branch not covered" >{};</span>
+&nbsp;
+    var _server_options = {
+        poolSize:1
+      , socketOptions: {
+          connectTimeoutMS: providedSocketOptions.connectTimeoutMS || 30000
+        , socketTimeoutMS:  providedSocketOptions.socketTimeoutMS || 30000
+      }
+      , auto_reconnect:false};
+&nbsp;
+    // Ensure we have ssl setup for the servers
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(object.server_options.ssl) {
+<span class="cstat-no" title="statement not covered" >      _server_options.ssl = object.server_options.ssl;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslValidate = object.server_options.sslValidate;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslCA = object.server_options.sslCA;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslCert = object.server_options.sslCert;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslKey = object.server_options.sslKey;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslPass = object.server_options.sslPass;</span>
+    } else <span class="missing-if-branch" title="if path not taken" >I</span>if(object.rs_options.ssl) {
+<span class="cstat-no" title="statement not covered" >      _server_options.ssl = object.rs_options.ssl;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslValidate = object.rs_options.sslValidate;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslCA = object.rs_options.sslCA;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslCert = object.rs_options.sslCert;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslKey = object.rs_options.sslKey;</span>
+<span class="cstat-no" title="statement not covered" >      _server_options.sslPass = object.rs_options.sslPass;</span>
+    }
+&nbsp;
+    // Error
+    var error = null;
+    // Set up the Server object
+    var _server = object.servers[i].domain_socket
+        ? <span class="branch-0 cbranch-no" title="branch not covered" >new Server(object.servers[i].domain_socket, _server_options)</span>
+        : new Server(object.servers[i].host, object.servers[i].port, _server_options);
+&nbsp;
+    var setName;
+&nbsp;
+    var connectFunction = function(__server) {
+      // Attempt connect
+      new Db(object.dbName, __server, {w:1, native_parser:false}).open(function(err, db) {
+        // Update number of servers
+        totalNumberOfServers = totalNumberOfServers - 1;
+        // If no error do the correct checks
+        <span class="missing-if-branch" title="else path not taken" >E</span>if(!err) {
+          // Close the connection
+          db.close();
+          var isMasterDoc = db.serverConfig.isMasterDoc;
+          // Check what type of server we have
+          <span class="missing-if-branch" title="if path not taken" >I</span>if(isMasterDoc.setName) {
+<span class="cstat-no" title="statement not covered" >            totalNumberOfMongodServers++;</span>
+<span class="cstat-no" title="statement not covered" >            setName = isMasterDoc.setName;</span>
+          }
+          <span class="missing-if-branch" title="if path not taken" >I</span>if(isMasterDoc.msg &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >isMasterDoc.msg == "isdbgrid")</span> <span class="cstat-no" title="statement not covered" >totalNumberOfMongosServers++;</span>
+        } else {
+<span class="cstat-no" title="statement not covered" >          error = err;</span>
+<span class="cstat-no" title="statement not covered" >          errorServers[__server.host + ":" + __server.port] = __server;</span>
+        }
+&nbsp;
+        <span class="missing-if-branch" title="else path not taken" >E</span>if(totalNumberOfServers == 0) {
+          // Error out
+          <span class="missing-if-branch" title="if path not taken" >I</span>if(totalNumberOfMongodServers == 0 &amp;&amp; totalNumberOfMongosServers == 0 &amp;&amp; error) {
+<span class="cstat-no" title="statement not covered" >            return callback(error, null);</span>
+          }
+&nbsp;
+          // If we have a mix of mongod and mongos, throw an error
+          <span class="missing-if-branch" title="if path not taken" >I</span>if(totalNumberOfMongosServers &gt; 0 &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >totalNumberOfMongodServers &gt; 0)</span> {
+<span class="cstat-no" title="statement not covered" >            if(db) <span class="cstat-no" title="statement not covered" >db.close();</span></span>
+<span class="cstat-no" title="statement not covered" >            return process.nextTick(<span class="fstat-no" title="function not covered" >function() {</span></span>
+<span class="cstat-no" title="statement not covered" >              try {</span>
+<span class="cstat-no" title="statement not covered" >                callback(new Error("cannot combine a list of replicaset seeds and mongos seeds"));</span>
+              } catch (err) {
+<span class="cstat-no" title="statement not covered" >                throw err</span>
+              }
+            })
+          }
+&nbsp;
+          <span class="missing-if-branch" title="else path not taken" >E</span>if(totalNumberOfMongodServers == 0
+            &amp;&amp; totalNumberOfMongosServers == 0
+            &amp;&amp; object.servers.length == 1
+            &amp;&amp; (!object.rs_options.replicaSet || <span class="branch-4 cbranch-no" title="branch not covered" >!object.rs_options.rs_name)</span>) {
+            var obj = object.servers[0];
+            serverConfig = obj.domain_socket ?
+<span class="branch-0 cbranch-no" title="branch not covered" >                new Server(obj.domain_socket, object.server_options)</span>
+              : new Server(obj.host, obj.port, object.server_options);
+          } else <span class="cstat-no" title="statement not covered" >if(totalNumberOfMongodServers &gt; 0</span>
+            || totalNumberOfMongosServers &gt; 0
+            || object.rs_options.replicaSet || object.rs_options.rs_name) {
+<span class="cstat-no" title="statement not covered" >            var finalServers = object.servers</span>
+              .filter(<span class="fstat-no" title="function not covered" >function(serverObj) {</span>
+<span class="cstat-no" title="statement not covered" >                return errorServers[serverObj.host + ":" + serverObj.port] == null;</span>
+              })
+              .map(<span class="fstat-no" title="function not covered" >function(serverObj) {</span>
+<span class="cstat-no" title="statement not covered" >                return new Server(serverObj.host, serverObj.port, object.server_options);</span>
+              });
+&nbsp;
+            // Clean out any error servers
+<span class="cstat-no" title="statement not covered" >            errorServers = {};</span>
+&nbsp;
+            // Set up the final configuration
+<span class="cstat-no" title="statement not covered" >            if(totalNumberOfMongodServers &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >              try {</span>
+<span class="cstat-no" title="statement not covered" >                if (totalNumberOfMongodServers == 1) {</span>
+<span class="cstat-no" title="statement not covered" >                  object.rs_options.replicaSet = object.rs_options.replicaSet || setName;</span>
+                }
+<span class="cstat-no" title="statement not covered" >                serverConfig = new ReplSet(finalServers, object.rs_options);</span>
+              } catch(err) {
+<span class="cstat-no" title="statement not covered" >                return callback(err, null);</span>
+              }
+            } else {
+<span class="cstat-no" title="statement not covered" >              serverConfig = new Mongos(finalServers, object.mongos_options);</span>
+            }
+          }
+&nbsp;
+          <span class="missing-if-branch" title="if path not taken" >I</span>if(serverConfig == null) {
+<span class="cstat-no" title="statement not covered" >            return process.nextTick(<span class="fstat-no" title="function not covered" >function() {</span></span>
+<span class="cstat-no" title="statement not covered" >              try {</span>
+<span class="cstat-no" title="statement not covered" >                callback(new Error("Could not locate any valid servers in initial seed list"));</span>
+              } catch (err) {
+<span class="cstat-no" title="statement not covered" >                if(db) <span class="cstat-no" title="statement not covered" >db.close();</span></span>
+<span class="cstat-no" title="statement not covered" >                throw err</span>
+              }
+            });
+          }
+&nbsp;
+          // Ensure no firing of open event before we are ready
+          serverConfig.emitOpen = false;
+          // Set up all options etc and connect to the database
+          _finishConnecting(serverConfig, object, options, callback)
+        }
+      });
+    }
+&nbsp;
+    // Wrap the context of the call
+    connectFunction(_server);
+  }
+}
+&nbsp;
+var _setNativeParser = function(db_options) {
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof db_options.native_parser == 'boolean') <span class="cstat-no" title="statement not covered" >return db_options.native_parser;</span>
+&nbsp;
+  try {
+    require('mongodb-core').BSON.BSONNative.BSON;
+<span class="cstat-no" title="statement not covered" >    return true;</span>
+  } catch(err) {
+    return false;
+  }
+}
+&nbsp;
+var _finishConnecting = function(serverConfig, object, options, callback) {
+  // If we have a readPreference passed in by the db options
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof object.db_options.readPreference == 'string') {
+<span class="cstat-no" title="statement not covered" >    object.db_options.readPreference = new ReadPreference(object.db_options.readPreference);</span>
+  } else <span class="missing-if-branch" title="else path not taken" >E</span>if(typeof object.db_options.read_preference == 'string') {
+    object.db_options.readPreference = new ReadPreference(object.db_options.read_preference);
+  }
+&nbsp;
+  // Do we have readPreference tags
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(object.db_options.readPreference &amp;&amp; object.db_options.readPreferenceTags) {
+<span class="cstat-no" title="statement not covered" >    object.db_options.readPreference.tags = object.db_options.readPreferenceTags;</span>
+  } else <span class="missing-if-branch" title="if path not taken" >I</span>if(object.db_options.readPreference &amp;&amp; object.db_options.read_preference_tags) {
+<span class="cstat-no" title="statement not covered" >    object.db_options.readPreference.tags = object.db_options.read_preference_tags;</span>
+  }
+&nbsp;
+  // Get the socketTimeoutMS
+  var socketTimeoutMS = object.server_options.socketOptions.socketTimeoutMS || 0;
+&nbsp;
+  // If we have a replset, override with replicaset socket timeout option if available
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(serverConfig instanceof ReplSet) {
+<span class="cstat-no" title="statement not covered" >    socketTimeoutMS = object.rs_options.socketOptions.socketTimeoutMS || socketTimeoutMS;</span>
+  }
+&nbsp;
+  // Set socketTimeout to the same as the connectTimeoutMS or 30 sec
+  serverConfig.connectTimeoutMS = serverConfig.connectTimeoutMS || 30000;
+  serverConfig.socketTimeoutMS = serverConfig.connectTimeoutMS;
+&nbsp;
+  // Set up the db options
+  var db = new Db(object.dbName, serverConfig, object.db_options);
+  // Open the db
+  db.open(function(err, db){
+&nbsp;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(err) {
+<span class="cstat-no" title="statement not covered" >      return process.nextTick(<span class="fstat-no" title="function not covered" >function() {</span></span>
+<span class="cstat-no" title="statement not covered" >        try {</span>
+<span class="cstat-no" title="statement not covered" >          callback(err, null);</span>
+        } catch (err) {
+<span class="cstat-no" title="statement not covered" >          if(db) <span class="cstat-no" title="statement not covered" >db.close();</span></span>
+<span class="cstat-no" title="statement not covered" >          throw err</span>
+        }
+      });
+    }
+&nbsp;
+    // Reset the socket timeout
+    serverConfig.socketTimeoutMS = socketTimeoutMS || 0;
+&nbsp;
+    // Return object
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(err == null &amp;&amp; object.auth){
+      // What db to authenticate against
+<span class="cstat-no" title="statement not covered" >      var authentication_db = db;</span>
+<span class="cstat-no" title="statement not covered" >      if(object.db_options &amp;&amp; object.db_options.authSource) {</span>
+<span class="cstat-no" title="statement not covered" >        authentication_db = db.db(object.db_options.authSource);</span>
+      }
+&nbsp;
+      // Build options object
+<span class="cstat-no" title="statement not covered" >      var options = {};</span>
+<span class="cstat-no" title="statement not covered" >      if(object.db_options.authMechanism) <span class="cstat-no" title="statement not covered" >options.authMechanism = object.db_options.authMechanism;</span></span>
+<span class="cstat-no" title="statement not covered" >      if(object.db_options.gssapiServiceName) <span class="cstat-no" title="statement not covered" >options.gssapiServiceName = object.db_options.gssapiServiceName;</span></span>
+&nbsp;
+      // Authenticate
+<span class="cstat-no" title="statement not covered" >      authentication_db.authenticate(object.auth.user, object.auth.password, options, <span class="fstat-no" title="function not covered" >function(err, success){</span></span>
+<span class="cstat-no" title="statement not covered" >        if(success){</span>
+<span class="cstat-no" title="statement not covered" >          process.nextTick(<span class="fstat-no" title="function not covered" >function() {</span></span>
+<span class="cstat-no" title="statement not covered" >            try {</span>
+<span class="cstat-no" title="statement not covered" >              callback(null, db);</span>
+            } catch (err) {
+<span class="cstat-no" title="statement not covered" >              if(db) <span class="cstat-no" title="statement not covered" >db.close();</span></span>
+<span class="cstat-no" title="statement not covered" >              throw err</span>
+            }
+          });
+        } else {
+<span class="cstat-no" title="statement not covered" >          if(db) <span class="cstat-no" title="statement not covered" >db.close();</span></span>
+<span class="cstat-no" title="statement not covered" >          process.nextTick(<span class="fstat-no" title="function not covered" >function() {</span></span>
+<span class="cstat-no" title="statement not covered" >            try {</span>
+<span class="cstat-no" title="statement not covered" >              callback(err ? err : new Error('Could not authenticate user ' + object.auth[0]), null);</span>
+            } catch (err) {
+<span class="cstat-no" title="statement not covered" >              if(db) <span class="cstat-no" title="statement not covered" >db.close();</span></span>
+<span class="cstat-no" title="statement not covered" >              throw err</span>
+            }
+          });
+        }
+      });
+    } else {
+      process.nextTick(function() {
+        try {
+          callback(err, db);
+        } catch (err) {
+<span class="cstat-no" title="statement not covered" >          if(db) <span class="cstat-no" title="statement not covered" >db.close();</span></span>
+<span class="cstat-no" title="statement not covered" >          throw err</span>
+        }
+      })
+    }
+  });
+}
+&nbsp;
+module.exports = MongoClient
+&nbsp;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 31 2015 10:54:58 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>

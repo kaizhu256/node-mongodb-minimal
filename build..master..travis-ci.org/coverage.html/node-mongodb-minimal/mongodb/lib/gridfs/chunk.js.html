@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/mongodb/lib/gridfs/chunk.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb/lib/gridfs/chunk.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">15.22% <small>(14 / 92)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">0% <small>(0 / 44)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">0% <small>(0 / 16)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">16.47% <small>(14 / 85)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/mongodb/lib/gridfs/</a> &#187; chunk.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
+&nbsp;
+var Binary = require('mongodb-core').BSON.Binary,
+  ObjectID = require('mongodb-core').BSON.ObjectID;
+&nbsp;
+/**
+ * Class for representing a single chunk in GridFS.
+ *
+ * @class
+ *
+ * @param file {GridStore} The {@link GridStore} object holding this chunk.
+ * @param mongoObject {object} The mongo object representation of this chunk.
+ *
+ * @throws Error when the type of data field for {@link mongoObject} is not
+ *     supported. Currently supported types for data field are instances of
+ *     {@link String}, {@link Array}, {@link Binary} and {@link Binary}
+ *     from the bson module
+ *
+ * @see Chunk#buildMongoObject
+ */
+var Chunk = <span class="fstat-no" title="function not covered" >function(file, mongoObject, writeConcern) {</span>
+<span class="cstat-no" title="statement not covered" >  if(!(this instanceof Chunk)) <span class="cstat-no" title="statement not covered" >return new Chunk(file, mongoObject);</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  this.file = file;</span>
+<span class="cstat-no" title="statement not covered" >  var self = this;</span>
+<span class="cstat-no" title="statement not covered" >  var mongoObjectFinal = mongoObject == null ? {} : mongoObject;</span>
+<span class="cstat-no" title="statement not covered" >  this.writeConcern = writeConcern || {w:1};</span>
+<span class="cstat-no" title="statement not covered" >  this.objectId = mongoObjectFinal._id == null ? new ObjectID() : mongoObjectFinal._id;</span>
+<span class="cstat-no" title="statement not covered" >  this.chunkNumber = mongoObjectFinal.n == null ? 0 : mongoObjectFinal.n;</span>
+<span class="cstat-no" title="statement not covered" >  this.data = new Binary();</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(mongoObjectFinal.data == null) {</span>
+  } else <span class="cstat-no" title="statement not covered" >if(typeof mongoObjectFinal.data == "string") {</span>
+<span class="cstat-no" title="statement not covered" >    var buffer = new Buffer(mongoObjectFinal.data.length);</span>
+<span class="cstat-no" title="statement not covered" >    buffer.write(mongoObjectFinal.data, 0, mongoObjectFinal.data.length, 'binary');</span>
+<span class="cstat-no" title="statement not covered" >    this.data = new Binary(buffer);</span>
+  } else <span class="cstat-no" title="statement not covered" >if(Array.isArray(mongoObjectFinal.data)) {</span>
+<span class="cstat-no" title="statement not covered" >    var buffer = new Buffer(mongoObjectFinal.data.length);</span>
+<span class="cstat-no" title="statement not covered" >    var data = mongoObjectFinal.data.join('');</span>
+<span class="cstat-no" title="statement not covered" >    buffer.write(data, 0, data.length, 'binary');</span>
+<span class="cstat-no" title="statement not covered" >    this.data = new Binary(buffer);</span>
+  } else <span class="cstat-no" title="statement not covered" >if(mongoObjectFinal.data._bsontype === 'Binary') {</span>
+<span class="cstat-no" title="statement not covered" >    this.data = mongoObjectFinal.data;</span>
+  } else <span class="cstat-no" title="statement not covered" >if(Buffer.isBuffer(mongoObjectFinal.data)) {</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    throw Error("Illegal chunk format");</span>
+  }
+&nbsp;
+  // Update position
+<span class="cstat-no" title="statement not covered" >  this.internalPosition = 0;</span>
+};
+&nbsp;
+/**
+ * Writes a data to this object and advance the read/write head.
+ *
+ * @param data {string} the data to write
+ * @param callback {function(*, GridStore)} This will be called after executing
+ *     this method. The first parameter will contain null and the second one
+ *     will contain a reference to this object.
+ */
+Chunk.prototype.write = <span class="fstat-no" title="function not covered" >function(data, callback) {</span>
+<span class="cstat-no" title="statement not covered" >  this.data.write(data, this.internalPosition, data.length, 'binary');</span>
+<span class="cstat-no" title="statement not covered" >  this.internalPosition = this.data.length();</span>
+<span class="cstat-no" title="statement not covered" >  if(callback != null) <span class="cstat-no" title="statement not covered" >return callback(null, this);</span></span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+};
+&nbsp;
+/**
+ * Reads data and advances the read/write head.
+ *
+ * @param length {number} The length of data to read.
+ *
+ * @return {string} The data read if the given length will not exceed the end of
+ *     the chunk. Returns an empty String otherwise.
+ */
+Chunk.prototype.read = <span class="fstat-no" title="function not covered" >function(length) {</span>
+  // Default to full read if no index defined
+<span class="cstat-no" title="statement not covered" >  length = length == null || length == 0 ? this.length() : length;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(this.length() - this.internalPosition + 1 &gt;= length) {</span>
+<span class="cstat-no" title="statement not covered" >    var data = this.data.read(this.internalPosition, length);</span>
+<span class="cstat-no" title="statement not covered" >    this.internalPosition = this.internalPosition + length;</span>
+<span class="cstat-no" title="statement not covered" >    return data;</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    return '';</span>
+  }
+};
+&nbsp;
+Chunk.prototype.readSlice = <span class="fstat-no" title="function not covered" >function(length) {</span>
+<span class="cstat-no" title="statement not covered" >  if ((this.length() - this.internalPosition) &gt;= length) {</span>
+<span class="cstat-no" title="statement not covered" >    var data = null;</span>
+<span class="cstat-no" title="statement not covered" >    if (this.data.buffer != null) { //Pure BSON</span>
+<span class="cstat-no" title="statement not covered" >      data = this.data.buffer.slice(this.internalPosition, this.internalPosition + length);</span>
+    } else { //Native BSON
+<span class="cstat-no" title="statement not covered" >      data = new Buffer(length);</span>
+<span class="cstat-no" title="statement not covered" >      length = this.data.readInto(data, this.internalPosition);</span>
+    }
+<span class="cstat-no" title="statement not covered" >    this.internalPosition = this.internalPosition + length;</span>
+<span class="cstat-no" title="statement not covered" >    return data;</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    return null;</span>
+  }
+};
+&nbsp;
+/**
+ * Checks if the read/write head is at the end.
+ *
+ * @return {boolean} Whether the read/write head has reached the end of this
+ *     chunk.
+ */
+Chunk.prototype.eof = <span class="fstat-no" title="function not covered" >function() {</span>
+<span class="cstat-no" title="statement not covered" >  return this.internalPosition == this.length() ? true : false;</span>
+};
+&nbsp;
+/**
+ * Reads one character from the data of this chunk and advances the read/write
+ * head.
+ *
+ * @return {string} a single character data read if the the read/write head is
+ *     not at the end of the chunk. Returns an empty String otherwise.
+ */
+Chunk.prototype.getc = <span class="fstat-no" title="function not covered" >function() {</span>
+<span class="cstat-no" title="statement not covered" >  return this.read(1);</span>
+};
+&nbsp;
+/**
+ * Clears the contents of the data in this chunk and resets the read/write head
+ * to the initial position.
+ */
+Chunk.prototype.rewind = <span class="fstat-no" title="function not covered" >function() {</span>
+<span class="cstat-no" title="statement not covered" >  this.internalPosition = 0;</span>
+<span class="cstat-no" title="statement not covered" >  this.data = new Binary();</span>
+};
+&nbsp;
+/**
+ * Saves this chunk to the database. Also overwrites existing entries having the
+ * same id as this chunk.
+ *
+ * @param callback {function(*, GridStore)} This will be called after executing
+ *     this method. The first parameter will contain null and the second one
+ *     will contain a reference to this object.
+ */
+Chunk.prototype.save = <span class="fstat-no" title="function not covered" >function(options, callback) {</span>
+<span class="cstat-no" title="statement not covered" >  var self = this;</span>
+<span class="cstat-no" title="statement not covered" >  if(typeof options == 'function') {</span>
+<span class="cstat-no" title="statement not covered" >    callback = options;</span>
+<span class="cstat-no" title="statement not covered" >    options = {};</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  self.file.chunkCollection(<span class="fstat-no" title="function not covered" >function(err, collection) {</span></span>
+<span class="cstat-no" title="statement not covered" >    if(err) <span class="cstat-no" title="statement not covered" >return callback(err);</span></span>
+&nbsp;
+    // Merge the options
+<span class="cstat-no" title="statement not covered" >    var writeOptions = {};</span>
+<span class="cstat-no" title="statement not covered" >    for(var name in options) <span class="cstat-no" title="statement not covered" >writeOptions[name] = options[name];</span></span>
+<span class="cstat-no" title="statement not covered" >    for(var name in self.writeConcern) <span class="cstat-no" title="statement not covered" >writeOptions[name] = self.writeConcern[name];</span></span>
+&nbsp;
+    // collection.remove({'_id':self.objectId}, self.writeConcern, function(err, result) {
+<span class="cstat-no" title="statement not covered" >    collection.remove({'_id':self.objectId}, writeOptions, <span class="fstat-no" title="function not covered" >function(err, result) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return callback(err);</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      if(self.data.length() &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >        self.buildMongoObject(<span class="fstat-no" title="function not covered" >function(mongoObject) {</span></span>
+<span class="cstat-no" title="statement not covered" >          var options = {forceServerObjectId:true};</span>
+<span class="cstat-no" title="statement not covered" >          for(var name in self.writeConcern) {</span>
+<span class="cstat-no" title="statement not covered" >            options[name] = self.writeConcern[name];</span>
+          }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          collection.insert(mongoObject, writeOptions, <span class="fstat-no" title="function not covered" >function(err, collection) {</span></span>
+<span class="cstat-no" title="statement not covered" >            callback(err, self);</span>
+          });
+        });
+      } else {
+<span class="cstat-no" title="statement not covered" >        callback(null, self);</span>
+      }
+    });
+  });
+};
+&nbsp;
+/**
+ * Creates a mongoDB object representation of this chunk.
+ *
+ * @param callback {function(Object)} This will be called after executing this
+ *     method. The object will be passed to the first parameter and will have
+ *     the structure:
+ *
+ *        &lt;pre&gt;&lt;code&gt;
+ *        {
+ *          '_id' : , // {number} id for this chunk
+ *          'files_id' : , // {number} foreign key to the file collection
+ *          'n' : , // {number} chunk number
+ *          'data' : , // {bson#Binary} the chunk data itself
+ *        }
+ *        &lt;/code&gt;&lt;/pre&gt;
+ *
+ * @see &lt;a href="http://www.mongodb.org/display/DOCS/GridFS+Specification#GridFSSpecification-{{chunks}}"&gt;MongoDB GridFS Chunk Object Structure&lt;/a&gt;
+ */
+Chunk.prototype.buildMongoObject = <span class="fstat-no" title="function not covered" >function(callback) {</span>
+<span class="cstat-no" title="statement not covered" >  var mongoObject = {</span>
+    'files_id': this.file.fileId,
+    'n': this.chunkNumber,
+    'data': this.data};
+  // If we are saving using a specific ObjectId
+<span class="cstat-no" title="statement not covered" >  if(this.objectId != null) <span class="cstat-no" title="statement not covered" >mongoObject._id = this.objectId;</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  callback(mongoObject);</span>
+};
+&nbsp;
+/**
+ * @return {number} the length of the data
+ */
+Chunk.prototype.length = <span class="fstat-no" title="function not covered" >function() {</span>
+<span class="cstat-no" title="statement not covered" >  return this.data.length();</span>
+};
+&nbsp;
+/**
+ * The position of the read/write head
+ * @name position
+ * @lends Chunk#
+ * @field
+ */
+Object.defineProperty(Chunk.prototype, "position", { enumerable: true
+  , get: <span class="fstat-no" title="function not covered" >function () {</span>
+<span class="cstat-no" title="statement not covered" >      return this.internalPosition;</span>
+    }
+  , set: <span class="fstat-no" title="function not covered" >function(value) {</span>
+<span class="cstat-no" title="statement not covered" >      this.internalPosition = value;</span>
+    }
+});
+&nbsp;
+/**
+ * The default chunk size
+ * @constant
+ */
+Chunk.DEFAULT_CHUNK_SIZE = 1024 * 255;
+&nbsp;
+module.exports = Chunk;
+&nbsp;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Jul 31 2015 10:54:58 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<style>
+.testReportPlatformDiv {
+border: 1px solid;
+border-radius: 5px;
+font-family: Helvetical Neue, Helvetica, Arial, sans-serif;
+margin-top: 20px;
+padding: 0 10px 10px 10px;
+text-align: left;
+}
+.testReportPlatformPre {
+background-color: #fdd;
+border: 1px;
+border-radius: 0 0 5px 5px;
+border-top-style: solid;
+margin-bottom: 0;
+padding: 10px;
+}
+.testReportPlatformPreHidden {
+display: none;
+}
+.testReportPlatformScreenCaptureImg {
+border: 1px solid;
+border-color: #000;
+margin: 5px 0 5px 0;
+max-height:256px;
+max-width:512px;
+}
+.testReportPlatformSpan {
+display: inline-block;
+width: 8em;
+}
+.testReportPlatformTable {
+border: 1px;
+border-top-style: solid;
+text-align: left;
+width: 100%;
+}
+.testReportPlatformTr:nth-child(odd) {
+background-color: #bfb;
+}
+.testReportTestFailed {
+background-color: #f99;
+}
+.testReportTestPending {
+background-color: #99f;
+}
+.testReportSummaryDiv {
+background-color: #bfb;
+}
+.testReportSummarySpan {
+display: inline-block;
+width: 6.5em;
+}
+</style>
+<div class="testReportPlatformDiv testReportSummaryDiv">
+<h2>mongodb-minimal test-report summary</h2>
+<h4>
+<span class="testReportSummarySpan">version</span>-
+2015.8.1<br>
+<span class="testReportSummarySpan">test date</span>- 2015-08-20T04:29:30.625Z<br>
+<span class="testReportSummarySpan">commit info</span>-
+cf51fd14f7e4c8369b8e669b3b233923c3e1c290 - 'update README.md'<br>
+</h4>
+<table class="testReportPlatformTable">
+<thead><tr>
+<th>total time-elapsed</th>
+<th>total tests failed</th>
+<th>total tests passed</th>
+<th>total tests pending</th>
+</tr></thead>
+<tbody><tr>
+<td>3 ms</td>
+<td class="testReportTestPassed">0</td>
+<td>1</td>
+<td>0</td>
+</tr></tbody>
+</table>
+</div>
+
+<div class="testReportPlatformDiv">
+<h4>
+1. npmTest - node - linux v0.12.7 - 2015-08-20T04:29:30.611Z<br>
+<a href="screen-capture.npmTest.svg"><img class="testReportPlatformScreenCaptureImg" src="screen-capture.npmTest.svg"></a><br>
+<span class="testReportPlatformSpan">time-elapsed</span>- 2 ms<br>
+<span class="testReportPlatformSpan">tests failed</span>- 0<br>
+<span class="testReportPlatformSpan">tests passed</span>- 1<br>
+<span class="testReportPlatformSpan">tests pending</span>- 0<br>
+</h4>
+<table class="testReportPlatformTable">
+<thead><tr>
+<th>#</th>
+<th>time-elapsed</th>
+<th>status</th>
+<th>test-case</th>
+</tr></thead>
+<tbody>
+
+<tr class="testReportPlatformTr">
+<td>1</td>
+<td>1 ms</td>
+<td class="testReportTestPassed">passed</td>
+<td>testCase_example_default</td>
+</tr>
+
+</tbody>
+</table>
+<pre class="testReportPlatformPreHidden">
+
+</pre>
+</div>
+
