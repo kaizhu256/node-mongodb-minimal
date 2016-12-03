@@ -2,7 +2,7 @@
 <rect height="1502" fill="#555" width="720"></rect>
 <text fill="#7f7" font-family="Courier New" font-size="12" xml:space="preserve">
 <tspan x="10" y="26"></tspan>
-<tspan x="10" y="42">[MODE_BUILD=npmTestPublished] - 2016-12-01T15:43:26Z - npm-testing published-package mongodb-min\</tspan>
+<tspan x="10" y="42">[MODE_BUILD=npmTestPublished] - 2016-12-03T11:46:54Z - npm-testing published-package mongodb-min\</tspan>
 <tspan x="10" y="58">imal</tspan>
 <tspan x="10" y="74"></tspan>
 <tspan x="10" y="90"></tspan>
@@ -31,35 +31,35 @@
 <tspan x="10" y="458">mongodb-minimal@2016.11.1 /tmp/app/node_modules/mongodb-minimal</tspan>
 <tspan x="10" y="474">├── electron-lite@2016.10.1  (git://github.com/kaizhu256/node-electron-lite.git#1a030198852d35e0\</tspan>
 <tspan x="10" y="490">ff8caa8c37c93c17c633b404)</tspan>
-<tspan x="10" y="506">└── utility2@2016.11.2  (git://github.com/kaizhu256/node-utility2.git#a35fa2bda7b4e4a3d9f54ca422\</tspan>
-<tspan x="10" y="522">fa69cebc6fdde0)</tspan>
+<tspan x="10" y="506">└── utility2@2016.11.3  (git://github.com/kaizhu256/node-utility2.git#6c28c33a90bfef929f08af80b2\</tspan>
+<tspan x="10" y="522">a9004427647ba4)</tspan>
 <tspan x="10" y="538"></tspan>
 <tspan x="10" y="554"></tspan>
 <tspan x="10" y="570">&gt; mongodb-minimal@2016.11.1 test /tmp/app/node_modules/mongodb-minimal</tspan>
 <tspan x="10" y="586">&gt; export PORT=$(utility2 shServerPortRandom) &amp;&amp; utility2 test test.js</tspan>
 <tspan x="10" y="602"></tspan>
 <tspan x="10" y="618"></tspan>
-<tspan x="10" y="634">[MODE_BUILD=npmTestPublished] - 2016-12-01T15:43:31Z - npm-testing /tmp/app/node_modules/mongodb\</tspan>
+<tspan x="10" y="634">[MODE_BUILD=npmTestPublished] - 2016-12-03T11:46:59Z - npm-testing /tmp/app/node_modules/mongodb\</tspan>
 <tspan x="10" y="650">-minimal</tspan>
 <tspan x="10" y="666"></tspan>
 <tspan x="10" y="682"></tspan>
 <tspan x="10" y="698">covering $ /home/travis/.nvm/versions/node/v7.2.0/bin/node /tmp/app/node_modules/mongodb-minimal\</tspan>
 <tspan x="10" y="714">/test.js</tspan>
-<tspan x="10" y="730">&gt; server listening on http-port 39470</tspan>
+<tspan x="10" y="730">&gt; server listening on http-port 61038</tspan>
 <tspan x="10" y="746">created documentation file:///tmp/app/node_modules/mongodb-minimal/tmp/build/doc.api.html</tspan>
 <tspan x="10" y="762"></tspan>
 <tspan x="10" y="778"></tspan>
 <tspan x="10" y="794">browserTest - created electron entry-page /tmp/app/node_modules/mongodb-minimal/tmp/electron.158\</tspan>
-<tspan x="10" y="810">bb0e1-6caf-4e9f-9642-d3d464dcb7d6.html</tspan>
+<tspan x="10" y="810">c4824-0939-4553-bab8-fc8835975023.html</tspan>
 <tspan x="10" y="826"></tspan>
-<tspan x="10" y="842">[4069:1201/154332:ERROR:browser_main_loop.cc(231)] Running without the SUID sandbox! See https:/\</tspan>
+<tspan x="10" y="842">[4092:1203/114700:ERROR:browser_main_loop.cc(231)] Running without the SUID sandbox! See https:/\</tspan>
 <tspan x="10" y="858">/chromium.googlesource.com/chromium/src/+/master/docs/linux_suid_sandbox_development.md for more\</tspan>
 <tspan x="10" y="874"> information on developing with the sandbox on.</tspan>
 <tspan x="10" y="890">Xlib:  extension "RANDR" missing on display ":99.0".</tspan>
 <tspan x="10" y="906">Xlib:  extension "RANDR" missing on display ":99.0".</tspan>
-<tspan x="10" y="922">[4069:1201/154333:WARNING:audio_manager.cc(314)] Multiple instances of AudioManager detected</tspan>
-<tspan x="10" y="938">[4069:1201/154333:WARNING:audio_manager.cc(275)] Multiple instances of AudioManager detected</tspan>
-<tspan x="10" y="954">[4092:1201/154333:ERROR:sandbox_linux.cc(343)] InitializeSandbox() called with multiple threads \</tspan>
+<tspan x="10" y="922">[4092:1203/114701:WARNING:audio_manager.cc(314)] Multiple instances of AudioManager detected</tspan>
+<tspan x="10" y="938">[4092:1203/114701:WARNING:audio_manager.cc(275)] Multiple instances of AudioManager detected</tspan>
+<tspan x="10" y="954">[4128:1203/114701:ERROR:sandbox_linux.cc(343)] InitializeSandbox() called with multiple threads \</tspan>
 <tspan x="10" y="970">in process gpu-process. </tspan>
 <tspan x="10" y="986"></tspan>
 <tspan x="10" y="1002">browserTest - opened url file:///tmp/app/node_modules/mongodb-minimal/tmp/build/doc.api.html</tspan>
@@ -85,8 +85,8 @@
 <tspan x="10" y="1322">created coverage file:///tmp/app/node_modules/mongodb-minimal/tmp/build/coverage.html/index.html</tspan>
 <tspan x="10" y="1338"></tspan>
 <tspan x="10" y="1354">-------------------------------------------------------</tspan>
-<tspan x="10" y="1370">| test-report - npmTestPublished - node - linux v7.2.0 - 2016-12-01T15:43:31.278Z</tspan>
-<tspan x="10" y="1386">|    7517 ms            0 failed        1 passed      |</tspan>
+<tspan x="10" y="1370">| test-report - npmTestPublished - node - linux v7.2.0 - 2016-12-03T11:46:59.209Z</tspan>
+<tspan x="10" y="1386">|    7234 ms            0 failed        1 passed      |</tspan>
 <tspan x="10" y="1402">-------------------------------------------------------</tspan>
 <tspan x="10" y="1418"></tspan>
 <tspan x="10" y="1434">created test-report file:///tmp/app/node_modules/mongodb-minimal/tmp/build/test-report.html</tspan>
