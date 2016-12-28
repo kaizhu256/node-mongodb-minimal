@@ -1729,6 +1729,12 @@
             
         </li>
         
+        <li>
+            
+            <span class="docApiSignatureSpan">string <span class="docApiSignatureSpan">mongodb-minimal.CoreServer.prototype.</span>parserType</span>
+        
+        </li>
+        
     </ol></li>
 
     <li><a href="#module.mongodb-minimal.Cursor">module mongodb-minimal.Cursor</a><ol>
@@ -4343,7 +4349,7 @@
             
             <a class="docApiElementLiA" href="#element.mongodb-minimal.ReplSet.prototype.isConnected">
             function <span class="docApiSignatureSpan">mongodb-minimal.ReplSet.prototype.</span>isConnected
-            <span class="docApiSignatureSpan">()</span>
+            <span class="docApiSignatureSpan">(options)</span>
             </a>
             
         </li>
@@ -5428,7 +5434,9 @@ ializeFunctions;
     // Factory overrides
     Cursor: options.cursorFactory || BasicCursor,
     // BSON instance
-    bson: options.bson || new BSON(),
+    bson: options.bson || new BSON([BSON.Binary, BSON.Code, BSON.DBRef, BSON.Decimal128,
+      BSON.Double, BSON.Int32, BSON.Long, BSON.Map, BSON.MaxKey, BSON.MinKey,
+      BSON.ObjectId, BSON.BSONRegExp, BSON.Symbol, BSON.Timestamp]),
     // Pool
     pool: null,
     // Disconnect handler
@@ -5780,7 +5788,7 @@ ializeFunctions;
     filename = undefined;
   }
 
-  if(id instanceof ObjectID) {
+  if(id &amp;&amp; id._bsontype == &#x27;ObjectID&#x27;) {
     this.referenceBy = REFERENCE_BY_ID;
     this.fileId = id;
     this.filename = filename;
@@ -8533,7 +8541,7 @@ _size + &quot;]&quot;);
   }
 
   // Check special case where we are using an objectId
-  if(selector instanceof ObjectID || (selector != null &amp;&amp; selector._bsontype == &#x27;ObjectID&#x27;)) {
+  if(selector != null &amp;&amp; selector._bsontype == &#x27;ObjectID&#x27;) {
     selector = {_id:selector};
   }
 
@@ -8584,7 +8592,7 @@ _size + &quot;]&quot;);
   }
 
   // Ensure the query is an object
-  if(selector != null &amp;&amp; ...</pre></li>
+  if(selector != null &amp;&amp; typeof selector != &#x27;object&#x27;) { ...</pre></li>
         <li>example usage<pre class="docApiCodePre">...
 We will finish up the Quickstart CRUD methods by performing a simple query that returns all the documents matching the query.
 
@@ -8950,7 +8958,7 @@ var findDocuments = function(db, callback) {
     finalize = null;
   }
 
-  if (!Array.isArray(keys) &amp;&amp; keys instanceof Object &amp;&amp; typeof(keys) !== &#x27;function&#x27; &amp;&amp; !(keys instanceof Code)) {
+  if (!Array.isArray(keys) &amp;&amp; keys instanceof Object &amp;&amp; typeof(keys) !== &#x27;function&#x27; &amp;&amp; !(keys._bsontype == &#x27;Code&#x27;)) {
     keys = Object.keys(keys);
   }
 
@@ -10327,7 +10335,9 @@ MongoClient.<span class="docApiCodeKeywordSpan">connect</span>(url, function(err
     // Factory overrides
     Cursor: options.cursorFactory || BasicCursor,
     // BSON instance
-    bson: options.bson || new BSON(),
+    bson: options.bson || new BSON([BSON.Binary, BSON.Code, BSON.DBRef, BSON.Decimal128,
+      BSON.Double, BSON.Int32, BSON.Long, BSON.Map, BSON.MaxKey, BSON.MinKey,
+      BSON.ObjectId, BSON.BSONRegExp, BSON.Symbol, BSON.Timestamp]),
     // Pool
     pool: null,
     // Disconnect handler
@@ -10971,6 +10981,8 @@ MongoClient.<span class="docApiCodeKeywordSpan">connect</span>(url, function(err
 }</pre></li>
         <li>example usage<pre class="docApiCodePre">n/a</pre></li>
         </ul>
+        
+        
         
         
     </div>
@@ -14152,7 +14164,7 @@ var findDocuments = function(db, callback) {
     filename = undefined;
   }
 
-  if(id instanceof ObjectID) {
+  if(id &amp;&amp; id._bsontype == &#x27;ObjectID&#x27;) {
     this.referenceBy = REFERENCE_BY_ID;
     this.fileId = id;
     this.filename = filename;
@@ -16972,7 +16984,7 @@ MongoClient.<span class="docApiCodeKeywordSpan">connect</span>(url, function(err
   } else if(typeof otherId == &#x27;string&#x27; &amp;&amp; ObjectID.isValid(otherId) &amp;&amp; otherId.length == 12 &amp;&amp; this.id instanceof _Buffer) {
     return otherId === this.id.toString(&#x27;binary&#x27;);
   } else if(typeof otherId == &#x27;string&#x27; &amp;&amp; ObjectID.isValid(otherId) &amp;&amp; otherId.length == 24) {
-    return otherId === this.toHexString();
+    return otherId.toLowerCase() === this.toHexString();
   } else if(typeof otherId == &#x27;string&#x27; &amp;&amp; ObjectID.isValid(otherId) &amp;&amp; otherId.length == 12) {
     return otherId === this.id;
   } else if(otherId != null &amp;&amp; (otherId instanceof ObjectID || otherId.toHexString)) {
@@ -17375,7 +17387,7 @@ MongoClient.<span class="docApiCodeKeywordSpan">connect</span>(url, function(err
   } else if(typeof otherId == &#x27;string&#x27; &amp;&amp; ObjectID.isValid(otherId) &amp;&amp; otherId.length == 12 &amp;&amp; this.id instanceof _Buffer) {
     return otherId === this.id.toString(&#x27;binary&#x27;);
   } else if(typeof otherId == &#x27;string&#x27; &amp;&amp; ObjectID.isValid(otherId) &amp;&amp; otherId.length == 24) {
-    return otherId === this.toHexString();
+    return otherId.toLowerCase() === this.toHexString();
   } else if(typeof otherId == &#x27;string&#x27; &amp;&amp; ObjectID.isValid(otherId) &amp;&amp; otherId.length == 12) {
     return otherId === this.id;
   } else if(otherId != null &amp;&amp; (otherId instanceof ObjectID || otherId.toHexString)) {
@@ -18155,12 +18167,20 @@ MongoClient.<span class="docApiCodeKeywordSpan">connect</span>(url, function(err
         <h2>
             <a href="#element.mongodb-minimal.ReplSet.prototype.isConnected" id="element.mongodb-minimal.ReplSet.prototype.isConnected">
             function <span class="docApiSignatureSpan">mongodb-minimal.ReplSet.prototype.</span>isConnected
-            <span class="docApiSignatureSpan">()</span>
+            <span class="docApiSignatureSpan">(options)</span>
             </a>
         </h2>
         <ul>
-        <li>description and source code<pre class="docApiCodePre">isConnected = function () {
-  return this.s.replset.isConnected();
+        <li>description and source code<pre class="docApiCodePre">isConnected = function (options) {
+  options = options || {};
+
+  // If we passed in a readPreference, translate to
+  // a CoreReadPreference instance
+  if(options.readPreference) {
+    options.readPreference = translateReadPreference(options.readPreference);
+  }
+
+  return this.s.replset.isConnected(options);
 }</pre></li>
         <li>example usage<pre class="docApiCodePre">n/a</pre></li>
         </ul>
