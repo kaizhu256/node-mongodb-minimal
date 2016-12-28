@@ -10,23 +10,23 @@
         "spec": "latest",
         "type": "tag"
       },
-      "/private/tmp/100"
+      "/private/tmp/app"
     ]
   ],
   "_from": "mongodb@latest",
-  "_id": "mongodb@2.2.12",
+  "_id": "mongodb@2.2.16",
   "_inCache": true,
   "_location": "/mongodb",
-  "_nodeVersion": "7.1.0",
+  "_nodeVersion": "6.9.1",
   "_npmOperationalInternal": {
-    "host": "packages-12-west.internal.npmjs.com",
-    "tmp": "tmp/mongodb-2.2.12.tgz_1480415483308_0.9239382324740291"
+    "host": "packages-18-east.internal.npmjs.com",
+    "tmp": "tmp/mongodb-2.2.16.tgz_1481656381868_0.36485050874762237"
   },
   "_npmUser": {
     "name": "christkv",
     "email": "christkv@gmail.com"
   },
-  "_npmVersion": "3.10.9",
+  "_npmVersion": "3.10.8",
   "_phantomChildren": {},
   "_requested": {
     "raw": "mongodb",
@@ -40,11 +40,11 @@
   "_requiredBy": [
     "#USER"
   ],
-  "_resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.12.tgz",
-  "_shasum": "2a86f10228f911e9d6fefdbd7d922188d7b730f9",
+  "_resolved": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.16.tgz",
+  "_shasum": "e32ba91cf9e29f371fb38ba0c4a71c3b1f5fae77",
   "_shrinkwrap": null,
   "_spec": "mongodb",
-  "_where": "/private/tmp/100",
+  "_where": "/private/tmp/app",
   "author": {
     "name": "Christian Kvalheim"
   },
@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "es6-promise": "3.2.1",
-    "mongodb-core": "2.0.14",
+    "mongodb-core": "2.1.2",
     "readable-stream": "2.1.5"
   },
   "description": "The official MongoDB driver for Node.js",
@@ -61,7 +61,7 @@
     "JSONStream": "^1.0.7",
     "betterbenchmarks": "^0.1.0",
     "bluebird": "3.4.6",
-    "bson": "^0.5.1",
+    "bson": "1.0.0",
     "cli-table": "^0.3.1",
     "co": "4.6.0",
     "colors": "^1.1.2",
@@ -83,13 +83,13 @@
   },
   "directories": {},
   "dist": {
-    "shasum": "2a86f10228f911e9d6fefdbd7d922188d7b730f9",
-    "tarball": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.12.tgz"
+    "shasum": "e32ba91cf9e29f371fb38ba0c4a71c3b1f5fae77",
+    "tarball": "https://registry.npmjs.org/mongodb/-/mongodb-2.2.16.tgz"
   },
   "engines": {
     "node": ">=0.10.3"
   },
-  "gitHead": "4a771514a4b53dd535a1c3903bf49591c209a33f",
+  "gitHead": "28da548dc2a1729a23e07418134dea88bf1e1c68",
   "homepage": "https://github.com/mongodb/node-mongodb-native",
   "keywords": [
     "mongodb",
@@ -119,7 +119,7 @@
   "scripts": {
     "coverage": "nyc node test/runner.js -t functional && node_modules/.bin/nyc report --reporter=text-lcov | node_modules/.bin/coveralls",
     "lint": "eslint lib",
-    "test": "node test/runner.js -t functional"
+    "test": "node test/runner.js -t functional -l"
   },
-  "version": "2.2.12"
+  "version": "2.2.16"
 }

@@ -1,4 +1,25 @@
-2.2.12 2016-10-21
+2.2.16 2016-12-13
+-----------------
+* NODE-899 reversed upsertedId change to bring back old behavior.
+
+2.2.15 2016-12-10
+-----------------
+* Updated mongodb-core to 2.1.2.
+  * Delay topologyMonitoring on successful attemptReconnect as no need to run a full scan immediately.
+  * Emit reconnect event in primary joining when in connected status for a replicaset (Fixes mongoose reconnect issue).
+
+2.2.14 2016-12-08
+-----------------
+* Updated mongodb-core to 2.1.1.
+* NODE-892 Passthrough options.readPreference to mongodb-core ReplSet instance.
+
+2.2.13 2016-12-05
+-----------------
+* Updated mongodb-core to 2.1.0.
+* NODE-889 Fixed issue where legacy killcursor wire protocol messages would not be sent when APM is enabled.
+* Expose parserType as property on topology objects.
+
+2.2.12 2016-11-29
 -----------------
 * Updated mongodb-core to 2.0.14.
   * Updated bson library to 0.5.7.
@@ -21,7 +42,7 @@
 * NODE-864 close event not emits during network issues using single server topology.
 * Introduced maxStalenessSeconds.
 * NODE-840 Added CRUD specification test cases and fix minor issues with upserts reporting matchedCount > 0.
-* Don't ignore Db-level authSource when using auth method. (https://github.com/donaldguy).
+* Don't ignore Db-level authSource when using auth method.  (https://github.com/donaldguy).
 
 2.2.11 2016-10-21
 -----------------

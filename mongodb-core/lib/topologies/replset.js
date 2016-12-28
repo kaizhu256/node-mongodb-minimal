@@ -3,9 +3,9 @@
 var inherits = require('util').inherits,
   f = require('util').format,
   EventEmitter = require('events').EventEmitter,
-  BSON = require('bson').native().BSON,
   ReadPreference = require('./read_preference'),
   BasicCursor = require('../cursor'),
+  retrieveBSON = require('../connection/utils').retrieveBSON,
   Logger = require('../connection/logger'),
   MongoError = require('../error'),
   Server = require('./server'),
@@ -20,6 +20,8 @@ var MongoCR = require('../auth/mongocr')
   , GSSAPI = require('../auth/gssapi')
   , SSPI = require('../auth/sspi')
   , ScramSHA1 = require('../auth/scram');
+
+var BSON = retrieveBSON();
 
 //
 // States
@@ -96,6 +98,8 @@ var handlers = ['connect', 'close', 'error', 'timeout', 'parseError'];
  * @fires ReplSet#topologyOpening
  * @fires ReplSet#topologyClosed
  * @fires ReplSet#topologyDescriptionChanged
+ * @property {string} type the topology type.
+ * @property {string} parserType the parser type used (c++ or js).
  */
 var ReplSet = function(seedlist, options) {
   var self = this;
@@ -129,7 +133,9 @@ var ReplSet = function(seedlist, options) {
   this.s = {
     options: assign({}, options),
     // BSON instance
-    bson: options.bson || new BSON(),
+    bson: options.bson || new BSON([BSON.Binary, BSON.Code, BSON.DBRef, BSON.Decimal128,
+      BSON.Double, BSON.Int32, BSON.Long, BSON.Map, BSON.MaxKey, BSON.MinKey,
+      BSON.ObjectId, BSON.BSONRegExp, BSON.Symbol, BSON.Timestamp]),
     // Factory overrides
     Cursor: options.cursorFactory || BasicCursor,
     // Logger instance
@@ -184,6 +190,10 @@ var ReplSet = function(seedlist, options) {
   var types = ['joined', 'left'];
   types.forEach(function(x) {
     self.s.replicaSetState.on(x, function(t, s) {
+      if(self.state === CONNECTED && x === 'joined' && t == 'primary') {
+        self.emit('reconnect', self);
+      }
+
       self.emit(x, t, s);
     });
   });
@@ -206,6 +216,12 @@ inherits(ReplSet, EventEmitter);
 
 Object.defineProperty(ReplSet.prototype, 'type', {
   enumerable:true, get: function() { return 'replset'; }
+});
+
+Object.defineProperty(ReplSet.prototype, 'parserType', {
+  enumerable:true, get: function() {
+    return BSON.native ? "c++" : "js";
+  }
 });
 
 function attemptReconnect(self) {
@@ -267,6 +283,9 @@ function attemptReconnect(self) {
 
             // Do we have a primary
             if(self.s.replicaSetState.hasPrimary()) {
+              // Emit reconnect as new primary was discovered
+              self.emit('reconnect', self);
+
               // Connect any missing servers
               connectNewServers(self, self.s.replicaSetState.unknownServers, function() {
                 // Debug log
@@ -276,8 +295,12 @@ function attemptReconnect(self) {
 
                 // Reset the running
                 self.runningAttempReconnect = false;
+
                 // Go back to normal topology monitoring
-                topologyMonitor(self);
+                // Schedule a topology monitoring sweep
+                setTimeout(function() {
+                  topologyMonitor(self);
+                }, self.s.haInterval);
               });
             } else {
               if(self.listeners("close").length > 0) {
@@ -516,7 +539,6 @@ function topologyMonitor(self, options) {
 
       // Emit the server heartbeat start
       emitSDAMEvent(self, 'serverHeartbeatStarted', { connectionId: _server.name });
-
       // Execute ismaster
       // Set the socketTimeout for a monitoring message to a low number
       // Ensuring ismaster calls are timed out quickly
@@ -821,9 +843,14 @@ ReplSet.prototype.connect = function(options) {
     }));
   });
 
+  // Error out as high availbility interval must be < than socketTimeout
+  if(this.s.options.socketTimeout > 0 && this.s.options.socketTimeout <= this.s.options.haInterval) {
+    return self.emit('error', new MongoError(f("haInterval [%s] MS must be set to less than socketTimeout [%s] MS"
+      , this.s.options.haInterval, this.s.options.socketTimeout)));
+  }
+
   // Emit the topology opening event
   emitSDAMEvent(this, 'topologyOpening', { topologyId: this.id });
-
   // Start all server connections
   connectServers(self, servers);
 }

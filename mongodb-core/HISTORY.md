@@ -1,3 +1,19 @@
+2.1.2 2016-12-10
+----------------
+* Delay topologyMonitoring on successful attemptReconnect as no need to run a full scan immediately.
+* Emit reconnect event in primary joining when in connected status for a replicaset.
+
+2.1.1 2016-12-08
+----------------
+* Updated bson library to 1.0.1.
+* Added optional support for bson-ext 1.0.1.
+
+2.1.0 2016-12-05
+----------------
+* Updated bson library to 1.0.0.
+* Added optional support for bson-ext 1.0.0.
+* Expose property parserType allowing for identification of currently configured parser.
+
 2.0.14 2016-11-29
 -----------------
 * Updated bson library to 0.5.7.

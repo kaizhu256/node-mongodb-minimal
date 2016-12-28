@@ -1,7 +1,7 @@
 {
     "package.json": true,
     "author": "kai zhu <kaizhu256@gmail.com>",
-    "description": "this is a zero-dependency version of the mongodb v2.2.12 npm-package",
+    "description": "this package is a zero-dependency version of the mongodb v2.2.16 npm-package",
     "devDependencies": {
         "electron-lite": "kaizhu256/node-electron-lite#alpha",
         "utility2": "kaizhu256/node-utility2#alpha"
@@ -31,5 +31,5 @@
 
         "test": "export PORT=$(utility2 shServerPortRandom) && utility2 test test.js"
     },
-    "version": "2016.11.1"
+    "version": "2016.12.28"
 }

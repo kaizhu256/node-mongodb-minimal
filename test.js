@@ -44,12 +44,6 @@
          * this function will test build's doc handling-behavior
          */
             options = {};
-            options.exampleFileList = [
-                'README.md',
-                './mongodb/README.md',
-                'test.js',
-                local.env.npm_package_main + '.js'
-            ];
             local.buildDoc(options, onError);
         };
         break;
