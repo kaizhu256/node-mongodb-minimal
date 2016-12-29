@@ -6,7 +6,7 @@
 <tspan x="10" y="58">&gt; export PORT=$(utility2 shServerPortRandom) &amp;&amp; utility2 test test.js</tspan>
 <tspan x="10" y="74"></tspan>
 <tspan x="10" y="90"></tspan>
-<tspan x="10" y="106">[MODE_BUILD=npmTest] - 2016-12-28T20:38:15Z - npm-testing /home/travis/build/kaizhu256/node-mong\</tspan>
+<tspan x="10" y="106">[MODE_BUILD=npmTest] - 2016-12-29T08:51:50Z - npm-testing /home/travis/build/kaizhu256/node-mong\</tspan>
 <tspan x="10" y="122">odb-minimal</tspan>
 <tspan x="10" y="138"></tspan>
 <tspan x="10" y="154"></tspan>
@@ -14,26 +14,26 @@
 <tspan x="10" y="186">godb-minimal/test.js</tspan>
 <tspan x="10" y="202">merging file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/test-report.json to t\</tspan>
 <tspan x="10" y="218">est-report</tspan>
-<tspan x="10" y="234">&gt; server listening on http-port 49216</tspan>
+<tspan x="10" y="234">&gt; server listening on http-port 64213</tspan>
 <tspan x="10" y="250">created documentation file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/doc.api\</tspan>
 <tspan x="10" y="266">.html</tspan>
 <tspan x="10" y="282"></tspan>
 <tspan x="10" y="298"></tspan>
 <tspan x="10" y="314">browserTest - created electron entry-page /home/travis/build/kaizhu256/node-mongodb-minimal/tmp/\</tspan>
-<tspan x="10" y="330">electron.1594727a4950.8157254159b0a.html</tspan>
+<tspan x="10" y="330">electron.15949c741a90.d41991b1a9ddc.html</tspan>
 <tspan x="10" y="346"></tspan>
-<tspan x="10" y="362">[4381:1228/203817:ERROR:browser_main_loop.cc(231)] Running without the SUID sandbox! See https:/\</tspan>
+<tspan x="10" y="362">[4338:1229/085152:ERROR:browser_main_loop.cc(231)] Running without the SUID sandbox! See https:/\</tspan>
 <tspan x="10" y="378">/chromium.googlesource.com/chromium/src/+/master/docs/linux_suid_sandbox_development.md for more\</tspan>
 <tspan x="10" y="394"> information on developing with the sandbox on.</tspan>
 <tspan x="10" y="410">Xlib:  extension "RANDR" missing on display ":99.0".</tspan>
 <tspan x="10" y="426">merging file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/test-report.json to t\</tspan>
 <tspan x="10" y="442">est-report</tspan>
 <tspan x="10" y="458">Xlib:  extension "RANDR" missing on display ":99.0".</tspan>
-<tspan x="10" y="474">[4381:1228/203818:WARNING:audio_manager.cc(314)] Multiple instances of AudioManager detected</tspan>
-<tspan x="10" y="490">[4381:1228/203818:WARNING:audio_manager.cc(275)] Multiple instances of AudioManager detected</tspan>
-<tspan x="10" y="506">[4413:1228/203818:ERROR:sandbox_linux.cc(343)] InitializeSandbox() called with multiple threads \</tspan>
+<tspan x="10" y="474">[4338:1229/085152:WARNING:audio_manager.cc(314)] Multiple instances of AudioManager detected</tspan>
+<tspan x="10" y="490">[4338:1229/085152:WARNING:audio_manager.cc(275)] Multiple instances of AudioManager detected</tspan>
+<tspan x="10" y="506">[4359:1229/085152:ERROR:sandbox_linux.cc(343)] InitializeSandbox() called with multiple threads \</tspan>
 <tspan x="10" y="522">in process gpu-process. </tspan>
-<tspan x="10" y="538">[4381:1228/203818:ERROR:browser_gpu_channel_host_factory.cc(131)] Failed to create channel.</tspan>
+<tspan x="10" y="538">[4338:1229/085152:ERROR:browser_gpu_channel_host_factory.cc(131)] Failed to create channel.</tspan>
 <tspan x="10" y="554"></tspan>
 <tspan x="10" y="570">browserTest - opened url file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/doc.\</tspan>
 <tspan x="10" y="586">api.html</tspan>
@@ -63,11 +63,11 @@
 <tspan x="10" y="970">est-report</tspan>
 <tspan x="10" y="986"></tspan>
 <tspan x="10" y="1002">-------------------------------------------------------</tspan>
-<tspan x="10" y="1018">| test-report - npmTest - node - linux v7.3.0 - 2016-12-28T20:38:15.737Z</tspan>
-<tspan x="10" y="1034">|    7742 ms            0 failed        1 passed      |</tspan>
+<tspan x="10" y="1018">| test-report - npmTest - node - linux v7.3.0 - 2016-12-29T08:51:50.889Z</tspan>
+<tspan x="10" y="1034">|   12147 ms            0 failed        1 passed      |</tspan>
 <tspan x="10" y="1050">-------------------------------------------------------</tspan>
-<tspan x="10" y="1066">| test-report - npmTestPublished - node - linux v7.3.0 - 2016-12-28T20:38:06.026Z</tspan>
-<tspan x="10" y="1082">|    7314 ms            0 failed        1 passed      |</tspan>
+<tspan x="10" y="1066">| test-report - npmTestPublished - node - linux v7.3.0 - 2016-12-29T08:51:36.028Z</tspan>
+<tspan x="10" y="1082">|   12481 ms            0 failed        1 passed      |</tspan>
 <tspan x="10" y="1098">-------------------------------------------------------</tspan>
 <tspan x="10" y="1114"></tspan>
 <tspan x="10" y="1130">created test-report file:///home/travis/build/kaizhu256/node-mongodb-minimal/tmp/build/test-repo\</tspan>
