@@ -2,7 +2,7 @@ mongodb-minimal
 ===============
 this package is a zero-dependency version of the mongodb v2.2.16 npm-package
 
-[![travis-ci.org build-status](https://api.travis-ci.org/kaizhu256/node-mongodb-minimal.svg)](https://travis-ci.org/kaizhu256/node-mongodb-minimal)
+[![travis-ci.org build-status](https://api.travis-ci.org/kaizhu256/node-mongodb-lite.svg)](https://travis-ci.org/kaizhu256/node-mongodb-lite) [![mongodb coverage](https://kaizhu256.github.io/node-mongodb-lite/build..alpha..travis-ci.org/coverage.badge.svg)](https://kaizhu256.github.io/node-mongodb-lite/build..alpha..travis-ci.org/coverage.html/index.html)
 
 [![NPM](https://nodei.co/npm/mongodb-minimal.png?downloads=true)](https://www.npmjs.com/package/mongodb-minimal)
 
