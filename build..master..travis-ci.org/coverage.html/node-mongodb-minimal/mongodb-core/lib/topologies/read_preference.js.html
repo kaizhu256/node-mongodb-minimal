@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/mongodb-core/lib/topologies/read_preference.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header medium">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb-core/lib/topologies/read_preference.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">75% <small>(15 / 20)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">0% <small>(0 / 2)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">50% <small>(2 / 4)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">78.95% <small>(15 / 19)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/mongodb-core/lib/topologies/</a> &#187; read_preference.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">6</span>
+<span class="cline-any cline-yes">6</span>
+<span class="cline-any cline-yes">6</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
+&nbsp;
+var needSlaveOk = ['primaryPreferred', 'secondary', 'secondaryPreferred', 'nearest'];
+&nbsp;
+/**
+ * @fileOverview The **ReadPreference** class is a class that represents a MongoDB ReadPreference and is
+ * used to construct connections.
+ * 
+ * @example
+ * var ReplSet = require('mongodb-core').ReplSet
+ *   , ReadPreference = require('mongodb-core').ReadPreference
+ *   , assert = require('assert');
+ * 
+ * var server = new ReplSet([{host: 'localhost', port: 30000}], {setName: 'rs'});
+ * // Wait for the connection event
+ * server.on('connect', function(server) {
+ *   var cursor = server.cursor('db.test'
+ *     , {find: 'db.test', query: {}}
+ *     , {readPreference: new ReadPreference('secondary')});
+ *   cursor.next(function(err, doc) {
+ *     server.destroy();
+ *   });
+ * });
+ * 
+ * // Start connecting
+ * server.connect();
+ */
+&nbsp;
+/**
+ * Creates a new Pool instance
+ * @class
+ * @param {string} preference A string describing the preference (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
+ * @param {object} tags The tags object
+ * @param {object} [options] Additional read preference options
+ * @property {string} preference The preference string (primary|primaryPreferred|secondary|secondaryPreferred|nearest)
+ * @property {object} tags The tags object
+ * @property {object} options Additional read preference options
+ * @return {ReadPreference}
+ */
+var ReadPreference = function(preference, tags, options) {
+  this.preference = preference;
+  this.tags = tags;
+  this.options = options;
+}
+&nbsp;
+/**
+ * This needs slaveOk bit set
+ * @method
+ * @return {boolean}
+ */
+ReadPreference.prototype.slaveOk = function() {
+  return needSlaveOk.indexOf(this.preference) != -1;
+}
+&nbsp;
+/**
+ * Are the two read preference equal
+ * @method
+ * @return {boolean}
+ */
+ReadPreference.prototype.equals = <span class="fstat-no" title="function not covered" >function(readPreference) {</span>
+<span class="cstat-no" title="statement not covered" >  return readPreference.preference == this.preference;</span>
+}
+&nbsp;
+/**
+ * Return JSON representation
+ * @method
+ * @return {Object}
+ */
+ReadPreference.prototype.toJSON = <span class="fstat-no" title="function not covered" >function() {</span>
+<span class="cstat-no" title="statement not covered" >  var readPreference = {mode: this.preference};</span>
+<span class="cstat-no" title="statement not covered" >  if(Array.isArray(this.tags)) <span class="cstat-no" title="statement not covered" >readPreference.tags = this.tags;</span></span>
+<span class="cstat-no" title="statement not covered" >  return readPreference;</span>
+}
+&nbsp;
+/**
+ * Primary read preference
+ * @method
+ * @return {ReadPreference}
+ */
+ReadPreference.primary = new ReadPreference('primary');
+/**
+ * Primary Preferred read preference
+ * @method
+ * @return {ReadPreference}
+ */
+ReadPreference.primaryPreferred = new ReadPreference('primaryPreferred');
+/**
+ * Secondary read preference
+ * @method
+ * @return {ReadPreference}
+ */
+ReadPreference.secondary = new ReadPreference('secondary');
+/**
+ * Secondary Preferred read preference
+ * @method
+ * @return {ReadPreference}
+ */
+ReadPreference.secondaryPreferred = new ReadPreference('secondaryPreferred');
+/**
+ * Nearest read preference
+ * @method
+ * @return {ReadPreference}
+ */
+ReadPreference.nearest = new ReadPreference('nearest');
+&nbsp;
+module.exports = ReadPreference;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Sep 16 2015 13:04:10 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<svg height="1502" width="720" xmlns="http://www.w3.org/2000/svg">
+<rect height="1502" fill="#555" width="720"></rect>
+<text fill="#7f7" font-family="Courier New" font-size="12" xml:space="preserve">
+<tspan x="10" y="26"></tspan>
+<tspan x="10" y="42">[MODE_BUILD=npmTestPublished] - 2016-12-01T15:43:26Z - npm-testing published-package mongodb-min\</tspan>
+<tspan x="10" y="58">imal</tspan>
+<tspan x="10" y="74"></tspan>
+<tspan x="10" y="90"></tspan>
+<tspan x="10" y="106">&gt; mongodb-minimal@2016.11.1 postinstall /tmp/app/node_modules/mongodb-minimal</tspan>
+<tspan x="10" y="122">&gt; for DIR in .bin electron-lite utility2; do     (if [ -d node_modules/$DIR ] &amp;&amp; [ ! -d $DIR ]; \</tspan>
+<tspan x="10" y="138">then mv node_modules/$DIR .; fi); done; rm -fr node_modules &amp;&amp; ln -s . node_modules</tspan>
+<tspan x="10" y="154"></tspan>
+<tspan x="10" y="170">/tmp/app</tspan>
+<tspan x="10" y="186">└── mongodb-minimal@2016.11.1 </tspan>
+<tspan x="10" y="202"></tspan>
+<tspan x="10" y="218">npm WARN enoent ENOENT: no such file or directory, open '/tmp/app/package.json'</tspan>
+<tspan x="10" y="234">npm WARN app No description</tspan>
+<tspan x="10" y="250">npm WARN app No repository field.</tspan>
+<tspan x="10" y="266">npm WARN app No README data</tspan>
+<tspan x="10" y="282">npm WARN app No license field.</tspan>
+<tspan x="10" y="298"></tspan>
+<tspan x="10" y="314">&gt; electron-lite@2016.10.1 postinstall /tmp/app/node_modules/mongodb-minimal/node_modules/electro\</tspan>
+<tspan x="10" y="330">n-lite</tspan>
+<tspan x="10" y="346">&gt; ./index.sh shNpmPostinstall</tspan>
+<tspan x="10" y="362"></tspan>
+<tspan x="10" y="378"></tspan>
+<tspan x="10" y="394">&gt; mongodb-minimal@2016.11.1 postinstall /tmp/app/node_modules/mongodb-minimal</tspan>
+<tspan x="10" y="410">&gt; for DIR in .bin electron-lite utility2; do     (if [ -d node_modules/$DIR ] &amp;&amp; [ ! -d $DIR ]; \</tspan>
+<tspan x="10" y="426">then mv node_modules/$DIR .; fi); done; rm -fr node_modules &amp;&amp; ln -s . node_modules</tspan>
+<tspan x="10" y="442"></tspan>
+<tspan x="10" y="458">mongodb-minimal@2016.11.1 /tmp/app/node_modules/mongodb-minimal</tspan>
+<tspan x="10" y="474">├── electron-lite@2016.10.1  (git://github.com/kaizhu256/node-electron-lite.git#1a030198852d35e0\</tspan>
+<tspan x="10" y="490">ff8caa8c37c93c17c633b404)</tspan>
+<tspan x="10" y="506">└── utility2@2016.11.2  (git://github.com/kaizhu256/node-utility2.git#a35fa2bda7b4e4a3d9f54ca422\</tspan>
+<tspan x="10" y="522">fa69cebc6fdde0)</tspan>
+<tspan x="10" y="538"></tspan>
+<tspan x="10" y="554"></tspan>
+<tspan x="10" y="570">&gt; mongodb-minimal@2016.11.1 test /tmp/app/node_modules/mongodb-minimal</tspan>
+<tspan x="10" y="586">&gt; export PORT=$(utility2 shServerPortRandom) &amp;&amp; utility2 test test.js</tspan>
+<tspan x="10" y="602"></tspan>
+<tspan x="10" y="618"></tspan>
+<tspan x="10" y="634">[MODE_BUILD=npmTestPublished] - 2016-12-01T15:43:31Z - npm-testing /tmp/app/node_modules/mongodb\</tspan>
+<tspan x="10" y="650">-minimal</tspan>
+<tspan x="10" y="666"></tspan>
+<tspan x="10" y="682"></tspan>
+<tspan x="10" y="698">covering $ /home/travis/.nvm/versions/node/v7.2.0/bin/node /tmp/app/node_modules/mongodb-minimal\</tspan>
+<tspan x="10" y="714">/test.js</tspan>
+<tspan x="10" y="730">&gt; server listening on http-port 39470</tspan>
+<tspan x="10" y="746">created documentation file:///tmp/app/node_modules/mongodb-minimal/tmp/build/doc.api.html</tspan>
+<tspan x="10" y="762"></tspan>
+<tspan x="10" y="778"></tspan>
+<tspan x="10" y="794">browserTest - created electron entry-page /tmp/app/node_modules/mongodb-minimal/tmp/electron.158\</tspan>
+<tspan x="10" y="810">bb0e1-6caf-4e9f-9642-d3d464dcb7d6.html</tspan>
+<tspan x="10" y="826"></tspan>
+<tspan x="10" y="842">[4069:1201/154332:ERROR:browser_main_loop.cc(231)] Running without the SUID sandbox! See https:/\</tspan>
+<tspan x="10" y="858">/chromium.googlesource.com/chromium/src/+/master/docs/linux_suid_sandbox_development.md for more\</tspan>
+<tspan x="10" y="874"> information on developing with the sandbox on.</tspan>
+<tspan x="10" y="890">Xlib:  extension "RANDR" missing on display ":99.0".</tspan>
+<tspan x="10" y="906">Xlib:  extension "RANDR" missing on display ":99.0".</tspan>
+<tspan x="10" y="922">[4069:1201/154333:WARNING:audio_manager.cc(314)] Multiple instances of AudioManager detected</tspan>
+<tspan x="10" y="938">[4069:1201/154333:WARNING:audio_manager.cc(275)] Multiple instances of AudioManager detected</tspan>
+<tspan x="10" y="954">[4092:1201/154333:ERROR:sandbox_linux.cc(343)] InitializeSandbox() called with multiple threads \</tspan>
+<tspan x="10" y="970">in process gpu-process. </tspan>
+<tspan x="10" y="986"></tspan>
+<tspan x="10" y="1002">browserTest - opened url file:///tmp/app/node_modules/mongodb-minimal/tmp/build/doc.api.html</tspan>
+<tspan x="10" y="1018"></tspan>
+<tspan x="10" y="1034"></tspan>
+<tspan x="10" y="1050">browserTest - created screen-capture file:///tmp/app/node_modules/mongodb-minimal/tmp/build/scre\</tspan>
+<tspan x="10" y="1066">en-capture.npmTestPublished.browser._2Ftmp_2Fapp_2Fnode_modules_2Fmongodb-minimal_2Ftmp_2Fbuild_\</tspan>
+<tspan x="10" y="1082">2Fdoc.api.html.png</tspan>
+<tspan x="10" y="1098"></tspan>
+<tspan x="10" y="1114"></tspan>
+<tspan x="10" y="1130">browserTest - exit-code 0 - file:///tmp/app/node_modules/mongodb-minimal/tmp/build/doc.api.html</tspan>
+<tspan x="10" y="1146"></tspan>
+<tspan x="10" y="1162">[node test-case 1 of 1 passed] - testCase_build_doc</tspan>
+<tspan x="10" y="1178">--------------------|-----------|-----------|-----------|-----------|</tspan>
+<tspan x="10" y="1194">File                |   % Stmts |% Branches |   % Funcs |   % Lines |</tspan>
+<tspan x="10" y="1210">--------------------|-----------|-----------|-----------|-----------|</tspan>
+<tspan x="10" y="1226">   mongodb-minimal/ |       100 |       100 |       100 |       100 |</tspan>
+<tspan x="10" y="1242">      test.js       |       100 |       100 |       100 |       100 |</tspan>
+<tspan x="10" y="1258">--------------------|-----------|-----------|-----------|-----------|</tspan>
+<tspan x="10" y="1274">All files           |       100 |       100 |       100 |       100 |</tspan>
+<tspan x="10" y="1290">--------------------|-----------|-----------|-----------|-----------|</tspan>
+<tspan x="10" y="1306"></tspan>
+<tspan x="10" y="1322">created coverage file:///tmp/app/node_modules/mongodb-minimal/tmp/build/coverage.html/index.html</tspan>
+<tspan x="10" y="1338"></tspan>
+<tspan x="10" y="1354">-------------------------------------------------------</tspan>
+<tspan x="10" y="1370">| test-report - npmTestPublished - node - linux v7.2.0 - 2016-12-01T15:43:31.278Z</tspan>
+<tspan x="10" y="1386">|    7517 ms            0 failed        1 passed      |</tspan>
+<tspan x="10" y="1402">-------------------------------------------------------</tspan>
+<tspan x="10" y="1418"></tspan>
+<tspan x="10" y="1434">created test-report file:///tmp/app/node_modules/mongodb-minimal/tmp/build/test-report.html</tspan>
+<tspan x="10" y="1450"></tspan>
+<tspan x="10" y="1466"></tspan>
+<tspan x="10" y="1482">npmTestPublished - 0 failed tests</tspan>
+</text>
+</svg>

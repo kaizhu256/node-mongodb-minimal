@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/mongodb-core/lib/auth/sspi.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb-core/lib/auth/sspi.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">17% <small>(17 / 100)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">1.89% <small>(1 / 53)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">11.11% <small>(2 / 18)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">18.39% <small>(16 / 87)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/mongodb-core/lib/auth/</a> &#187; sspi.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
+&nbsp;
+var f = require('util').format
+  , crypto = require('crypto')
+  , MongoError = require('../error');
+&nbsp;
+var AuthSession = <span class="fstat-no" title="function not covered" >function(db, username, password, options) {</span>
+<span class="cstat-no" title="statement not covered" >  this.db = db;</span>
+<span class="cstat-no" title="statement not covered" >  this.username = username;</span>
+<span class="cstat-no" title="statement not covered" >  this.password = password;</span>
+<span class="cstat-no" title="statement not covered" >  this.options = options;</span>
+}
+&nbsp;
+AuthSession.prototype.equal = <span class="fstat-no" title="function not covered" >function(session) {</span>
+<span class="cstat-no" title="statement not covered" >  return session.db == this.db </span>
+    &amp;&amp; session.username == this.username
+    &amp;&amp; session.password == this.password;
+}
+&nbsp;
+// Kerberos class
+var Kerberos = null;
+var MongoAuthProcess = null;
+&nbsp;
+// Try to grab the Kerberos class
+try {
+  Kerberos = require('kerberos').Kerberos
+  // Authentication process for Mongo
+<span class="cstat-no" title="statement not covered" >  MongoAuthProcess = require('kerberos').processes.MongoAuthProcess</span>
+} catch(err) {}
+&nbsp;
+/**
+ * Creates a new SSPI authentication mechanism
+ * @class
+ * @return {SSPI} A cursor instance
+ */
+var SSPI = function() {
+  this.authStore = [];
+}
+&nbsp;
+/**
+ * Authenticate
+ * @method
+ * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+ * @param {Pool} pool Connection pool for this topology
+ * @param {string} db Name of the database
+ * @param {string} username Username
+ * @param {string} password Password
+ * @param {authResultCallback} callback The callback to return the result from the authentication
+ * @return {object}
+ */
+SSPI.prototype.auth = <span class="fstat-no" title="function not covered" >function(server, pool, db, username, password, options, callback) {</span>
+<span class="cstat-no" title="statement not covered" >  var self = this;</span>
+  // We don't have the Kerberos library
+<span class="cstat-no" title="statement not covered" >  if(Kerberos == null) <span class="cstat-no" title="statement not covered" >return callback(new Error("Kerberos library is not installed"));  </span></span>
+<span class="cstat-no" title="statement not covered" >  var gssapiServiceName = options['gssapiServiceName'] || 'mongodb';</span>
+  // Get all the connections
+<span class="cstat-no" title="statement not covered" >  var connections = pool.getAll();</span>
+  // Total connections
+<span class="cstat-no" title="statement not covered" >  var count = connections.length;</span>
+<span class="cstat-no" title="statement not covered" >  if(count == 0) <span class="cstat-no" title="statement not covered" >return callback(null, null);</span></span>
+&nbsp;
+  // Valid connections
+<span class="cstat-no" title="statement not covered" >  var numberOfValidConnections = 0;</span>
+<span class="cstat-no" title="statement not covered" >  var credentialsValid = false;</span>
+<span class="cstat-no" title="statement not covered" >  var errorObject = null;</span>
+&nbsp;
+  // For each connection we need to authenticate
+<span class="cstat-no" title="statement not covered" >  while(connections.length &gt; 0) {    </span>
+    // Execute MongoCR
+<span class="cstat-no" title="statement not covered" >    var execute = <span class="fstat-no" title="function not covered" >function(connection) {</span></span>
+      // Start Auth process for a connection
+<span class="cstat-no" title="statement not covered" >      SSIPAuthenticate(username, password, gssapiServiceName, server, connection, <span class="fstat-no" title="function not covered" >function(err, r) {</span></span>
+        // Adjust count
+<span class="cstat-no" title="statement not covered" >        count = count - 1;</span>
+&nbsp;
+        // If we have an error
+<span class="cstat-no" title="statement not covered" >        if(err) {</span>
+<span class="cstat-no" title="statement not covered" >          errorObject = err;</span>
+        } else <span class="cstat-no" title="statement not covered" >if(r &amp;&amp; typeof r == 'object' &amp;&amp; r.result['$err']) {</span>
+<span class="cstat-no" title="statement not covered" >          errorObject = r.result;</span>
+        } else <span class="cstat-no" title="statement not covered" >if(r &amp;&amp; typeof r == 'object' &amp;&amp; r.result['errmsg']) {</span>
+<span class="cstat-no" title="statement not covered" >          errorObject = r.result;</span>
+        } else {
+<span class="cstat-no" title="statement not covered" >          credentialsValid = true;</span>
+<span class="cstat-no" title="statement not covered" >          numberOfValidConnections = numberOfValidConnections + 1;</span>
+        }
+&nbsp;
+        // We have authenticated all connections
+<span class="cstat-no" title="statement not covered" >        if(count == 0 &amp;&amp; numberOfValidConnections &gt; 0) {</span>
+          // Store the auth details
+<span class="cstat-no" title="statement not covered" >          addAuthSession(self.authStore, new AuthSession(db, username, password, options));</span>
+          // Return correct authentication
+<span class="cstat-no" title="statement not covered" >          callback(null, true);</span>
+        } else <span class="cstat-no" title="statement not covered" >if(count == 0) {</span>
+<span class="cstat-no" title="statement not covered" >          if(errorObject == null) <span class="cstat-no" title="statement not covered" >errorObject = new MongoError(f("failed to authenticate using mongocr"));</span></span>
+<span class="cstat-no" title="statement not covered" >          callback(errorObject, false);</span>
+        }
+      });
+    }
+&nbsp;
+    // Get the connection
+<span class="cstat-no" title="statement not covered" >    execute(connections.shift());</span>
+  }
+}
+&nbsp;
+var SSIPAuthenticate = <span class="fstat-no" title="function not covered" >function(username, password, gssapiServiceName, server, connection, callback) {</span>
+  // Build Authentication command to send to MongoDB
+<span class="cstat-no" title="statement not covered" >  var command = {</span>
+      saslStart: 1
+    , mechanism: 'GSSAPI'
+    , payload: ''
+    , autoAuthorize: 1
+  };
+&nbsp;
+  // Create authenticator
+<span class="cstat-no" title="statement not covered" >  var mongo_auth_process = new MongoAuthProcess(connection.host, connection.port, gssapiServiceName);</span>
+&nbsp;
+  // Execute first sasl step
+<span class="cstat-no" title="statement not covered" >  server.command("$external.$cmd"</span>
+    , command
+    , { connection: connection }, <span class="fstat-no" title="function not covered" >function(err, r) {</span>
+<span class="cstat-no" title="statement not covered" >    if(err) <span class="cstat-no" title="statement not covered" >return callback(err, false);    </span></span>
+<span class="cstat-no" title="statement not covered" >    var doc = r.result;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    mongo_auth_process.init(username, password, <span class="fstat-no" title="function not covered" >function(err) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return callback(err);</span></span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      mongo_auth_process.transition(doc.payload, <span class="fstat-no" title="function not covered" >function(err, payload) {</span></span>
+<span class="cstat-no" title="statement not covered" >        if(err) <span class="cstat-no" title="statement not covered" >return callback(err);</span></span>
+&nbsp;
+        // Perform the next step against mongod
+<span class="cstat-no" title="statement not covered" >        var command = {</span>
+            saslContinue: 1
+          , conversationId: doc.conversationId
+          , payload: payload
+        };
+&nbsp;
+        // Execute the command
+<span class="cstat-no" title="statement not covered" >        server.command("$external.$cmd"</span>
+          , command
+          , { connection: connection }, <span class="fstat-no" title="function not covered" >function(err, r) {</span>
+<span class="cstat-no" title="statement not covered" >          if(err) <span class="cstat-no" title="statement not covered" >return callback(err, false);</span></span>
+<span class="cstat-no" title="statement not covered" >          var doc = r.result;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >          mongo_auth_process.transition(doc.payload, <span class="fstat-no" title="function not covered" >function(err, payload) {</span></span>
+<span class="cstat-no" title="statement not covered" >            if(err) <span class="cstat-no" title="statement not covered" >return callback(err);</span></span>
+&nbsp;
+            // Perform the next step against mongod
+<span class="cstat-no" title="statement not covered" >            var command = {</span>
+                saslContinue: 1
+              , conversationId: doc.conversationId
+              , payload: payload
+            };
+&nbsp;
+            // Execute the command
+<span class="cstat-no" title="statement not covered" >            server.command("$external.$cmd"</span>
+              , command
+              , { connection: connection }, <span class="fstat-no" title="function not covered" >function(err, r) {</span>
+<span class="cstat-no" title="statement not covered" >              if(err) <span class="cstat-no" title="statement not covered" >return callback(err, false);</span></span>
+<span class="cstat-no" title="statement not covered" >              var doc = r.result;</span>
+              
+<span class="cstat-no" title="statement not covered" >              mongo_auth_process.transition(doc.payload, <span class="fstat-no" title="function not covered" >function(err, payload) {</span></span>
+                // Perform the next step against mongod
+<span class="cstat-no" title="statement not covered" >                var command = {</span>
+                    saslContinue: 1
+                  , conversationId: doc.conversationId
+                  , payload: payload
+                };
+&nbsp;
+                // Execute the command
+<span class="cstat-no" title="statement not covered" >                server.command("$external.$cmd"</span>
+                  , command
+                  , { connection: connection }, <span class="fstat-no" title="function not covered" >function(err, r) {</span>
+<span class="cstat-no" title="statement not covered" >                  if(err) <span class="cstat-no" title="statement not covered" >return callback(err, false);</span></span>
+<span class="cstat-no" title="statement not covered" >                  var doc = r.result;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                  if(doc.done) <span class="cstat-no" title="statement not covered" >return callback(null, true);</span></span>
+<span class="cstat-no" title="statement not covered" >                  callback(new Error("Authentication failed"), false);</span>
+                });        
+              });
+            });
+          });
+        });
+      });
+    });
+  });  
+}
+&nbsp;
+// Add to store only if it does not exist
+var addAuthSession = <span class="fstat-no" title="function not covered" >function(authStore, session) {</span>
+<span class="cstat-no" title="statement not covered" >  var found = false;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  for(var i = 0; i &lt; authStore.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >    if(authStore[i].equal(session)) {</span>
+<span class="cstat-no" title="statement not covered" >      found = true;</span>
+<span class="cstat-no" title="statement not covered" >      break;</span>
+    }
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(!found) <span class="cstat-no" title="statement not covered" >authStore.push(session);</span></span>
+}
+&nbsp;
+/**
+ * Re authenticate pool
+ * @method
+ * @param {{Server}|{ReplSet}|{Mongos}} server Topology the authentication method is being called on
+ * @param {Pool} pool Connection pool for this topology
+ * @param {authResultCallback} callback The callback to return the result from the authentication
+ * @return {object}
+ */
+SSPI.prototype.reauthenticate = function(server, pool, callback) {
+  var count = this.authStore.length;
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(count == 0) return callback(null, null);
+  // Iterate over all the auth details stored
+<span class="cstat-no" title="statement not covered" >  for(var i = 0; i &lt; this.authStore.length; i++) {</span>
+<span class="cstat-no" title="statement not covered" >    this.auth(server, pool, this.authStore[i].db, this.authStore[i].username, this.authStore[i].password, this.authStore[i].options, <span class="fstat-no" title="function not covered" >function(err, r) {</span></span>
+<span class="cstat-no" title="statement not covered" >      count = count - 1;</span>
+      // Done re-authenticating
+<span class="cstat-no" title="statement not covered" >      if(count == 0) {</span>
+<span class="cstat-no" title="statement not covered" >        callback(null, null);</span>
+      }
+    });
+  }
+}
+&nbsp;
+/**
+ * This is a result from a authentication strategy
+ *
+ * @callback authResultCallback
+ * @param {error} error An error object. Set to null if no error present
+ * @param {boolean} result The result of the authentication process
+ */
+&nbsp;
+module.exports = SSPI;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Sep 16 2015 13:04:10 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/mongodb/index.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header high">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb/index.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">100% <small>(28 / 28)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">100% <small>(0 / 0)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">100% <small>(0 / 0)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">100% <small>(28 / 28)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/mongodb/</a> &#187; index.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// Core module
+var core = require('mongodb-core'),
+  Instrumentation = require('./lib/apm');
+&nbsp;
+// Set up the connect function
+var connect = require('./lib/mongo_client').connect;
+&nbsp;
+// Expose error class
+connect.MongoError = core.MongoError;
+&nbsp;
+// Actual driver classes exported
+connect.MongoClient = require('./lib/mongo_client');
+connect.Db = require('./lib/db');
+connect.Collection = require('./lib/collection');
+connect.Server = require('./lib/server');
+connect.ReplSet = require('./lib/replset');
+connect.Mongos = require('./lib/mongos');
+connect.ReadPreference = require('./lib/read_preference');
+connect.GridStore = require('./lib/gridfs/grid_store');
+connect.Chunk = require('./lib/gridfs/chunk');
+connect.Logger = core.Logger;
+connect.Cursor = require('./lib/cursor');
+&nbsp;
+// BSON types exported
+connect.Binary = core.BSON.Binary;
+connect.Code = core.BSON.Code;
+connect.DBRef = core.BSON.DBRef;
+connect.Double = core.BSON.Double;
+connect.Long = core.BSON.Long;
+connect.MinKey = core.BSON.MinKey;
+connect.MaxKey = core.BSON.MaxKey;
+connect.ObjectID = core.BSON.ObjectID;
+connect.ObjectId = core.BSON.ObjectID;
+connect.Symbol = core.BSON.Symbol;
+connect.Timestamp = core.BSON.Timestamp;
+&nbsp;
+// Add connect method
+connect.connect = connect;
+&nbsp;
+// Instrumentation instance
+var instrumentation = null;
+&nbsp;
+// // Set up the instrumentation method
+// connect.instrument = function(options) {
+//   if(!instrumentation) instrumentation = new Instrumentation(core, options)
+//   return instrumentation;
+// }
+&nbsp;
+// Set our exports to be the connect function
+module.exports = connect;
+&nbsp;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Sep 16 2015 13:04:10 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>

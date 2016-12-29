@@ -1,0 +1,3309 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/mongodb/lib/cursor.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb/lib/cursor.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">23.86% <small>(94 / 394)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">11.3% <small>(33 / 292)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">11.86% <small>(7 / 59)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">29.1% <small>(94 / 323)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/mongodb/lib/</a> &#187; cursor.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525
+526
+527
+528
+529
+530
+531
+532
+533
+534
+535
+536
+537
+538
+539
+540
+541
+542
+543
+544
+545
+546
+547
+548
+549
+550
+551
+552
+553
+554
+555
+556
+557
+558
+559
+560
+561
+562
+563
+564
+565
+566
+567
+568
+569
+570
+571
+572
+573
+574
+575
+576
+577
+578
+579
+580
+581
+582
+583
+584
+585
+586
+587
+588
+589
+590
+591
+592
+593
+594
+595
+596
+597
+598
+599
+600
+601
+602
+603
+604
+605
+606
+607
+608
+609
+610
+611
+612
+613
+614
+615
+616
+617
+618
+619
+620
+621
+622
+623
+624
+625
+626
+627
+628
+629
+630
+631
+632
+633
+634
+635
+636
+637
+638
+639
+640
+641
+642
+643
+644
+645
+646
+647
+648
+649
+650
+651
+652
+653
+654
+655
+656
+657
+658
+659
+660
+661
+662
+663
+664
+665
+666
+667
+668
+669
+670
+671
+672
+673
+674
+675
+676
+677
+678
+679
+680
+681
+682
+683
+684
+685
+686
+687
+688
+689
+690
+691
+692
+693
+694
+695
+696
+697
+698
+699
+700
+701
+702
+703
+704
+705
+706
+707
+708
+709
+710
+711
+712
+713
+714
+715
+716
+717
+718
+719
+720
+721
+722
+723
+724
+725
+726
+727
+728
+729
+730
+731
+732
+733
+734
+735
+736
+737
+738
+739
+740
+741
+742
+743
+744
+745
+746
+747
+748
+749
+750
+751
+752
+753
+754
+755
+756
+757
+758
+759
+760
+761
+762
+763
+764
+765
+766
+767
+768
+769
+770
+771
+772
+773
+774
+775
+776
+777
+778
+779
+780
+781
+782
+783
+784
+785
+786
+787
+788
+789
+790
+791
+792
+793
+794
+795
+796
+797
+798
+799
+800
+801
+802
+803
+804
+805
+806
+807
+808
+809
+810
+811
+812
+813
+814
+815
+816
+817
+818
+819
+820
+821
+822
+823
+824
+825
+826
+827
+828
+829
+830
+831
+832
+833
+834
+835
+836
+837
+838
+839
+840
+841
+842
+843
+844
+845
+846
+847
+848
+849
+850
+851
+852
+853
+854
+855
+856
+857
+858
+859
+860
+861
+862
+863
+864
+865
+866
+867
+868
+869
+870
+871
+872
+873
+874
+875
+876
+877
+878
+879
+880
+881
+882
+883
+884
+885
+886
+887
+888
+889
+890
+891
+892
+893
+894
+895
+896
+897
+898
+899
+900
+901
+902
+903
+904
+905
+906
+907
+908
+909
+910
+911
+912
+913
+914
+915
+916
+917
+918
+919
+920
+921
+922
+923
+924
+925
+926
+927
+928
+929
+930
+931
+932
+933
+934
+935
+936
+937
+938
+939
+940
+941
+942
+943
+944
+945
+946
+947
+948
+949
+950
+951
+952
+953
+954
+955
+956
+957
+958
+959
+960
+961
+962
+963
+964
+965
+966
+967
+968
+969
+970
+971
+972
+973
+974
+975
+976
+977
+978
+979
+980
+981
+982
+983
+984
+985
+986
+987
+988
+989
+990
+991
+992
+993
+994
+995
+996
+997
+998
+999
+1000
+1001
+1002
+1003
+1004
+1005
+1006
+1007
+1008
+1009
+1010
+1011
+1012
+1013
+1014
+1015
+1016
+1017
+1018
+1019
+1020
+1021
+1022
+1023
+1024
+1025
+1026
+1027
+1028
+1029
+1030
+1031
+1032
+1033
+1034
+1035
+1036
+1037
+1038
+1039
+1040
+1041
+1042
+1043
+1044
+1045
+1046
+1047
+1048
+1049
+1050
+1051
+1052
+1053
+1054
+1055
+1056
+1057
+1058
+1059
+1060
+1061
+1062
+1063
+1064
+1065
+1066
+1067
+1068
+1069
+1070
+1071
+1072
+1073
+1074
+1075
+1076
+1077
+1078
+1079
+1080
+1081
+1082
+1083
+1084
+1085
+1086
+1087
+1088
+1089
+1090</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">19</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
+&nbsp;
+var inherits = require('util').inherits
+  , f = require('util').format
+  , toError = require('./utils').toError
+  , getSingleProperty = require('./utils').getSingleProperty
+  , formattedOrderClause = require('./utils').formattedOrderClause
+  , handleCallback = require('./utils').handleCallback
+  , Logger = require('mongodb-core').Logger
+  , EventEmitter = require('events').EventEmitter
+  , ReadPreference = require('./read_preference')
+  , MongoError = require('mongodb-core').MongoError
+  , Readable = require('stream').Readable || <span class="branch-1 cbranch-no" title="branch not covered" >require('readable-stream').Readable</span>
+  , CoreCursor = require('mongodb-core').Cursor
+  , Query = require('mongodb-core').Query
+  , CoreReadPreference = require('mongodb-core').ReadPreference;
+&nbsp;
+/**
+ * @fileOverview The **Cursor** class is an internal class that embodies a cursor on MongoDB
+ * allowing for iteration over the results returned from the underlying query. It supports
+ * one by one document iteration, conversion to an array or can be iterated as a Node 0.10.X
+ * or higher stream
+ *
+ * **CURSORS Cannot directly be instantiated**
+ * @example
+ * var MongoClient = require('mongodb').MongoClient,
+ *   test = require('assert');
+ * // Connection url
+ * var url = 'mongodb://localhost:27017/test';
+ * // Connect using MongoClient
+ * MongoClient.connect(url, function(err, db) {
+ *   // Create a collection we want to drop later
+ *   var col = db.collection('createIndexExample1');
+ *   // Insert a bunch of documents
+ *   col.insert([{a:1, b:1}
+ *     , {a:2, b:2}, {a:3, b:3}
+ *     , {a:4, b:4}], {w:1}, function(err, result) {
+ *     test.equal(null, err);
+ *
+ *     // Show that duplicate records got dropped
+ *     col.find({}).toArray(function(err, items) {
+ *       test.equal(null, err);
+ *       test.equal(4, items.length);
+ *       db.close();
+ *     });
+ *   });
+ * });
+ */
+&nbsp;
+/**
+ * Namespace provided by the mongodb-core and node.js
+ * @external CoreCursor
+ * @external Readable
+ */
+&nbsp;
+// Flags allowed for cursor
+var flags = ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'];
+var fields = ['numberOfRetries', 'tailableRetryInterval'];
+&nbsp;
+/**
+ * Creates a new Cursor instance (INTERNAL TYPE, do not instantiate directly)
+ * @class Cursor
+ * @extends external:CoreCursor
+ * @extends external:Readable
+ * @property {string} sortValue Cursor query sort setting.
+ * @property {boolean} timeout Is Cursor able to time out.
+ * @property {ReadPreference} readPreference Get cursor ReadPreference.
+ * @fires Cursor#data
+ * @fires Cursor#end
+ * @fires Cursor#close
+ * @fires Cursor#readable
+ * @return {Cursor} a Cursor instance.
+ * @example
+ * Some example
+ */
+var Cursor = function(bson, ns, cmd, options, topology, topologyOptions) {
+  CoreCursor.apply(this, Array.prototype.slice.call(arguments, 0));
+  var self = this;
+  var state = Cursor.INIT;
+  var streamOptions = {};
+&nbsp;
+  // Tailable cursor options
+  var numberOfRetries = options.numberOfRetries || 5;
+  var tailableRetryInterval = options.tailableRetryInterval || 500;
+  var currentNumberOfRetries = numberOfRetries;
+&nbsp;
+  // Get the promiseLibrary
+  var promiseLibrary = options.promiseLibrary;
+&nbsp;
+  // No promise library selected fall back
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(!promiseLibrary) {
+<span class="cstat-no" title="statement not covered" >    promiseLibrary = typeof global.Promise == 'function' ?</span>
+      global.Promise : require('es6-promise').Promise;
+  }
+&nbsp;
+  // Set up
+  Readable.call(this, {objectMode: true});
+&nbsp;
+  // Internal cursor state
+  this.s = {
+    // Tailable cursor options
+      numberOfRetries: numberOfRetries
+    , tailableRetryInterval: tailableRetryInterval
+    , currentNumberOfRetries: currentNumberOfRetries
+    // State
+    , state: state
+    // Stream options
+    , streamOptions: streamOptions
+    // BSON
+    , bson: bson
+    // Namespace
+    , ns: ns
+    // Command
+    , cmd: cmd
+    // Options
+    , options: options
+    // Topology
+    , topology: topology
+    // Topology options
+    , topologyOptions: topologyOptions
+    // Promise library
+    , promiseLibrary: promiseLibrary
+    // Current doc
+    , currentDoc: null
+  }
+&nbsp;
+  // Legacy fields
+  this.timeout = self.s.options.noCursorTimeout == true;
+  this.sortValue = self.s.cmd.sort;
+  this.readPreference = self.s.options.readPreference;
+}
+&nbsp;
+/**
+ * Cursor stream data event, fired for each document in the cursor.
+ *
+ * @event Cursor#data
+ * @type {object}
+ */
+&nbsp;
+/**
+ * Cursor stream end event
+ *
+ * @event Cursor#end
+ * @type {null}
+ */
+&nbsp;
+/**
+ * Cursor stream close event
+ *
+ * @event Cursor#close
+ * @type {null}
+ */
+&nbsp;
+/**
+ * Cursor stream readable event
+ *
+ * @event Cursor#readable
+ * @type {null}
+ */
+&nbsp;
+// Inherit from Readable
+inherits(Cursor, Readable);
+&nbsp;
+// Map core cursor _next method so we can apply mapping
+CoreCursor.prototype._next = CoreCursor.prototype.next;
+&nbsp;
+for(var name in CoreCursor.prototype) {
+  Cursor.prototype[name] = CoreCursor.prototype[name];
+}
+&nbsp;
+/**
+ * Check if there is any document still available in the cursor
+ * @method
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @throws {MongoError}
+ * @deprecated
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.hasNext = <span class="fstat-no" title="function not covered" >function(callback) {</span>
+<span class="cstat-no" title="statement not covered" >  var self = this;</span>
+&nbsp;
+  // Execute using callback
+<span class="cstat-no" title="statement not covered" >  if(typeof callback == 'function') <span class="cstat-no" title="statement not covered" >return nextObject(self, <span class="fstat-no" title="function not covered" >function(err, doc) {</span></span></span>
+<span class="cstat-no" title="statement not covered" >    if(!doc) <span class="cstat-no" title="statement not covered" >return callback(null, false);</span></span>
+<span class="cstat-no" title="statement not covered" >    self.s.currentDoc = doc;</span>
+<span class="cstat-no" title="statement not covered" >    callback(null, true);</span>
+  });
+&nbsp;
+  // Return a Promise
+<span class="cstat-no" title="statement not covered" >  return new this.s.promiseLibrary(<span class="fstat-no" title="function not covered" >function(resolve, reject) {</span></span>
+<span class="cstat-no" title="statement not covered" >    nextObject(self, <span class="fstat-no" title="function not covered" >function(err, doc) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if(self.s.state == Cursor.CLOSED || self.isDead()) <span class="cstat-no" title="statement not covered" >return resolve(false);</span></span>
+<span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return reject(err);</span></span>
+<span class="cstat-no" title="statement not covered" >      if(!doc) <span class="cstat-no" title="statement not covered" >return resolve(false);</span></span>
+<span class="cstat-no" title="statement not covered" >      self.s.currentDoc = doc;</span>
+<span class="cstat-no" title="statement not covered" >      resolve(true);</span>
+    });
+  });
+}
+&nbsp;
+&nbsp;
+/**
+ * Get the next available document from the cursor, returns null if no more documents are available.
+ * @method
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @throws {MongoError}
+ * @deprecated
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.next = function(callback) {
+  var self = this;
+&nbsp;
+  // Execute using callback
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(typeof callback == 'function') {
+    // Return the currentDoc if someone called hasNext first
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(self.s.currentDoc) {
+<span class="cstat-no" title="statement not covered" >      var doc = self.s.currentDoc;</span>
+<span class="cstat-no" title="statement not covered" >      self.s.currentDoc = null;</span>
+<span class="cstat-no" title="statement not covered" >      return callback(null, doc);</span>
+    }
+&nbsp;
+    // Return the next object
+    return nextObject(self, callback)
+  };
+&nbsp;
+  // Return a Promise
+<span class="cstat-no" title="statement not covered" >  return new this.s.promiseLibrary(<span class="fstat-no" title="function not covered" >function(resolve, reject) {</span></span>
+    // Return the currentDoc if someone called hasNext first
+<span class="cstat-no" title="statement not covered" >    if(self.s.currentDoc) {</span>
+<span class="cstat-no" title="statement not covered" >      var doc = self.s.currentDoc;</span>
+<span class="cstat-no" title="statement not covered" >      self.s.currentDoc = null;</span>
+<span class="cstat-no" title="statement not covered" >      return resolve(doc);</span>
+    }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    nextObject(self, <span class="fstat-no" title="function not covered" >function(err, r) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return reject(err);</span></span>
+<span class="cstat-no" title="statement not covered" >      resolve(r);</span>
+    });
+  });
+}
+&nbsp;
+/**
+ * Set the cursor query
+ * @method
+ * @param {object} filter The filter object used for the cursor.
+ * @return {Cursor}
+ */
+Cursor.prototype.filter = <span class="fstat-no" title="function not covered" >function(filter) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.query = filter;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set the cursor maxScan
+ * @method
+ * @param {object} maxScan Constrains the query to only scan the specified number of documents when fulfilling the query
+ * @return {Cursor}
+ */
+Cursor.prototype.maxScan = <span class="fstat-no" title="function not covered" >function(maxScan) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.maxScan = maxScan;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set the cursor hint
+ * @method
+ * @param {object} hint If specified, then the query system will only consider plans using the hinted index.
+ * @return {Cursor}
+ */
+Cursor.prototype.hint = <span class="fstat-no" title="function not covered" >function(hint) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.hint = hint;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set the cursor min
+ * @method
+ * @param {object} min Specify a $min value to specify the inclusive lower bound for a specific index in order to constrain the results of find(). The $min specifies the lower bound for all keys of a specific index in order.
+ * @return {Cursor}
+ */
+Cursor.prototype.min = <span class="fstat-no" title="function not covered" >function(min) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.min = min;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set the cursor max
+ * @method
+ * @param {object} max Specify a $max value to specify the exclusive upper bound for a specific index in order to constrain the results of find(). The $max specifies the upper bound for all keys of a specific index in order.
+ * @return {Cursor}
+ */
+Cursor.prototype.max = <span class="fstat-no" title="function not covered" >function(max) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.max = max;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set the cursor returnKey
+ * @method
+ * @param {object} returnKey Only return the index field or fields for the results of the query. If $returnKey is set to true and the query does not use an index to perform the read operation, the returned documents will not contain any fields. Use one of the following forms:
+ * @return {Cursor}
+ */
+Cursor.prototype.returnKey = <span class="fstat-no" title="function not covered" >function(value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.returnKey = value;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set the cursor showRecordId
+ * @method
+ * @param {object} showRecordId The $showDiskLoc option has now been deprecated and replaced with the showRecordId field. $showDiskLoc will still be accepted for OP_QUERY stye find.
+ * @return {Cursor}
+ */
+Cursor.prototype.showRecordId = <span class="fstat-no" title="function not covered" >function(value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.showDiskLoc = value;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set the cursor snapshot
+ * @method
+ * @param {object} snapshot The $snapshot operator prevents the cursor from returning a document more than once because an intervening write operation results in a move of the document.
+ * @return {Cursor}
+ */
+Cursor.prototype.snapshot = <span class="fstat-no" title="function not covered" >function(value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.snapshot = value;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set a node.js specific cursor option
+ * @method
+ * @param {string} field The cursor option to set ['numberOfRetries', 'tailableRetryInterval'].
+ * @param {object} value The field value.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.setCursorOption = <span class="fstat-no" title="function not covered" >function(field, value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(fields.indexOf(field) == -1) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: f("option %s not a supported option %s", field, fields), driver:true });</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s[field] = value;</span>
+<span class="cstat-no" title="statement not covered" >  if(field == 'numberOfRetries')</span>
+<span class="cstat-no" title="statement not covered" >    this.s.currentNumberOfRetries = value;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Add a cursor flag to the cursor
+ * @method
+ * @param {string} flag The flag to set, must be one of following ['tailable', 'oplogReplay', 'noCursorTimeout', 'awaitData', 'exhaust', 'partial'].
+ * @param {boolean} value The flag boolean value.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.addCursorFlag = <span class="fstat-no" title="function not covered" >function(flag, value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(flags.indexOf(flag) == -1) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: f("flag %s not a supported flag %s", flag, flags), driver:true });</span></span>
+<span class="cstat-no" title="statement not covered" >  if(typeof value != 'boolean') <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: f("flag %s must be a boolean value", flag), driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd[flag] = value;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Add a query modifier to the cursor query
+ * @method
+ * @param {string} name The query modifier (must start with $, such as $orderby etc)
+ * @param {boolean} value The flag boolean value.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.addQueryModifier = <span class="fstat-no" title="function not covered" >function(name, value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(name[0] != '$') <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: f("%s is not a valid query modifier"), driver:true});</span></span>
+  // Strip of the $
+<span class="cstat-no" title="statement not covered" >  var field = name.substr(1);</span>
+  // Set on the command
+<span class="cstat-no" title="statement not covered" >  this.s.cmd[field] = value;</span>
+  // Deal with the special case for sort
+<span class="cstat-no" title="statement not covered" >  if(field == 'orderby') <span class="cstat-no" title="statement not covered" >this.s.cmd.sort = this.s.cmd[field];</span></span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Add a comment to the cursor query allowing for tracking the comment in the log.
+ * @method
+ * @param {string} value The comment attached to this query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.comment = <span class="fstat-no" title="function not covered" >function(value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.comment = value;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set a maxTimeMS on the cursor query, allowing for hard timeout limits on queries (Only supported on MongoDB 2.6 or higher)
+ * @method
+ * @param {number} value Number of milliseconds to wait before aborting the query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.maxTimeMS = <span class="fstat-no" title="function not covered" >function(value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(typeof value != 'number') <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "maxTimeMS must be a number", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.maxTimeMS = value;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+Cursor.prototype.maxTimeMs = Cursor.prototype.maxTimeMS;
+&nbsp;
+/**
+ * Sets a field projection for the query.
+ * @method
+ * @param {object} value The field projection object.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.project = <span class="fstat-no" title="function not covered" >function(value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.fields = value;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Sets the sort order of the cursor query.
+ * @method
+ * @param {(string|array|object)} keyOrList The key or keys set for the sort.
+ * @param {number} [direction] The direction of the sorting (1 or -1).
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.sort = <span class="fstat-no" title="function not covered" >function(keyOrList, direction) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.options.tailable) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Tailable cursor doesn't support sorting", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.CLOSED || this.s.state == Cursor.OPEN || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  var order = keyOrList;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(direction != null) {</span>
+<span class="cstat-no" title="statement not covered" >    order = [[keyOrList, direction]];</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.sort = order;</span>
+<span class="cstat-no" title="statement not covered" >  this.sortValue = order;</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Set the batch size for the cursor.
+ * @method
+ * @param {number} value The batchSize for the cursor.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.batchSize = function(value) {
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(this.s.options.tailable) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Tailable cursor doesn't support batchSize", driver:true});</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(this.s.state == Cursor.CLOSED || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof value != 'number') <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "batchSize requires an integer", driver:true});</span>
+  this.s.cmd.batchSize = value;
+  this.setCursorBatchSize(value);
+  return this;
+}
+&nbsp;
+/**
+ * Set the limit for the cursor.
+ * @method
+ * @param {number} value The limit for the cursor query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.limit = function(value) {
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(this.s.options.tailable) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Tailable cursor doesn't support limit", driver:true});</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(this.s.state == Cursor.OPEN || this.s.state == Cursor.CLOSED || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof value != 'number') <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "limit requires an integer", driver:true});</span>
+  this.s.cmd.limit = value;
+  // this.cursorLimit = value;
+  this.setCursorLimit(value);
+  return this;
+}
+&nbsp;
+/**
+ * Set the skip for the cursor.
+ * @method
+ * @param {number} value The skip for the cursor query.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.skip = <span class="fstat-no" title="function not covered" >function(value) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.options.tailable) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Tailable cursor doesn't support skip", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state == Cursor.OPEN || this.s.state == Cursor.CLOSED || this.isDead()) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "Cursor is closed", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(typeof value != 'number') <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "skip requires an integer", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.skip = value;</span>
+<span class="cstat-no" title="statement not covered" >  this.setCursorSkip(value);</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * The callback format for results
+ * @callback Cursor~resultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {(object|null|boolean)} result The result object if the command was executed successfully.
+ */
+&nbsp;
+/**
+ * Set the new batchSize of the cursor
+ * @function Cursor.prototype.setBatchSize
+ * @param {number} value The new batchSize for the cursor
+ * @return {null}
+ */
+&nbsp;
+/**
+ * Get the batchSize of the cursor
+ * @function Cursor.prototype.batchSize
+ * @param {number} value The current batchSize for the cursor
+ * @return {null}
+ */
+&nbsp;
+/**
+ * Set the new skip value of the cursor
+ * @function Cursor.prototype.setCursorSkip
+ * @param {number} value The new skip for the cursor
+ * @return {null}
+ */
+&nbsp;
+/**
+ * Get the skip value of the cursor
+ * @function Cursor.prototype.cursorSkip
+ * @param {number} value The current skip value for the cursor
+ * @return {null}
+ */
+&nbsp;
+/**
+ * Set the new limit value of the cursor
+ * @function Cursor.prototype.setCursorLimit
+ * @param {number} value The new limit for the cursor
+ * @return {null}
+ */
+&nbsp;
+/**
+ * Get the limit value of the cursor
+ * @function Cursor.prototype.cursorLimit
+ * @param {number} value The current limit value for the cursor
+ * @return {null}
+ */
+&nbsp;
+/**
+ * Clone the cursor
+ * @function external:CoreCursor#clone
+ * @return {Cursor}
+ */
+&nbsp;
+/**
+ * Resets the cursor
+ * @function external:CoreCursor#rewind
+ * @return {null}
+ */
+&nbsp;
+/**
+ * Get the next available document from the cursor, returns null if no more documents are available.
+ * @method
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @throws {MongoError}
+ * @deprecated
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.nextObject = Cursor.prototype.next;
+&nbsp;
+var nextObject = function(self, callback) {
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(self.s.state == Cursor.CLOSED || self.isDead()) <span class="cstat-no" title="statement not covered" >return handleCallback(callback, MongoError.create({message: "Cursor is closed", driver:true}));</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(self.s.state == Cursor.INIT &amp;&amp; self.s.cmd.sort) {
+<span class="cstat-no" title="statement not covered" >    try {</span>
+<span class="cstat-no" title="statement not covered" >      self.s.cmd.sort = formattedOrderClause(self.s.cmd.sort);</span>
+    } catch(err) {
+<span class="cstat-no" title="statement not covered" >      return handleCallback(callback, err);</span>
+    }
+  }
+  // Get the next object
+  self._next(function(err, doc) {
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(err &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >err.tailable </span>&amp;&amp; <span class="branch-2 cbranch-no" title="branch not covered" >self.s.currentNumberOfRetries == 0)</span> <span class="cstat-no" title="statement not covered" >return callback(err);</span>
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(err &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >err.tailable </span>&amp;&amp; <span class="branch-2 cbranch-no" title="branch not covered" >self.s.currentNumberOfRetries &gt; 0)</span> {
+<span class="cstat-no" title="statement not covered" >      self.s.currentNumberOfRetries = self.s.currentNumberOfRetries - 1;</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      return setTimeout(<span class="fstat-no" title="function not covered" >function() {</span></span>
+<span class="cstat-no" title="statement not covered" >        self.nextObject(callback);</span>
+      }, self.s.tailableRetryInterval);
+    }
+&nbsp;
+    self.s.state = Cursor.OPEN;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(err) <span class="cstat-no" title="statement not covered" >return handleCallback(callback, err);</span>
+    handleCallback(callback, null, doc);
+  });
+}
+&nbsp;
+// Trampoline emptying the number of retrieved items
+// without incurring a nextTick operation
+var loop = <span class="fstat-no" title="function not covered" >function(self, callback) {</span>
+  // No more items we are done
+<span class="cstat-no" title="statement not covered" >  if(self.bufferedCount() == 0) <span class="cstat-no" title="statement not covered" >return;</span></span>
+  // Get the next document
+<span class="cstat-no" title="statement not covered" >  self._next(callback);</span>
+  // Loop
+<span class="cstat-no" title="statement not covered" >  return loop;</span>
+}
+&nbsp;
+/**
+ * Get the next available document from the cursor, returns null if no more documents are available.
+ * @method
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @throws {MongoError}
+ * @deprecated
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.next = Cursor.prototype.nextObject;
+&nbsp;
+/**
+ * Iterates over all the documents for this cursor. As with **{cursor.toArray}**,
+ * not all of the elements will be iterated if this cursor had been previouly accessed.
+ * In that case, **{cursor.rewind}** can be used to reset the cursor. However, unlike
+ * **{cursor.toArray}**, the cursor will only hold a maximum of batch size elements
+ * at any given time if batch size is specified. Otherwise, the caller is responsible
+ * for making sure that the entire result can fit the memory.
+ * @method
+ * @deprecated
+ * @param {Cursor~resultCallback} callback The result callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+Cursor.prototype.each = <span class="fstat-no" title="function not covered" >function(callback) {</span>
+  // Rewind cursor state
+<span class="cstat-no" title="statement not covered" >  this.rewind();</span>
+  // Set current cursor to INIT
+<span class="cstat-no" title="statement not covered" >  this.s.state = Cursor.INIT;</span>
+  // Run the query
+<span class="cstat-no" title="statement not covered" >  _each(this, callback);</span>
+};
+&nbsp;
+// Run the each loop
+var _each = <span class="fstat-no" title="function not covered" >function(self, callback) {</span>
+<span class="cstat-no" title="statement not covered" >  if(!callback) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: 'callback is mandatory', driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(self.isNotified()) <span class="cstat-no" title="statement not covered" >return;</span></span>
+<span class="cstat-no" title="statement not covered" >  if(self.s.state == Cursor.CLOSED || self.isDead()) {</span>
+<span class="cstat-no" title="statement not covered" >    return handleCallback(callback, MongoError.create({message: "Cursor is closed", driver:true}));</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(self.s.state == Cursor.INIT) <span class="cstat-no" title="statement not covered" >self.s.state = Cursor.OPEN;</span></span>
+&nbsp;
+  // Define function to avoid global scope escape
+<span class="cstat-no" title="statement not covered" >  var fn = null;</span>
+  // Trampoline all the entries
+<span class="cstat-no" title="statement not covered" >  if(self.bufferedCount() &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >    while(fn = loop(self, callback)) <span class="cstat-no" title="statement not covered" >fn(self, callback);</span></span>
+<span class="cstat-no" title="statement not covered" >    _each(self, callback);</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    self._next(<span class="fstat-no" title="function not covered" >function(err, item) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return handleCallback(callback, err);</span></span>
+<span class="cstat-no" title="statement not covered" >      if(item == null) {</span>
+<span class="cstat-no" title="statement not covered" >        self.s.state = Cursor.CLOSED;</span>
+<span class="cstat-no" title="statement not covered" >        return handleCallback(callback, null, null);</span>
+      }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      if(handleCallback(callback, null, item) == false) <span class="cstat-no" title="statement not covered" >return;</span></span>
+<span class="cstat-no" title="statement not covered" >      _each(self, callback);</span>
+    })
+  }
+}
+&nbsp;
+/**
+ * The callback format for the forEach iterator method
+ * @callback Cursor~iteratorCallback
+ * @param {Object} doc An emitted document for the iterator
+ */
+&nbsp;
+/**
+ * The callback error format for the forEach iterator method
+ * @callback Cursor~endCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ */
+&nbsp;
+/**
+ * Iterates over all the documents for this cursor using the iterator, callback pattern.
+ * @method
+ * @param {Cursor~iteratorCallback} iterator The iteration callback.
+ * @param {Cursor~endCallback} callback The end callback.
+ * @throws {MongoError}
+ * @return {null}
+ */
+Cursor.prototype.forEach = <span class="fstat-no" title="function not covered" >function(iterator, callback) {</span>
+<span class="cstat-no" title="statement not covered" >  this.each(<span class="fstat-no" title="function not covered" >function(err, doc){</span></span>
+<span class="cstat-no" title="statement not covered" >    if(err) { <span class="cstat-no" title="statement not covered" >callback(err); <span class="cstat-no" title="statement not covered" ></span>return false; </span>}</span>
+<span class="cstat-no" title="statement not covered" >    if(doc != null) { <span class="cstat-no" title="statement not covered" >iterator(doc); <span class="cstat-no" title="statement not covered" ></span>return true; </span>}</span>
+<span class="cstat-no" title="statement not covered" >    if(doc == null &amp;&amp; callback) {</span>
+<span class="cstat-no" title="statement not covered" >      var internalCallback = callback;</span>
+<span class="cstat-no" title="statement not covered" >      callback = null;</span>
+<span class="cstat-no" title="statement not covered" >      internalCallback(null);</span>
+<span class="cstat-no" title="statement not covered" >      return false;</span>
+    }
+  });
+}
+&nbsp;
+/**
+ * Set the ReadPreference for the cursor.
+ * @method
+ * @param {(string|ReadPreference)} readPreference The new read preference for the cursor.
+ * @throws {MongoError}
+ * @return {Cursor}
+ */
+Cursor.prototype.setReadPreference = <span class="fstat-no" title="function not covered" >function(r) {</span>
+<span class="cstat-no" title="statement not covered" >  if(this.s.state != Cursor.INIT) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: 'cannot change cursor readPreference after cursor has been accessed', driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(r instanceof ReadPreference) {</span>
+<span class="cstat-no" title="statement not covered" >    this.s.options.readPreference = new CoreReadPreference(r.mode, r.tags);</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    this.s.options.readPreference = new CoreReadPreference(r);</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * The callback format for results
+ * @callback Cursor~toArrayResultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {object[]} documents All the documents the satisfy the cursor.
+ */
+&nbsp;
+/**
+ * Returns an array of documents. The caller is responsible for making sure that there
+ * is enough memory to store the results. Note that the array only contain partial
+ * results when this cursor had been previouly accessed. In that case,
+ * cursor.rewind() can be used to reset the cursor.
+ * @method
+ * @param {Cursor~toArrayResultCallback} [callback] The result callback.
+ * @throws {MongoError}
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.toArray = <span class="fstat-no" title="function not covered" >function(callback) {</span>
+<span class="cstat-no" title="statement not covered" >  var self = this;</span>
+<span class="cstat-no" title="statement not covered" >  if(self.s.options.tailable) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: 'Tailable cursor cannot be converted to array', driver:true});</span></span>
+&nbsp;
+  // Execute using callback
+<span class="cstat-no" title="statement not covered" >  if(typeof callback == 'function') <span class="cstat-no" title="statement not covered" >return toArray(self, callback);</span></span>
+&nbsp;
+  // Return a Promise
+<span class="cstat-no" title="statement not covered" >  return new this.s.promiseLibrary(<span class="fstat-no" title="function not covered" >function(resolve, reject) {</span></span>
+<span class="cstat-no" title="statement not covered" >    toArray(self, <span class="fstat-no" title="function not covered" >function(err, r) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return reject(err);</span></span>
+<span class="cstat-no" title="statement not covered" >      resolve(r);</span>
+    });
+  });
+}
+&nbsp;
+var toArray = <span class="fstat-no" title="function not covered" >function(self, callback) {</span>
+<span class="cstat-no" title="statement not covered" >  var items = [];</span>
+&nbsp;
+  // Reset cursor
+<span class="cstat-no" title="statement not covered" >  self.rewind();</span>
+<span class="cstat-no" title="statement not covered" >  self.s.state = Cursor.INIT;</span>
+&nbsp;
+&nbsp;
+  // Fetch all the documents
+<span class="cstat-no" title="statement not covered" >  var fetchDocs = <span class="fstat-no" title="function not covered" >function() {</span></span>
+<span class="cstat-no" title="statement not covered" >    self._next(<span class="fstat-no" title="function not covered" >function(err, doc) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return handleCallback(callback, err);</span></span>
+<span class="cstat-no" title="statement not covered" >      if(doc == null) {</span>
+<span class="cstat-no" title="statement not covered" >        self.s.state = Cursor.CLOSED;</span>
+<span class="cstat-no" title="statement not covered" >        return handleCallback(callback, null, items);</span>
+      }
+&nbsp;
+      // Add doc to items
+<span class="cstat-no" title="statement not covered" >      items.push(doc)</span>
+&nbsp;
+      // Get all buffered objects
+<span class="cstat-no" title="statement not covered" >      if(self.bufferedCount() &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >        var docs = self.readBufferedDocuments(self.bufferedCount())</span>
+&nbsp;
+        // Transform the doc if transform method added
+<span class="cstat-no" title="statement not covered" >        if(self.s.transforms &amp;&amp; typeof self.s.transforms.doc == 'function') {</span>
+<span class="cstat-no" title="statement not covered" >          docs = docs.map(self.s.transforms.doc);</span>
+        }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >        items = items.concat(docs);</span>
+      }
+&nbsp;
+      // Attempt a fetch
+<span class="cstat-no" title="statement not covered" >      fetchDocs();</span>
+    })
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  fetchDocs();</span>
+}
+&nbsp;
+/**
+ * The callback format for results
+ * @callback Cursor~countResultCallback
+ * @param {MongoError} error An error instance representing the error during the execution.
+ * @param {number} count The count of documents.
+ */
+&nbsp;
+/**
+ * Get the count of documents for this cursor
+ * @method
+ * @param {boolean} applySkipLimit Should the count command apply limit and skip settings on the cursor or in the passed in options.
+ * @param {object} [options=null] Optional settings.
+ * @param {number} [options.skip=null] The number of documents to skip.
+ * @param {number} [options.limit=null] The maximum amounts to count before aborting.
+ * @param {number} [options.maxTimeMS=null] Number of miliseconds to wait before aborting the query.
+ * @param {string} [options.hint=null] An index name hint for the query.
+ * @param {(ReadPreference|string)} [options.readPreference=null] The preferred read preference (ReadPreference.PRIMARY, ReadPreference.PRIMARY_PREFERRED, ReadPreference.SECONDARY, ReadPreference.SECONDARY_PREFERRED, ReadPreference.NEAREST).
+ * @param {Cursor~countResultCallback} [callback] The result callback.
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.count = <span class="fstat-no" title="function not covered" >function(applySkipLimit, opts, callback) {</span>
+<span class="cstat-no" title="statement not covered" >  var self = this;</span>
+<span class="cstat-no" title="statement not covered" >  if(self.s.cmd.query == null) <span class="cstat-no" title="statement not covered" >throw MongoError.create({message: "count can only be used with find command", driver:true});</span></span>
+<span class="cstat-no" title="statement not covered" >  if(typeof opts == 'function') <span class="cstat-no" title="statement not covered" >callback = opts, opts = {};</span></span>
+<span class="cstat-no" title="statement not covered" >  opts = opts || {};</span>
+&nbsp;
+  // Execute using callback
+<span class="cstat-no" title="statement not covered" >  if(typeof callback == 'function') <span class="cstat-no" title="statement not covered" >return count(self, applySkipLimit, opts, callback);</span></span>
+&nbsp;
+  // Return a Promise
+<span class="cstat-no" title="statement not covered" >  return new this.s.promiseLibrary(<span class="fstat-no" title="function not covered" >function(resolve, reject) {</span></span>
+<span class="cstat-no" title="statement not covered" >    count(self, applySkipLimit, opts, <span class="fstat-no" title="function not covered" >function(err, r) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return reject(err);</span></span>
+<span class="cstat-no" title="statement not covered" >      resolve(r);</span>
+    });
+  });
+};
+&nbsp;
+var count = <span class="fstat-no" title="function not covered" >function(self, applySkipLimit, opts, callback) {</span>
+<span class="cstat-no" title="statement not covered" >  if(typeof applySkipLimit == 'function') {</span>
+<span class="cstat-no" title="statement not covered" >    callback = applySkipLimit;</span>
+<span class="cstat-no" title="statement not covered" >    applySkipLimit = true;</span>
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(applySkipLimit) {</span>
+<span class="cstat-no" title="statement not covered" >    if(typeof self.cursorSkip() == 'number') <span class="cstat-no" title="statement not covered" >opts.skip = self.cursorSkip();</span></span>
+<span class="cstat-no" title="statement not covered" >    if(typeof self.cursorLimit() == 'number') <span class="cstat-no" title="statement not covered" >opts.limit = self.cursorLimit();</span></span>
+  }
+&nbsp;
+  // Command
+<span class="cstat-no" title="statement not covered" >  var delimiter = self.s.ns.indexOf('.');</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  var command = {</span>
+    'count': self.s.ns.substr(delimiter+1), 'query': self.s.cmd.query
+  }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >  if(typeof opts.maxTimeMS == 'number') {</span>
+<span class="cstat-no" title="statement not covered" >    command.maxTimeMS = opts.maxTimeMS;</span>
+  } else <span class="cstat-no" title="statement not covered" >if(typeof self.s.maxTimeMS == 'number') {</span>
+<span class="cstat-no" title="statement not covered" >    command.maxTimeMS = self.s.maxTimeMS;</span>
+  }
+&nbsp;
+  // Get a server
+<span class="cstat-no" title="statement not covered" >  var server = self.s.topology.getServer(opts);</span>
+  // Get a connection
+<span class="cstat-no" title="statement not covered" >  var connection = self.s.topology.getConnection(opts);</span>
+  // Get the callbacks
+<span class="cstat-no" title="statement not covered" >  var callbacks = server.getCallbacks();</span>
+&nbsp;
+  // Merge in any options
+<span class="cstat-no" title="statement not covered" >  if(opts.skip) <span class="cstat-no" title="statement not covered" >command.skip = opts.skip;</span></span>
+<span class="cstat-no" title="statement not covered" >  if(opts.limit) <span class="cstat-no" title="statement not covered" >command.limit = opts.limit;</span></span>
+<span class="cstat-no" title="statement not covered" >  if(self.s.options.hint) <span class="cstat-no" title="statement not covered" >command.hint = self.s.options.hint;</span></span>
+&nbsp;
+  // Build Query object
+<span class="cstat-no" title="statement not covered" >  var query = new Query(self.s.bson, f("%s.$cmd", self.s.ns.substr(0, delimiter)), command, {</span>
+      numberToSkip: 0, numberToReturn: -1
+    , checkKeys: false
+  });
+&nbsp;
+  // Set up callback
+<span class="cstat-no" title="statement not covered" >  callbacks.register(query.requestId, <span class="fstat-no" title="function not covered" >function(err, result) {</span></span>
+<span class="cstat-no" title="statement not covered" >    if(err) <span class="cstat-no" title="statement not covered" >return handleCallback(callback, err);</span></span>
+<span class="cstat-no" title="statement not covered" >    if(result.documents.length == 1</span>
+      &amp;&amp; (result.documents[0].errmsg
+      || result.documents[0].err
+      || result.documents[0]['$err'])) <span class="cstat-no" title="statement not covered" >return callback(MongoError.create(result.documents[0]));</span>
+<span class="cstat-no" title="statement not covered" >    handleCallback(callback, null, result.documents[0].n);</span>
+  });
+&nbsp;
+  // Write the initial command out
+<span class="cstat-no" title="statement not covered" >  connection.write(query.toBin());</span>
+}
+&nbsp;
+/**
+ * Close the cursor, sending a KillCursor command and emitting close.
+ * @method
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.close = <span class="fstat-no" title="function not covered" >function(callback) {</span>
+<span class="cstat-no" title="statement not covered" >  this.s.state = Cursor.CLOSED;</span>
+  // Kill the cursor
+<span class="cstat-no" title="statement not covered" >  this.kill();</span>
+  // Emit the close event for the cursor
+<span class="cstat-no" title="statement not covered" >  this.emit('close');</span>
+  // Callback if provided
+<span class="cstat-no" title="statement not covered" >  if(typeof callback == 'function') <span class="cstat-no" title="statement not covered" >return handleCallback(callback, null, this);</span></span>
+  // Return a Promise
+<span class="cstat-no" title="statement not covered" >  return new this.s.promiseLibrary(<span class="fstat-no" title="function not covered" >function(resolve, reject) {</span></span>
+<span class="cstat-no" title="statement not covered" >    resolve();</span>
+  });
+}
+&nbsp;
+/**
+ * Map all documents using the provided function
+ * @method
+ * @param {function} [transform] The mapping transformation method.
+ * @return {null}
+ */
+Cursor.prototype.map = <span class="fstat-no" title="function not covered" >function(transform) {</span>
+<span class="cstat-no" title="statement not covered" >  this.cursorState.transforms = { doc: transform };</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Is the cursor closed
+ * @method
+ * @return {boolean}
+ */
+Cursor.prototype.isClosed = <span class="fstat-no" title="function not covered" >function() {</span>
+<span class="cstat-no" title="statement not covered" >  return this.isDead();</span>
+}
+&nbsp;
+Cursor.prototype.destroy = <span class="fstat-no" title="function not covered" >function(err) {</span>
+<span class="cstat-no" title="statement not covered" >  this.pause();</span>
+<span class="cstat-no" title="statement not covered" >  this.close();</span>
+<span class="cstat-no" title="statement not covered" >  if(err) <span class="cstat-no" title="statement not covered" >this.emit('error', err);</span></span>
+}
+&nbsp;
+/**
+ * Return a modified Readable stream including a possible transform method.
+ * @method
+ * @param {object} [options=null] Optional settings.
+ * @param {function} [options.transform=null] A transformation method applied to each document emitted by the stream.
+ * @return {Cursor}
+ */
+Cursor.prototype.stream = <span class="fstat-no" title="function not covered" >function(options) {</span>
+<span class="cstat-no" title="statement not covered" >  this.s.streamOptions = options || {};</span>
+<span class="cstat-no" title="statement not covered" >  return this;</span>
+}
+&nbsp;
+/**
+ * Execute the explain for the cursor
+ * @method
+ * @param {Cursor~resultCallback} [callback] The result callback.
+ * @return {Promise} returns Promise if no callback passed
+ */
+Cursor.prototype.explain = <span class="fstat-no" title="function not covered" >function(callback) {</span>
+<span class="cstat-no" title="statement not covered" >  var self = this;</span>
+<span class="cstat-no" title="statement not covered" >  this.s.cmd.explain = true;</span>
+&nbsp;
+  // Execute using callback
+<span class="cstat-no" title="statement not covered" >  if(typeof callback == 'function') <span class="cstat-no" title="statement not covered" >return this._next(callback);</span></span>
+&nbsp;
+  // Return a Promise
+<span class="cstat-no" title="statement not covered" >  return new this.s.promiseLibrary(<span class="fstat-no" title="function not covered" >function(resolve, reject) {</span></span>
+<span class="cstat-no" title="statement not covered" >    self._next(<span class="fstat-no" title="function not covered" >function(err, r) {</span></span>
+<span class="cstat-no" title="statement not covered" >      if(err) <span class="cstat-no" title="statement not covered" >return reject(err);</span></span>
+<span class="cstat-no" title="statement not covered" >      resolve(r);</span>
+    });
+  });
+}
+&nbsp;
+Cursor.prototype._read = <span class="fstat-no" title="function not covered" >function(n) {</span>
+<span class="cstat-no" title="statement not covered" >  var self = this;</span>
+<span class="cstat-no" title="statement not covered" >  if(self.s.state == Cursor.CLOSED || self.isDead()) {</span>
+<span class="cstat-no" title="statement not covered" >    return self.push(null);</span>
+  }
+&nbsp;
+  // Get the next item
+<span class="cstat-no" title="statement not covered" >  self.nextObject(<span class="fstat-no" title="function not covered" >function(err, result) {</span></span>
+<span class="cstat-no" title="statement not covered" >    if(err) {</span>
+<span class="cstat-no" title="statement not covered" >      if(!self.isDead()) <span class="cstat-no" title="statement not covered" >self.close();</span></span>
+<span class="cstat-no" title="statement not covered" >      if(self.listeners('error') &amp;&amp; self.listeners('error').length &gt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >        self.emit('error', err);</span>
+      }
+&nbsp;
+      // Emit end event
+<span class="cstat-no" title="statement not covered" >      self.emit('end');</span>
+<span class="cstat-no" title="statement not covered" >      return self.emit('finish');</span>
+    }
+&nbsp;
+    // If we provided a transformation method
+<span class="cstat-no" title="statement not covered" >    if(typeof self.s.streamOptions.transform == 'function' &amp;&amp; result != null) {</span>
+<span class="cstat-no" title="statement not covered" >      return self.push(self.s.streamOptions.transform(result));</span>
+    }
+&nbsp;
+    // If we provided a map function
+<span class="cstat-no" title="statement not covered" >    if(self.cursorState.transforms &amp;&amp; typeof self.cursorState.transforms.doc == 'function' &amp;&amp; result != null) {</span>
+<span class="cstat-no" title="statement not covered" >      return self.push(self.cursorState.transforms.doc(result));</span>
+    }
+&nbsp;
+    // Return the result
+<span class="cstat-no" title="statement not covered" >    self.push(result);</span>
+  });
+}
+&nbsp;
+Object.defineProperty(Cursor.prototype, 'namespace', {
+  enumerable: true,
+  get: function() {
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (!this || !this.s) {
+      return null;
+    }
+&nbsp;
+    // TODO: refactor this logic into core
+<span class="cstat-no" title="statement not covered" >    var ns = this.s.ns || '';</span>
+<span class="cstat-no" title="statement not covered" >    var firstDot = ns.indexOf('.');</span>
+<span class="cstat-no" title="statement not covered" >    if (firstDot &lt; 0) {</span>
+<span class="cstat-no" title="statement not covered" >      return {</span>
+        database: this.s.ns,
+        collection: ''
+      };
+    }
+<span class="cstat-no" title="statement not covered" >    return {</span>
+      database: ns.substr(0, firstDot),
+      collection: ns.substr(firstDot + 1)
+    };
+  }
+});
+&nbsp;
+/**
+ * The read() method pulls some data out of the internal buffer and returns it. If there is no data available, then it will return null.
+ * @function external:Readable#read
+ * @param {number} size Optional argument to specify how much data to read.
+ * @return {(String | Buffer | null)}
+ */
+&nbsp;
+/**
+ * Call this function to cause the stream to return strings of the specified encoding instead of Buffer objects.
+ * @function external:Readable#setEncoding
+ * @param {string} encoding The encoding to use.
+ * @return {null}
+ */
+&nbsp;
+/**
+ * This method will cause the readable stream to resume emitting data events.
+ * @function external:Readable#resume
+ * @return {null}
+ */
+&nbsp;
+/**
+ * This method will cause a stream in flowing-mode to stop emitting data events. Any data that becomes available will remain in the internal buffer.
+ * @function external:Readable#pause
+ * @return {null}
+ */
+&nbsp;
+/**
+ * This method pulls all the data out of a readable stream, and writes it to the supplied destination, automatically managing the flow so that the destination is not overwhelmed by a fast readable stream.
+ * @function external:Readable#pipe
+ * @param {Writable} destination The destination for writing data
+ * @param {object} [options] Pipe options
+ * @return {null}
+ */
+&nbsp;
+/**
+ * This method will remove the hooks set up for a previous pipe() call.
+ * @function external:Readable#unpipe
+ * @param {Writable} [destination] The destination for writing data
+ * @return {null}
+ */
+&nbsp;
+/**
+ * This is useful in certain cases where a stream is being consumed by a parser, which needs to "un-consume" some data that it has optimistically pulled out of the source, so that the stream can be passed on to some other party.
+ * @function external:Readable#unshift
+ * @param {(Buffer|string)} chunk Chunk of data to unshift onto the read queue.
+ * @return {null}
+ */
+&nbsp;
+/**
+ * Versions of Node prior to v0.10 had streams that did not implement the entire Streams API as it is today. (See "Compatibility" below for more information.)
+ * @function external:Readable#wrap
+ * @param {Stream} stream An "old style" readable stream.
+ * @return {null}
+ */
+&nbsp;
+Cursor.INIT = 0;
+Cursor.OPEN = 1;
+Cursor.CLOSED = 2;
+Cursor.GET_MORE = 3;
+&nbsp;
+module.exports = Cursor;
+&nbsp;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Sep 16 2015 13:04:10 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,1614 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for node-mongodb-minimal/mongodb-core/lib/wireprotocol/2_4_support.js</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="../../../../base.css">
+    <style type="text/css">
+        div.coverage-summary .sorter {
+            background-image: url(../../../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class="header low">
+    <h1>Code coverage report for <span class="entity">node-mongodb-minimal/mongodb-core/lib/wireprotocol/2_4_support.js</span></h1>
+    <h2>
+        
+        Statements: <span class="metric">48.87% <small>(130 / 266)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Branches: <span class="metric">41.3% <small>(102 / 247)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Functions: <span class="metric">65% <small>(13 / 20)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        
+        Lines: <span class="metric">56.39% <small>(128 / 227)</small></span> &nbsp;&nbsp;&nbsp;&nbsp;
+        
+        Ignored: <span class="metric"><span class="ignore-none">none</span></span> &nbsp;&nbsp;&nbsp;&nbsp;
+    </h2>
+    <div class="path"><a href="../../../../index.html">All files</a> &#187; <a href="index.html">node-mongodb-minimal/mongodb-core/lib/wireprotocol/</a> &#187; 2_4_support.js</div>
+</div>
+<div class="body">
+<pre><table class="coverage">
+<tr><td class="line-count">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277
+278
+279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291
+292
+293
+294
+295
+296
+297
+298
+299
+300
+301
+302
+303
+304
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333
+334
+335
+336
+337
+338
+339
+340
+341
+342
+343
+344
+345
+346
+347
+348
+349
+350
+351
+352
+353
+354
+355
+356
+357
+358
+359
+360
+361
+362
+363
+364
+365
+366
+367
+368
+369
+370
+371
+372
+373
+374
+375
+376
+377
+378
+379
+380
+381
+382
+383
+384
+385
+386
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434
+435
+436
+437
+438
+439
+440
+441
+442
+443
+444
+445
+446
+447
+448
+449
+450
+451
+452
+453
+454
+455
+456
+457
+458
+459
+460
+461
+462
+463
+464
+465
+466
+467
+468
+469
+470
+471
+472
+473
+474
+475
+476
+477
+478
+479
+480
+481
+482
+483
+484
+485
+486
+487
+488
+489
+490
+491
+492
+493
+494
+495
+496
+497
+498
+499
+500
+501
+502
+503
+504
+505
+506
+507
+508
+509
+510
+511
+512
+513
+514
+515
+516
+517
+518
+519
+520
+521
+522
+523
+524
+525</td><td class="line-coverage"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">6</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">12</span>
+<span class="cline-any cline-yes">2</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">3</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
+&nbsp;
+var Insert = require('./commands').Insert
+  , Update = require('./commands').Update
+  , Remove = require('./commands').Remove
+  , Query = require('../connection/commands').Query
+  , copy = require('../connection/utils').copy
+  , KillCursor = require('../connection/commands').KillCursor
+  , GetMore = require('../connection/commands').GetMore
+  , Query = require('../connection/commands').Query
+  , ReadPreference = require('../topologies/read_preference')
+  , f = require('util').format
+  , CommandResult = require('../topologies/command_result')
+  , MongoError = require('../error')
+  , Long = require('bson').Long;
+&nbsp;
+// Write concern fields
+var writeConcernFields = ['w', 'wtimeout', 'j', 'fsync'];
+&nbsp;
+var WireProtocol = function() {}
+&nbsp;
+//
+// Needs to support legacy mass insert as well as ordered/unordered legacy
+// emulation
+//
+WireProtocol.prototype.insert = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+  options = options || <span class="branch-1 cbranch-no" title="branch not covered" >{};</span>
+  // Default is ordered execution
+  var ordered = typeof options.ordered == 'boolean' ? options.ordered : <span class="branch-1 cbranch-no" title="branch not covered" >true;</span>
+  var legacy = typeof options.legacy == 'boolean' ? <span class="branch-0 cbranch-no" title="branch not covered" >options.legacy </span>: false;
+  ops = Array.isArray(ops) ? ops :<span class="branch-1 cbranch-no" title="branch not covered" >[ops];</span>
+&nbsp;
+  // If we have more than a 1000 ops fails
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(ops.length &gt; 1000) <span class="cstat-no" title="statement not covered" >return callback(new MongoError("exceeded maximum write batch size of 1000"));</span>
+&nbsp;
+  // Write concern
+  var writeConcern = options.writeConcern || <span class="branch-1 cbranch-no" title="branch not covered" >{w:1};</span>
+&nbsp;
+  // We are unordered
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(!ordered || writeConcern.w == 0) {
+<span class="cstat-no" title="statement not covered" >    return executeUnordered('insert', Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);</span>
+  }
+&nbsp;
+  return executeOrdered('insert', Insert, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+}
+&nbsp;
+WireProtocol.prototype.update = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+  options = options || <span class="branch-1 cbranch-no" title="branch not covered" >{};</span>
+  // Default is ordered execution
+  var ordered = typeof options.ordered == 'boolean' ? <span class="branch-0 cbranch-no" title="branch not covered" >options.ordered </span>: true;
+  ops = Array.isArray(ops) ? ops :<span class="branch-1 cbranch-no" title="branch not covered" >[ops];</span>
+&nbsp;
+  // Write concern
+  var writeConcern = options.writeConcern || {w:1};
+&nbsp;
+  // We are unordered
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(!ordered || writeConcern.w == 0) {
+<span class="cstat-no" title="statement not covered" >    return executeUnordered('update', Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);</span>
+  }
+&nbsp;
+  return executeOrdered('update', Update, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+}
+&nbsp;
+WireProtocol.prototype.remove = function(topology, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+  options = options || <span class="branch-1 cbranch-no" title="branch not covered" >{};</span>
+  // Default is ordered execution
+  var ordered = typeof options.ordered == 'boolean' ? <span class="branch-0 cbranch-no" title="branch not covered" >options.ordered </span>: true;
+  ops = Array.isArray(ops) ? ops :<span class="branch-1 cbranch-no" title="branch not covered" >[ops];</span>
+&nbsp;
+  // Write concern
+  var writeConcern = options.writeConcern || {w:1};
+&nbsp;
+  // We are unordered
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(!ordered || writeConcern.w == 0) {
+<span class="cstat-no" title="statement not covered" >    return executeUnordered('remove', Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);</span>
+  }
+&nbsp;
+  return executeOrdered('remove', Remove, ismaster, ns, bson, pool, callbacks, ops, options, callback);
+}
+&nbsp;
+WireProtocol.prototype.killCursor = <span class="fstat-no" title="function not covered" >function(bson, ns, cursorId, connection, callbacks, callback) {</span>
+  // Create a kill cursor command
+<span class="cstat-no" title="statement not covered" >  var killCursor = new KillCursor(bson, [cursorId]);</span>
+  // Execute the kill cursor command
+<span class="cstat-no" title="statement not covered" >  if(connection &amp;&amp; connection.isConnected()) <span class="cstat-no" title="statement not covered" >connection.write(killCursor.toBin());</span></span>
+  // Set cursor to 0
+<span class="cstat-no" title="statement not covered" >  cursorId = Long.ZERO;</span>
+  // Return to caller
+<span class="cstat-no" title="statement not covered" >  if(callback) <span class="cstat-no" title="statement not covered" >callback(null, null);</span></span>
+}
+&nbsp;
+WireProtocol.prototype.getMore = <span class="fstat-no" title="function not covered" >function(bson, ns, cursorState, batchSize, raw, connection, callbacks, options, callback) {</span>
+  // Create getMore command
+<span class="cstat-no" title="statement not covered" >  var getMore = new GetMore(bson, ns, cursorState.cursorId, {numberToReturn: batchSize});</span>
+&nbsp;
+  // Query callback
+<span class="cstat-no" title="statement not covered" >  var queryCallback = <span class="fstat-no" title="function not covered" >function(err, r) {</span></span>
+<span class="cstat-no" title="statement not covered" >    if(err) <span class="cstat-no" title="statement not covered" >return callback(err);</span></span>
+&nbsp;
+    // If we have a timed out query or a cursor that was killed
+<span class="cstat-no" title="statement not covered" >    if((r.responseFlags &amp; (1 &lt;&lt; 0)) != 0) {</span>
+<span class="cstat-no" title="statement not covered" >      return callback(new MongoError("cursor killed or timed out"), null);</span>
+    }
+&nbsp;
+    // Ensure we have a Long valie cursor id
+<span class="cstat-no" title="statement not covered" >    var cursorId = typeof r.cursorId == 'number'</span>
+      ? Long.fromNumber(r.cursorId)
+      : r.cursorId;
+&nbsp;
+    // Set all the values
+<span class="cstat-no" title="statement not covered" >    cursorState.documents = r.documents;</span>
+<span class="cstat-no" title="statement not covered" >    cursorState.cursorId = cursorId;</span>
+&nbsp;
+    // Return
+<span class="cstat-no" title="statement not covered" >    callback(null);</span>
+  }
+&nbsp;
+  // If we have a raw query decorate the function
+<span class="cstat-no" title="statement not covered" >  if(raw) {</span>
+<span class="cstat-no" title="statement not covered" >    queryCallback.raw = raw;</span>
+  }
+&nbsp;
+  // Register a callback
+<span class="cstat-no" title="statement not covered" >  callbacks.register(getMore.requestId, queryCallback);</span>
+  // Write out the getMore command
+<span class="cstat-no" title="statement not covered" >  connection.write(getMore.toBin());</span>
+}
+&nbsp;
+WireProtocol.prototype.command = function(bson, ns, cmd, cursorState, topology, options) {
+  // Establish type of command
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(cmd.find) {
+    return setupClassicFind(bson, ns, cmd, cursorState, topology, options)
+  } else <span class="cstat-no" title="statement not covered" >if(cursorState.cursorId != null) {</span>
+  } else <span class="cstat-no" title="statement not covered" >if(cmd) {</span>
+<span class="cstat-no" title="statement not covered" >    return setupCommand(bson, ns, cmd, cursorState, topology, options);</span>
+  } else {
+<span class="cstat-no" title="statement not covered" >    throw new MongoError(f("command %s does not return a cursor", JSON.stringify(cmd)));</span>
+  }
+}
+&nbsp;
+//
+// Execute a find command
+var setupClassicFind = function(bson, ns, cmd, cursorState, topology, options) {
+  var readPreference = options.readPreference || <span class="branch-1 cbranch-no" title="branch not covered" >new ReadPreference('primary');</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof readPreference == 'string') <span class="cstat-no" title="statement not covered" >readPreference = new ReadPreference(readPreference);</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(!(readPreference instanceof ReadPreference)) <span class="cstat-no" title="statement not covered" >throw new MongoError('readPreference must be a ReadPreference instance');</span>
+&nbsp;
+  // Ensure we have at least some options
+  options = options || <span class="branch-1 cbranch-no" title="branch not covered" >{};</span>
+  // Set the optional batchSize
+  cursorState.batchSize = cmd.batchSize || <span class="branch-1 cbranch-no" title="branch not covered" >cursorState.batchSize;</span>
+  var numberToReturn = 0;
+&nbsp;
+  // Unpack the limit and batchSize values
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cursorState.limit == 0) {
+<span class="cstat-no" title="statement not covered" >    numberToReturn = cursorState.batchSize;</span>
+  } else <span class="missing-if-branch" title="else path not taken" >E</span>if(cursorState.limit &lt; 0 || <span class="branch-1 cbranch-no" title="branch not covered" >cursorState.limit &lt; cursorState.batchSize </span>|| (<span class="branch-2 cbranch-no" title="branch not covered" >cursorState.limit &gt; 0 </span>&amp;&amp; <span class="branch-3 cbranch-no" title="branch not covered" >cursorState.batchSize == 0)</span>) {
+    numberToReturn = cursorState.limit;
+  } else {
+<span class="cstat-no" title="statement not covered" >    numberToReturn = cursorState.batchSize;</span>
+  }
+&nbsp;
+  var numberToSkip = cursorState.skip || 0;
+  // Build actual find command
+  var findCmd = {};
+  // Using special modifier
+  var usesSpecialModifier = false;
+&nbsp;
+  // We have a Mongos topology, check if we need to add a readPreference
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(topology.type == 'mongos' &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >readPreference)</span> {
+<span class="cstat-no" title="statement not covered" >    findCmd['$readPreference'] = readPreference.toJSON();</span>
+<span class="cstat-no" title="statement not covered" >    usesSpecialModifier = true;</span>
+  }
+&nbsp;
+  // Add special modifiers to the query
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.sort) <span class="cstat-no" title="statement not covered" >findCmd['orderby'] = cmd.sort, usesSpecialModifier = true;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.hint) <span class="cstat-no" title="statement not covered" >findCmd['$hint'] = cmd.hint, usesSpecialModifier = true;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.snapshot) <span class="cstat-no" title="statement not covered" >findCmd['$snapshot'] = cmd.snapshot, usesSpecialModifier = true;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.returnKey) <span class="cstat-no" title="statement not covered" >findCmd['$returnKey'] = cmd.returnKey, usesSpecialModifier = true;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.maxScan) <span class="cstat-no" title="statement not covered" >findCmd['$maxScan'] = cmd.maxScan, usesSpecialModifier = true;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.min) <span class="cstat-no" title="statement not covered" >findCmd['$min'] = cmd.min, usesSpecialModifier = true;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.max) <span class="cstat-no" title="statement not covered" >findCmd['$max'] = cmd.max, usesSpecialModifier = true;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.showDiskLoc) <span class="cstat-no" title="statement not covered" >findCmd['$showDiskLoc'] = cmd.showDiskLoc, usesSpecialModifier = true;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.comment) <span class="cstat-no" title="statement not covered" >findCmd['$comment'] = cmd.comment, usesSpecialModifier = true;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.maxTimeMS) <span class="cstat-no" title="statement not covered" >findCmd['$maxTimeMS'] = cmd.maxTimeMS, usesSpecialModifier = true;</span>
+&nbsp;
+  // If we have explain, return a single document and close cursor
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(cmd.explain) {
+<span class="cstat-no" title="statement not covered" >    numberToReturn = -1;</span>
+<span class="cstat-no" title="statement not covered" >    usesSpecialModifier = true;</span>
+<span class="cstat-no" title="statement not covered" >    findCmd['$explain'] = true;</span>
+  }
+&nbsp;
+  // If we have a special modifier
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(usesSpecialModifier) {
+<span class="cstat-no" title="statement not covered" >    findCmd['$query'] = cmd.query;</span>
+  } else {
+    findCmd = cmd.query;
+  }
+&nbsp;
+  // Build Query object
+  var query = new Query(bson, ns, findCmd, {
+      numberToSkip: numberToSkip, numberToReturn: numberToReturn
+    , checkKeys: false, returnFieldSelector: cmd.fields
+  });
+&nbsp;
+  // Set query flags
+  query.slaveOk = readPreference.slaveOk();
+&nbsp;
+  // Set up the option bits for wire protocol
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof cmd.tailable == 'boolean') <span class="cstat-no" title="statement not covered" >query.tailable = cmd.tailable;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof cmd.oplogReplay == 'boolean') <span class="cstat-no" title="statement not covered" >query.oplogReplay = cmd.oplogReplay;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof cmd.noCursorTimeout == 'boolean') <span class="cstat-no" title="statement not covered" >query.noCursorTimeout = cmd.noCursorTimeout;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof cmd.awaitData == 'boolean') <span class="cstat-no" title="statement not covered" >query.awaitData = cmd.awaitData;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof cmd.exhaust == 'boolean') <span class="cstat-no" title="statement not covered" >query.exhaust = cmd.exhaust;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(typeof cmd.partial == 'boolean') <span class="cstat-no" title="statement not covered" >query.partial = cmd.partial;</span>
+  // Return the query
+  return query;
+}
+&nbsp;
+//
+// Set up a command cursor
+var setupCommand = <span class="fstat-no" title="function not covered" >function(bson, ns, cmd, cursorState, topology, options) {</span>
+<span class="cstat-no" title="statement not covered" >  var readPreference = options.readPreference || new ReadPreference('primary');</span>
+<span class="cstat-no" title="statement not covered" >  if(typeof readPreference == 'string') <span class="cstat-no" title="statement not covered" >readPreference = new ReadPreference(readPreference);</span></span>
+<span class="cstat-no" title="statement not covered" >  if(!(readPreference instanceof ReadPreference)) <span class="cstat-no" title="statement not covered" >throw new MongoError('readPreference must be a ReadPreference instance');</span></span>
+&nbsp;
+  // Set empty options object
+<span class="cstat-no" title="statement not covered" >  options = options || {}</span>
+&nbsp;
+  // Final query
+<span class="cstat-no" title="statement not covered" >  var finalCmd = {};</span>
+<span class="cstat-no" title="statement not covered" >  for(var name in cmd) {</span>
+<span class="cstat-no" title="statement not covered" >    finalCmd[name] = cmd[name];</span>
+  }
+&nbsp;
+  // Build command namespace
+<span class="cstat-no" title="statement not covered" >  var parts = ns.split(/\./);</span>
+&nbsp;
+  // We have a Mongos topology, check if we need to add a readPreference
+<span class="cstat-no" title="statement not covered" >  if(topology.type == 'mongos' &amp;&amp; readPreference) {</span>
+<span class="cstat-no" title="statement not covered" >    finalCmd['$readPreference'] = readPreference.toJSON();</span>
+  }
+&nbsp;
+  // Build Query object
+<span class="cstat-no" title="statement not covered" >  var query = new Query(bson, f('%s.$cmd', parts.shift()), finalCmd, {</span>
+      numberToSkip: 0, numberToReturn: -1
+    , checkKeys: false
+  });
+&nbsp;
+  // Set query flags
+<span class="cstat-no" title="statement not covered" >  query.slaveOk = readPreference.slaveOk();</span>
+&nbsp;
+  // Return the query
+<span class="cstat-no" title="statement not covered" >  return query;</span>
+}
+&nbsp;
+/**
+ * @ignore
+ */
+var bindToCurrentDomain = function(callback) {
+  var domain = process.domain;
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(domain == null || <span class="branch-1 cbranch-no" title="branch not covered" >callback == null)</span> {
+    return callback;
+  } else {
+<span class="cstat-no" title="statement not covered" >    return domain.bind(callback);</span>
+  }
+}
+&nbsp;
+var hasWriteConcern = function(writeConcern) {
+  <span class="missing-if-branch" title="else path not taken" >E</span>if(writeConcern.w
+    || writeConcern.wtimeout
+    || writeConcern.j == true
+    || writeConcern.fsync == true
+    || Object.keys(writeConcern).length == 0) {
+    return true;
+  }
+<span class="cstat-no" title="statement not covered" >  return false;</span>
+}
+&nbsp;
+var cloneWriteConcern = function(writeConcern) {
+  var wc = {};
+  if(writeConcern.w != null) wc.w = writeConcern.w;
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(writeConcern.wtimeout != null) <span class="cstat-no" title="statement not covered" >wc.wtimeout = writeConcern.wtimeout;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(writeConcern.j != null) <span class="cstat-no" title="statement not covered" >wc.j = writeConcern.j;</span>
+  <span class="missing-if-branch" title="if path not taken" >I</span>if(writeConcern.fsync != null) <span class="cstat-no" title="statement not covered" >wc.fsync = writeConcern.fsync;</span>
+  return wc;
+}
+&nbsp;
+//
+// Aggregate up all the results
+//
+var aggregateWriteOperationResults = function(opType, ops, results, connection) {
+  var finalResult = { ok: 1, n: 0 }
+&nbsp;
+  // Map all the results coming back
+  for(var i = 0; i &lt; results.length; i++) {
+    var result = results[i];
+    var op = ops[i];
+&nbsp;
+    <span class="missing-if-branch" title="if path not taken" >I</span>if((result.upserted || (result.updatedExisting == false)) &amp;&amp; <span class="branch-2 cbranch-no" title="branch not covered" >finalResult.upserted == null)</span> {
+<span class="cstat-no" title="statement not covered" >      finalResult.upserted = [];</span>
+    }
+&nbsp;
+    // Push the upserted document to the list of upserted values
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(result.upserted) {
+<span class="cstat-no" title="statement not covered" >      finalResult.upserted.push({index: i, _id: result.upserted});</span>
+    }
+&nbsp;
+    // We have an upsert where we passed in a _id
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(result.updatedExisting == false &amp;&amp; <span class="branch-1 cbranch-no" title="branch not covered" >result.n == 1 </span>&amp;&amp; <span class="branch-2 cbranch-no" title="branch not covered" >result.upserted == null)</span> {
+<span class="cstat-no" title="statement not covered" >      finalResult.upserted.push({index: i, _id: op.q._id});</span>
+    }
+&nbsp;
+    // We have an insert command
+    if(result.ok == 1 &amp;&amp; opType == 'insert' &amp;&amp; result.err == null) {
+      finalResult.n = finalResult.n + 1;
+    }
+&nbsp;
+    // We have a command error
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(result != null &amp;&amp; result.ok == 0 || result.err || result.errmsg) {
+<span class="cstat-no" title="statement not covered" >      if(result.ok == 0) <span class="cstat-no" title="statement not covered" >finalResult.ok = 0;</span></span>
+<span class="cstat-no" title="statement not covered" >      finalResult.code = result.code;</span>
+<span class="cstat-no" title="statement not covered" >      finalResult.errmsg = result.errmsg || result.err || result.errMsg;</span>
+&nbsp;
+      // Check if we have a write error
+<span class="cstat-no" title="statement not covered" >      if(result.code == 11000</span>
+        || result.code == 11001
+        || result.code == 12582
+        || result.code == 16544
+        || result.code == 16538
+        || result.code == 16542
+        || result.code == 14
+        || result.code == 13511) {
+<span class="cstat-no" title="statement not covered" >        if(finalResult.writeErrors == null) <span class="cstat-no" title="statement not covered" >finalResult.writeErrors = [];</span></span>
+<span class="cstat-no" title="statement not covered" >        finalResult.writeErrors.push({</span>
+            index: i
+          , code: result.code
+          , errmsg: result.errmsg || result.err || result.errMsg
+        });
+      } else {
+<span class="cstat-no" title="statement not covered" >        finalResult.writeConcernError = {</span>
+            code: result.code
+          , errmsg: result.errmsg || result.err || result.errMsg
+        }
+      }
+    } else <span class="missing-if-branch" title="else path not taken" >E</span>if(typeof result.n == 'number') {
+      finalResult.n += result.n;
+    } else {
+<span class="cstat-no" title="statement not covered" >      finalResult.n += 1;</span>
+    }
+&nbsp;
+    // Result as expected
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(result != null &amp;&amp; result.lastOp) <span class="cstat-no" title="statement not covered" >finalResult.lastOp = result.lastOp;</span>
+  }
+&nbsp;
+  // Return finalResult aggregated results
+  return new CommandResult(finalResult, connection);
+}
+&nbsp;
+//
+// Execute all inserts in an ordered manner
+//
+var executeOrdered = function(opType ,command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {
+  var _ops = ops.slice(0);
+  // Bind to current domain
+  callback = bindToCurrentDomain(callback);
+  // Collect all the getLastErrors
+  var getLastErrors = [];
+&nbsp;
+  // Execute an operation
+  var executeOp = function(list, _callback) {
+    // Get a pool connection
+    var connection = pool.get();
+    // No more items in the list
+    if(list.length == 0) return _callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));
+&nbsp;
+    // Get the first operation
+    var doc = list.shift();
+&nbsp;
+    // Create an insert command
+    var op = new command(Query.getRequestId(), ismaster, bson, ns, [doc], options);
+    // Write concern
+    var optionWriteConcern = options.writeConcern || {w:1};
+    // Final write concern
+    var writeConcern = cloneWriteConcern(optionWriteConcern);
+&nbsp;
+    // Get the db name
+    var db = ns.split('.').shift();
+&nbsp;
+    // Error out if no connection available
+    <span class="missing-if-branch" title="if path not taken" >I</span>if(connection == null)
+<span class="cstat-no" title="statement not covered" >      return _callback(new MongoError("no connection available"));</span>
+&nbsp;
+    try {
+      // Execute the insert
+      connection.write(op.toBin());
+&nbsp;
+      // If write concern 0 don't fire getLastError
+      <span class="missing-if-branch" title="else path not taken" >E</span>if(hasWriteConcern(writeConcern)) {
+        var getLastErrorCmd = {getlasterror: 1};
+        // Merge all the fields
+        for(var i = 0; i &lt; writeConcernFields.length; i++) {
+          if(writeConcern[writeConcernFields[i]] != null)
+            getLastErrorCmd[writeConcernFields[i]] = writeConcern[writeConcernFields[i]];
+        }
+&nbsp;
+        // Create a getLastError command
+        var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});
+        // Write the lastError message
+        connection.write(getLastErrorOp.toBin());
+        // Register the callback
+        callbacks.register(getLastErrorOp.requestId, function(err, result) {
+          <span class="missing-if-branch" title="if path not taken" >I</span>if(err) <span class="cstat-no" title="statement not covered" >return callback(err);</span>
+          // Get the document
+          var doc = result.documents[0];
+          // Save the getLastError document
+          getLastErrors.push(doc);
+          // If we have an error terminate
+          <span class="missing-if-branch" title="if path not taken" >I</span>if(doc.ok == 0 || doc.err || doc.errmsg) <span class="cstat-no" title="statement not covered" >return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));</span>
+          // Execute the next op in the list
+          executeOp(list, callback);
+        });
+      }
+    } catch(err) {
+<span class="cstat-no" title="statement not covered" >      if(typeof err == 'string') <span class="cstat-no" title="statement not covered" >err = new MongoError(err);</span></span>
+      // We have a serialization error, rewrite as a write error to have same behavior as modern
+      // write commands
+<span class="cstat-no" title="statement not covered" >      getLastErrors.push({ ok: 1, errmsg: err.message, code: 14 });</span>
+      // Return due to an error
+<span class="cstat-no" title="statement not covered" >      return callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));</span>
+    }
+  }
+&nbsp;
+  // Execute the operations
+  executeOp(_ops, callback);
+}
+&nbsp;
+var executeUnordered = <span class="fstat-no" title="function not covered" >function(opType, command, ismaster, ns, bson, pool, callbacks, ops, options, callback) {</span>
+  // Bind to current domain
+<span class="cstat-no" title="statement not covered" >  callback = bindToCurrentDomain(callback);</span>
+  // Total operations to write
+<span class="cstat-no" title="statement not covered" >  var totalOps = ops.length;</span>
+  // Collect all the getLastErrors
+<span class="cstat-no" title="statement not covered" >  var getLastErrors = [];</span>
+  // Write concern
+<span class="cstat-no" title="statement not covered" >  var optionWriteConcern = options.writeConcern || {w:1};</span>
+  // Final write concern
+<span class="cstat-no" title="statement not covered" >  var writeConcern = cloneWriteConcern(optionWriteConcern);</span>
+  // Driver level error
+<span class="cstat-no" title="statement not covered" >  var error;</span>
+&nbsp;
+  // Execute all the operations
+<span class="cstat-no" title="statement not covered" >  for(var i = 0; i &lt; ops.length; i++) {</span>
+    // Create an insert command
+<span class="cstat-no" title="statement not covered" >    var op = new command(Query.getRequestId(), ismaster, bson, ns, [ops[i]], options);</span>
+    // Get db name
+<span class="cstat-no" title="statement not covered" >    var db = ns.split('.').shift();</span>
+&nbsp;
+    // Get a pool connection
+<span class="cstat-no" title="statement not covered" >    var connection = pool.get();</span>
+&nbsp;
+    // Error out if no connection available
+<span class="cstat-no" title="statement not covered" >    if(connection == null)</span>
+<span class="cstat-no" title="statement not covered" >      return _callback(new MongoError("no connection available"));</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >    try {</span>
+      // Execute the insert
+<span class="cstat-no" title="statement not covered" >      connection.write(op.toBin());</span>
+      // If write concern 0 don't fire getLastError
+<span class="cstat-no" title="statement not covered" >      if(hasWriteConcern(writeConcern)) {</span>
+<span class="cstat-no" title="statement not covered" >        var getLastErrorCmd = {getlasterror: 1};</span>
+        // Merge all the fields
+<span class="cstat-no" title="statement not covered" >        for(var j = 0; j &lt; writeConcernFields.length; j++) {</span>
+<span class="cstat-no" title="statement not covered" >          if(writeConcern[writeConcernFields[j]] != null)</span>
+<span class="cstat-no" title="statement not covered" >            getLastErrorCmd[writeConcernFields[j]] = writeConcern[writeConcernFields[j]];</span>
+        }
+&nbsp;
+        // Create a getLastError command
+<span class="cstat-no" title="statement not covered" >        var getLastErrorOp = new Query(bson, f("%s.$cmd", db), getLastErrorCmd, {numberToReturn: -1});</span>
+        // Write the lastError message
+<span class="cstat-no" title="statement not covered" >        connection.write(getLastErrorOp.toBin());</span>
+&nbsp;
+        // Give the result from getLastError the right index
+<span class="cstat-no" title="statement not covered" >        var callbackOp = <span class="fstat-no" title="function not covered" >function(_index) {</span></span>
+<span class="cstat-no" title="statement not covered" >          return <span class="fstat-no" title="function not covered" >function(err, result) {</span></span>
+<span class="cstat-no" title="statement not covered" >            if(err) <span class="cstat-no" title="statement not covered" >error = err;</span></span>
+            // Update the number of operations executed
+<span class="cstat-no" title="statement not covered" >            totalOps = totalOps - 1;</span>
+            // Save the getLastError document
+<span class="cstat-no" title="statement not covered" >            if(!err) <span class="cstat-no" title="statement not covered" >getLastErrors[_index] = result.documents[0];</span></span>
+            // Check if we are done
+<span class="cstat-no" title="statement not covered" >            if(totalOps == 0) {</span>
+<span class="cstat-no" title="statement not covered" >              if(error) <span class="cstat-no" title="statement not covered" >return callback(error);</span></span>
+<span class="cstat-no" title="statement not covered" >              callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));</span>
+            }
+          }
+        }
+&nbsp;
+        // Register the callback
+<span class="cstat-no" title="statement not covered" >        callbacks.register(getLastErrorOp.requestId, callbackOp(i));</span>
+      }
+    } catch(err) {
+<span class="cstat-no" title="statement not covered" >      if(typeof err == 'string') <span class="cstat-no" title="statement not covered" >err = new MongoError(err);</span></span>
+      // Update the number of operations executed
+<span class="cstat-no" title="statement not covered" >      totalOps = totalOps - 1;</span>
+      // We have a serialization error, rewrite as a write error to have same behavior as modern
+      // write commands
+<span class="cstat-no" title="statement not covered" >      getLastErrors[i] = { ok: 1, errmsg: err.message, code: 14 };</span>
+      // Check if we are done
+<span class="cstat-no" title="statement not covered" >      if(totalOps == 0) {</span>
+<span class="cstat-no" title="statement not covered" >        callback(null, aggregateWriteOperationResults(opType, ops, getLastErrors, connection));</span>
+      }
+    }
+  }
+&nbsp;
+  // Empty w:0 return
+<span class="cstat-no" title="statement not covered" >  if(writeConcern</span>
+    &amp;&amp; writeConcern.w == 0 &amp;&amp; callback) {
+<span class="cstat-no" title="statement not covered" >    callback(null, null);</span>
+  }
+}
+&nbsp;
+module.exports = WireProtocol;
+&nbsp;</pre></td></tr>
+</table></pre>
+</div>
+<div class="footer">
+    <div class="meta">Generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Sep 16 2015 13:04:10 GMT+0000 (UTC)</div>
+</div>
+</body>
+</html>
