@@ -17,8 +17,6 @@
 
     // run shared js-env code - pre-init
     (function () {
-        // init Error.stackTraceLimit
-        Error.stackTraceLimit = 20;
         // init local
         local = {};
         // init modeJs
